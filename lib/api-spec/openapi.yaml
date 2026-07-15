@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: classify
+    description: AI persona classification
 paths:
   /healthz:
     get:
@@ -24,6 +26,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /classify:
+    post:
+      operationId: classifyPersona
+      tags: [classify]
+      summary: Classify AI persona using Claude
+      description: Sends all assessment answers to Claude, which reasons holistically and returns a persona classification with narrative and recommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClassifyRequest"
+      responses:
+        "200":
+          description: AI classification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClassifyResponse"
+        "400":
+          description: Invalid request body
+        "500":
+          description: AI classification error
 components:
   schemas:
     HealthStatus:
@@ -33,4 +58,64 @@ components:
           type: string
       required:
         - status
-
+    AnswerItem:
+      type: object
+      properties:
+        questionId:
+          type: integer
+        questionText:
+          type: string
+        selectedOption:
+          type: string
+        selectedText:
+          type: string
+        personaId:
+          type: string
+        freeText:
+          type: string
+      required:
+        - questionId
+        - questionText
+    ClassifyRequest:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnswerItem"
+      required:
+        - answers
+    Recommendation:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+      required:
+        - title
+        - description
+    ClassifyResponse:
+      type: object
+      properties:
+        persona:
+          type: string
+          enum: [explorer, builder, strategist, visionary]
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        reasoning:
+          type: string
+        narrative:
+          type: string
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Recommendation"
+      required:
+        - persona
+        - confidence
+        - reasoning
+        - narrative
+        - recommendations

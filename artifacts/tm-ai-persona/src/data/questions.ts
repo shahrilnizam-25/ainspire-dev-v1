@@ -1,3 +1,15 @@
+export type OpenQuestion = {
+  id: number;
+  text: string;
+  placeholder: string;
+};
+
+export const openQuestion: OpenQuestion = {
+  id: 6,
+  text: "In your own words, what does AI mean for your role at Telekom Malaysia, and where do you want to take your AI journey?",
+  placeholder: "Share your thoughts openly — this is the most important part of the assessment…",
+};
+
 export type Option = {
   id: string; // 'A', 'B', 'C', 'D'
   text: string;

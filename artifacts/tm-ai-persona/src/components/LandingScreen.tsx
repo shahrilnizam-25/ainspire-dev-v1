@@ -31,8 +31,8 @@ export default function LandingScreen({ onStart }: { onStart: () => void }) {
           </span>
         </h1>
         <p className="text-lg md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          A 5-question self-assessment to find your role in Malaysia's AI future. 
-          Uncover how you shape the digital workforce of tomorrow.
+          An AI-powered assessment — 5 questions + 1 open response — that uses
+          Claude to discover your unique role in Malaysia's AI future.
         </p>
       </motion.div>
 

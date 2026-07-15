@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Question } from '../data/questions';
+import { Question, Option } from '../data/questions';
 
 export default function QuestionScreen({ 
   question, 
@@ -11,7 +11,7 @@ export default function QuestionScreen({
   question: Question, 
   currentIndex: number, 
   totalQuestions: number,
-  onAnswer: (personaId: string) => void 
+  onAnswer: (option: Option) => void 
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -20,10 +20,10 @@ export default function QuestionScreen({
     setSelectedId(null);
   }, [question.id]);
 
-  const handleSelect = (optionId: string, personaId: string) => {
+  const handleSelect = (option: Option) => {
     if (selectedId) return; // Prevent multiple clicks
-    setSelectedId(optionId);
-    onAnswer(personaId);
+    setSelectedId(option.id);
+    onAnswer(option);
   };
 
   return (
@@ -70,7 +70,7 @@ export default function QuestionScreen({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1, duration: 0.4 }}
-                    onClick={() => handleSelect(opt.id, opt.personaId)}
+                    onClick={() => handleSelect(opt)}
                     disabled={!!selectedId}
                     className={`w-full text-left p-6 rounded-xl border-2 transition-all duration-300 relative overflow-hidden group
                       ${isSelected ? 'border-primary bg-primary/10 shadow-[0_0_20px_rgba(0,212,255,0.2)]' : 'border-card-border bg-card hover:border-primary/50 hover:bg-card/80'}
