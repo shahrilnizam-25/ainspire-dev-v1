@@ -14,11 +14,14 @@ export default function OpenQuestionScreen({
   question: OpenQuestion;
   currentIndex: number;
   totalQuestions: number;
-  onSubmit: (text: string) => void;
+  onSubmit: (role: string, freeText: string) => void;
 }) {
+  const [role, setRole] = useState('');
   const [text, setText] = useState('');
-  const trimmed = text.trim();
-  const canSubmit = trimmed.length >= MIN_CHARS;
+
+  const trimmedRole = role.trim();
+  const trimmedText = text.trim();
+  const canSubmit = trimmedRole.length > 0 && trimmedText.length >= MIN_CHARS;
 
   return (
     <div className="w-full max-w-3xl px-6 py-8 flex flex-col items-center">
@@ -51,18 +54,18 @@ export default function OpenQuestionScreen({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="text-3xl md:text-4xl font-bold mb-8 leading-tight text-center"
+        className="text-3xl md:text-4xl font-bold mb-3 leading-tight text-center"
       >
-        {question.text}
+        Question 6
       </motion.h2>
 
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="text-muted-foreground text-base mb-6 text-center max-w-xl"
+        className="text-muted-foreground text-base mb-10 text-center max-w-xl"
       >
-        Your answer here carries real weight — the AI agent reads it holistically
+        Your answers here carry real weight — the AI agent reads them holistically
         alongside your multiple-choice responses before classifying your persona.
       </motion.p>
 
@@ -70,27 +73,73 @@ export default function OpenQuestionScreen({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
-        className="w-full"
+        className="w-full space-y-8"
       >
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={question.placeholder}
-          rows={6}
-          className="w-full bg-card border-2 border-card-border rounded-xl p-5 text-lg text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:border-primary/60 transition-colors leading-relaxed"
-        />
+        {/* Part A — Role */}
+        <div className="w-full">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="px-2.5 py-0.5 rounded-md bg-primary/20 text-primary text-xs font-bold uppercase tracking-widest border border-primary/30">
+              Part A
+            </span>
+            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+              Required
+            </span>
+          </div>
+          <label className="block text-lg font-semibold mb-3 leading-snug">
+            What is your current role in Telekom Malaysia?
+          </label>
+          <input
+            type="text"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder="e.g. Senior Network Engineer, Product Manager, Data Analyst…"
+            className="w-full bg-card border-2 border-card-border rounded-xl px-5 py-4 text-base text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/60 transition-colors"
+          />
+          {trimmedRole.length === 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Please enter your current role to continue.
+            </p>
+          )}
+        </div>
 
-        <div className="flex items-center justify-between mt-3">
-          <span
-            className={`text-sm font-mono transition-colors ${
-              trimmed.length < MIN_CHARS ? 'text-muted-foreground' : 'text-primary'
-            }`}
-          >
-            {trimmed.length} / {MIN_CHARS} characters minimum
-          </span>
+        {/* Divider */}
+        <div className="w-full h-px bg-card-border/50" />
 
+        {/* Part B — AI Journey */}
+        <div className="w-full">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="px-2.5 py-0.5 rounded-md bg-secondary/20 text-secondary text-xs font-bold uppercase tracking-widest border border-secondary/30">
+              Part B
+            </span>
+            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+              Required · {MIN_CHARS} characters minimum
+            </span>
+          </div>
+          <label className="block text-lg font-semibold mb-3 leading-snug">
+            {question.text}
+          </label>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={question.placeholder}
+            rows={6}
+            className="w-full bg-card border-2 border-card-border rounded-xl p-5 text-base text-foreground placeholder:text-muted-foreground/40 resize-none focus:outline-none focus:border-primary/60 transition-colors leading-relaxed"
+          />
+          <div className="mt-2">
+            <span
+              className={`text-sm font-mono transition-colors ${
+                trimmedText.length < MIN_CHARS ? 'text-muted-foreground' : 'text-primary'
+              }`}
+            >
+              {trimmedText.length} / {MIN_CHARS} characters minimum
+            </span>
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="flex justify-end pt-2">
           <motion.button
-            onClick={() => canSubmit && onSubmit(trimmed)}
+            onClick={() => canSubmit && onSubmit(trimmedRole, trimmedText)}
             disabled={!canSubmit}
             whileHover={canSubmit ? { scale: 1.02 } : {}}
             whileTap={canSubmit ? { scale: 0.98 } : {}}

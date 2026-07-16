@@ -32,7 +32,12 @@ router.post("/classify", async (req, res) => {
   }
 
   const mcq = answers.filter((a) => a.selectedOption !== undefined);
-  const open = answers.find((a) => a.freeText !== undefined);
+  const roleAnswer = answers.find(
+    (a) => a.freeText !== undefined && a.questionId === 6,
+  );
+  const openAnswer = answers.find(
+    (a) => a.freeText !== undefined && a.questionId !== 6,
+  );
 
   const mcqSummary = mcq
     .map(
@@ -41,8 +46,12 @@ router.post("/classify", async (req, res) => {
     )
     .join("\n\n");
 
-  const openSection = open
-    ? `\n\nOpen-ended response:\nQ${open.questionId}: "${open.questionText}"\nEmployee wrote: "${open.freeText}"`
+  const roleSection = roleAnswer
+    ? `\n\nEmployee's current role at Telekom Malaysia: "${roleAnswer.freeText}"`
+    : "";
+
+  const openSection = openAnswer
+    ? `\n\nOpen-ended response:\nQ${openAnswer.questionId}: "${openAnswer.questionText}"\nEmployee wrote: "${openAnswer.freeText}"`
     : "";
 
   const prompt = `You are an expert AI talent classifier for Telekom Malaysia's workforce development programme. Analyse this employee's self-assessment holistically and classify them into the most fitting AI persona.
@@ -52,15 +61,18 @@ ${Object.entries(PERSONA_DEFS)
   .map(([k, v]) => `- **${k}**: ${v}`)
   .join("\n")}
 
-## Employee Assessment Responses
+## Employee Context${roleSection}
+
+## Assessment Responses
 ${mcqSummary}${openSection}
 
 ## Instructions
-1. Analyse the multiple-choice answers AND the free-text response together as a whole picture
-2. Pay special attention to the free-text — it often reveals the employee's true orientation more than MCQ choices
-3. Mixed signals are common and expected; resolve them with your best professional judgement
-4. Assign the ONE persona that best fits the complete picture, not just the plurality vote
-5. Be specific in your reasoning — cite actual phrases or patterns from their answers
+1. Analyse the employee's role context, multiple-choice answers, AND the open-ended response together as a whole picture
+2. Factor in the employee's current role — it provides important context about their position and likely AI exposure
+3. Pay special attention to the open-ended response — it often reveals the employee's true orientation more than MCQ choices
+4. Mixed signals are common and expected; resolve them with your best professional judgement
+5. Assign the ONE persona that best fits the complete picture, not just the plurality vote
+6. Be specific in your reasoning — cite actual phrases or patterns from their answers and role context
 
 Respond ONLY with a valid JSON object. No markdown, no text outside the JSON braces:
 {

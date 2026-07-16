@@ -60,11 +60,16 @@ export default function App() {
     }
   };
 
-  const handleOpenSubmit = async (freeText: string) => {
+  const handleOpenSubmit = async (role: string, freeText: string) => {
     setScreen('ai-loading');
 
     const answers = [
       ...mcqAnswers,
+      {
+        questionId: 6,
+        questionText: "What is your current role in Telekom Malaysia?",
+        freeText: role,
+      },
       {
         questionId: openQuestion.id,
         questionText: openQuestion.text,
