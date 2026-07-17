@@ -37,18 +37,6 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
   return (
     <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center">
 
-      {/* Back button */}
-      <motion.button
-        onClick={onBack}
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4 }}
-        className="self-start flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"
-      >
-        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-        Back to Main Page
-      </motion.button>
-
       {/* Page Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
@@ -96,12 +84,6 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
               <p className="text-sm text-muted-foreground max-w-xs">
                 Your default mail app has opened with your message pre-filled. We'll get back to you shortly.
               </p>
-              <button
-                onClick={onBack}
-                className="mt-2 px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
-              >
-                Back to Main Page
-              </button>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -248,17 +230,21 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
             </ul>
           </div>
 
-          {/* Back button (secondary) */}
-          <button
-            onClick={onBack}
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-card-border/60 bg-card/30 hover:border-primary/30 hover:bg-card/50 transition-all text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Main Page
-          </button>
         </motion.div>
 
       </div>
+
+      {/* ── Bottom-left back button ── */}
+      <motion.button
+        onClick={onBack}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="self-start mt-10 flex items-center gap-2 px-5 py-2.5 rounded-full border border-card-border/60 bg-card/30 hover:border-primary/30 hover:bg-card/50 transition-all text-sm text-muted-foreground hover:text-foreground group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+        Back to Main Page
+      </motion.button>
     </div>
   );
 }

@@ -141,16 +141,6 @@ export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
   return (
     <div className="w-full min-h-screen px-4 md:px-8 py-8 max-w-7xl mx-auto">
 
-      {/* Back button */}
-      <motion.button
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        onClick={onBack}
-        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 text-sm font-medium"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Home
-      </motion.button>
-
       {/* ── Hero ── */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -489,10 +479,22 @@ export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7 }}
-        className="text-center text-xs text-muted-foreground/50 pb-8"
+        className="text-center text-xs text-muted-foreground/50 pb-6"
       >
         Data is simulated for demonstration purposes · AiNspire Workforce Intelligence Platform · Telekom Malaysia Berhad
       </motion.div>
+
+      {/* ── Bottom-left back button ── */}
+      <motion.button
+        onClick={onBack}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.75 }}
+        className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-card-border/60 bg-card/30 hover:border-primary/30 hover:bg-card/50 transition-all text-sm text-muted-foreground hover:text-foreground mb-8 group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+        Back to Main Page
+      </motion.button>
 
     </div>
   );
