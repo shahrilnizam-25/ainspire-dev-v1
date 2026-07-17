@@ -1,56 +1,129 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles, Brain, BarChart3, Route } from 'lucide-react';
+
+const FEATURES = [
+  { icon: Brain, label: 'AI-Powered Classification', desc: 'Claude Sonnet reasons holistically over your responses' },
+  { icon: Route, label: 'Personalised Learning Pathway', desc: 'Tailored recommendations matched to your unique profile' },
+  { icon: BarChart3, label: 'Workforce Analytics', desc: 'HR-ready insights with human-in-the-loop governance' },
+];
 
 export default function LandingScreen({ onStart }: { onStart: () => void }) {
   return (
-    <div className="w-full max-w-4xl px-6 py-12 flex flex-col items-center text-center mt-[-5vh]">
-      {/* TM Branding */}
-      <motion.div 
+    <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center">
+
+      {/* TM Official Logo */}
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="flex flex-col items-center mb-16"
+        transition={{ duration: 0.7, ease: 'easeOut' }}
+        className="flex flex-col items-center mb-14"
       >
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#FFB700] to-[#FF8A00] flex items-center justify-center shadow-lg shadow-orange-500/20 mb-6 border border-white/10">
-          <span className="text-3xl font-black text-white tracking-tighter">TM</span>
+        <img
+          src="/tm-logo.svg"
+          alt="Telekom Malaysia"
+          className="h-12 md:h-14 w-auto object-contain mb-5"
+          style={{ filter: 'brightness(0) invert(1)' }}
+        />
+        <div className="flex items-center gap-3">
+          <div className="h-px w-16 bg-gradient-to-r from-transparent to-primary/50" />
+          <span className="text-[10px] font-bold tracking-[0.3em] text-primary uppercase">
+            Talent Development Initiative
+          </span>
+          <div className="h-px w-16 bg-gradient-to-l from-transparent to-primary/50" />
         </div>
-        <h2 className="text-sm font-bold tracking-[0.2em] text-muted-foreground uppercase">Telekom Malaysia</h2>
       </motion.div>
 
-      {/* Main Content */}
+      {/* Hero Text */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-        className="space-y-8 mb-16"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
+        className="mb-6"
       >
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white drop-shadow-2xl">
-          Discover Your <br className="hidden md:block"/>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_25px_rgba(0,212,255,0.4)]">
+        {/* Eyebrow badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/8 text-primary text-xs font-semibold uppercase tracking-widest mb-8">
+          <Sparkles className="w-3.5 h-3.5" />
+          Powered by Claude AI · Agentic Reasoning
+        </div>
+
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] mb-0">
+          <span className="text-white">Discover Your</span>
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.35)]">
             AI Persona
           </span>
+          <br />
+          <span className="text-white text-4xl md:text-5xl lg:text-[3.5rem] font-semibold">
+            with Personalized
+          </span>
+          <br />
+          <span className="text-white text-4xl md:text-5xl lg:text-[3.5rem] font-semibold">
+            Learning Pathway
+          </span>
         </h1>
-        <p className="text-lg md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          An AI-powered assessment — 5 questions + 1 open response — that uses
-          Claude to discover your unique role in Malaysia's AI future.
-        </p>
+      </motion.div>
+
+      {/* Subtitle */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-12"
+      >
+        An AI-powered assessment to discover your unique role in{' '}
+        <span className="text-foreground font-medium">Telekom Malaysia's AI future.</span>
+      </motion.p>
+
+      {/* Feature cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+        className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-12"
+      >
+        {FEATURES.map((f, i) => {
+          const Icon = f.icon;
+          return (
+            <motion.div
+              key={f.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.45 + i * 0.08 }}
+              className="flex flex-col items-center gap-3 px-5 py-5 rounded-2xl bg-card/40 border border-card-border/60 backdrop-blur-sm hover:border-primary/30 hover:bg-card/60 transition-all duration-300"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <Icon className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-1">{f.label}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+              </div>
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {/* CTA */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+        transition={{ duration: 0.8, delay: 0.55 }}
+        className="flex flex-col items-center gap-4"
       >
         <button
           onClick={onStart}
-          className="group relative inline-flex items-center gap-4 px-10 py-5 bg-primary text-primary-foreground font-bold text-xl rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 glow-cyan"
+          className="group relative inline-flex items-center gap-4 px-12 py-5 bg-primary text-primary-foreground font-bold text-lg rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(0,212,255,0.35)] hover:shadow-[0_0_60px_rgba(0,212,255,0.55)]"
         >
-          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+          <div className="absolute inset-0 bg-white/15 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-full" />
           <span className="relative">Begin Assessment</span>
-          <ArrowRight className="relative w-6 h-6 group-hover:translate-x-1 transition-transform" />
+          <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>
+
+        <p className="text-xs text-muted-foreground/60 tracking-wide">
+          5 questions + 1 open response · Takes ~3 minutes
+        </p>
       </motion.div>
+
     </div>
   );
 }
