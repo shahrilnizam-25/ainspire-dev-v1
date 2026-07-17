@@ -44,9 +44,6 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
         transition={{ duration: 0.6 }}
         className="text-center mb-10"
       >
-        <p className="text-[10px] font-bold tracking-[0.22em] text-muted-foreground uppercase mb-3">
-          // JOIN THE MOVEMENT. LEAD THE AI ERA.
-        </p>
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
           <span className="text-white">Contact </span>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.35)]">
@@ -54,7 +51,8 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
           </span>
         </h1>
         <p className="mt-4 text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-          Whether you have a suggestion, a concern, or want to collaborate — we want to hear from you.
+          Whether you wish to share a suggestion, raise a concern,<br className="hidden sm:block" />
+          or explore collaboration opportunities, we would love to hear from you.
         </p>
       </motion.div>
 
@@ -193,16 +191,16 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-1">Email Us</p>
+              <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-2">Email Us</p>
+              <p className="text-sm font-semibold text-foreground">Ts. Soo Chern Tien</p>
+              <p className="text-xs text-muted-foreground mt-0.5">IT Service Strategy &amp; Orchestration</p>
+              <p className="text-xs text-muted-foreground">IT as a Service (ITaaS)</p>
               <a
                 href="mailto:ctsoo@tm.com.my"
-                className="text-sm font-semibold text-foreground hover:text-primary transition-colors break-all"
+                className="inline-block mt-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors break-all"
               >
                 ctsoo@tm.com.my
               </a>
-              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                We typically respond within 1–2 business days.
-              </p>
             </div>
           </div>
 
