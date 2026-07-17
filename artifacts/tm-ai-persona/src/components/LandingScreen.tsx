@@ -108,22 +108,11 @@ export default function LandingScreen({ onStart, onStats, onContact }: { onStart
         })}
       </motion.div>
 
-      {/* Powered by badge — below feature cards */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.62 }}
-        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary/70 text-xs font-semibold uppercase tracking-widest mb-10"
-      >
-        <Sparkles className="w-3.5 h-3.5" />
-        Powered by Claude AI · Agentic Reasoning
-      </motion.div>
-
       {/* CTA */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.7 }}
+        transition={{ duration: 0.8, delay: 0.62 }}
         className="flex flex-col items-center gap-4"
       >
         <button
@@ -160,6 +149,17 @@ export default function LandingScreen({ onStart, onStats, onContact }: { onStart
             Contact Us
           </motion.button>
         </div>
+
+        {/* Powered by badge — bottom center */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.85 }}
+          className="mt-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary/70 text-xs font-semibold uppercase tracking-widest"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          Powered by Claude AI · Agentic Reasoning
+        </motion.div>
       </motion.div>
 
     </div>
