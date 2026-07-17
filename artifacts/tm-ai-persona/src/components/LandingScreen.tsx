@@ -38,8 +38,8 @@ export default function LandingScreen({ onStart }: { onStart: () => void }) {
             transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
             className="relative px-7 py-2 rounded-full border border-primary/40 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10"
           >
-            <span className="text-3xl md:text-4xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#00d4ff] via-[#a855f7] to-[#00d4ff]"
-              style={{ filter: 'drop-shadow(0 0 12px rgba(0,212,255,0.6))' }}
+            <span className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#00d4ff] via-[#a855f7] to-[#00d4ff]"
+              style={{ filter: 'drop-shadow(0 0 18px rgba(0,212,255,0.7))' }}
             >
               AiNspire
             </span>
