@@ -11,63 +11,69 @@ export default function LandingScreen({ onStart }: { onStart: () => void }) {
   return (
     <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center">
 
-      {/* TM Official Logo */}
+      {/* TM Logo + Platform Branding */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
-        className="flex flex-col items-center mb-14"
+        className="flex flex-col items-center mb-10"
       >
         <img
           src="/tm-logo-official.png"
           alt="Telekom Malaysia"
           className="h-16 md:h-20 w-auto object-contain mb-5"
         />
-        <div className="flex items-center gap-3">
-          <div className="h-px w-16 bg-gradient-to-r from-transparent to-primary/50" />
-          <span className="text-[10px] font-bold tracking-[0.3em] text-primary uppercase">
-            Talent Development Initiative
-          </span>
-          <div className="h-px w-16 bg-gradient-to-l from-transparent to-primary/50" />
+
+        {/* Platform label */}
+        <p className="text-[10px] font-bold tracking-[0.22em] text-muted-foreground uppercase mb-3">
+          TM AI Workforce Intelligent Platform
+        </p>
+
+        {/* AiNspire — glowing product name */}
+        <div className="relative flex items-center justify-center">
+          {/* Outer glow halo */}
+          <div className="absolute inset-0 rounded-full blur-2xl opacity-40 bg-gradient-to-r from-primary via-secondary to-primary scale-150" />
+          <motion.div
+            animate={{ opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="relative px-7 py-2 rounded-full border border-primary/40 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10"
+          >
+            <span className="text-3xl md:text-4xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#00d4ff] via-[#a855f7] to-[#00d4ff]"
+              style={{ filter: 'drop-shadow(0 0 12px rgba(0,212,255,0.6))' }}
+            >
+              AiNspire
+            </span>
+          </motion.div>
         </div>
       </motion.div>
 
-      {/* Hero Text */}
+      {/* Hero Headline */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
-        className="mb-6"
+        transition={{ duration: 0.8, delay: 0.18, ease: 'easeOut' }}
+        className="mb-5"
       >
-        {/* Eyebrow badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/8 text-primary text-xs font-semibold uppercase tracking-widest mb-8">
-          <Sparkles className="w-3.5 h-3.5" />
-          Powered by Claude AI · Agentic Reasoning
-        </div>
-
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] mb-0">
-          <span className="text-white">Discover Your</span>
-          <br />
+        {/* Main title — large */}
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight whitespace-nowrap mb-2">
+          <span className="text-white">Discover Your </span>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.35)]">
             AI Persona
           </span>
-          <br />
-          <span className="text-white text-4xl md:text-5xl lg:text-[3.5rem] font-semibold">
-            with Personalized
-          </span>
-          <br />
-          <span className="text-white text-4xl md:text-5xl lg:text-[3.5rem] font-semibold">
-            Learning Pathway
-          </span>
         </h1>
+
+        {/* Subtitle line — smaller, one line */}
+        <h2 className="text-2xl md:text-3xl font-semibold text-white/70 whitespace-nowrap">
+          with Personalized Learning Pathway
+        </h2>
       </motion.div>
 
-      {/* Subtitle */}
+      {/* Description — one horizontal line */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-12"
+        className="text-base md:text-lg text-muted-foreground whitespace-nowrap mb-10"
       >
         An AI-powered assessment to discover your unique role in{' '}
         <span className="text-foreground font-medium">Telekom Malaysia's AI future.</span>
@@ -78,7 +84,7 @@ export default function LandingScreen({ onStart }: { onStart: () => void }) {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
-        className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-12"
+        className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
       >
         {FEATURES.map((f, i) => {
           const Icon = f.icon;
@@ -102,11 +108,22 @@ export default function LandingScreen({ onStart }: { onStart: () => void }) {
         })}
       </motion.div>
 
+      {/* Powered by badge — below feature cards */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.62 }}
+        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary/70 text-xs font-semibold uppercase tracking-widest mb-10"
+      >
+        <Sparkles className="w-3.5 h-3.5" />
+        Powered by Claude AI · Agentic Reasoning
+      </motion.div>
+
       {/* CTA */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.55 }}
+        transition={{ duration: 0.8, delay: 0.7 }}
         className="flex flex-col items-center gap-4"
       >
         <button
@@ -117,7 +134,6 @@ export default function LandingScreen({ onStart }: { onStart: () => void }) {
           <span className="relative">Begin Assessment</span>
           <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>
-
         <p className="text-xs text-muted-foreground/60 tracking-wide">
           5 questions + 1 open response · Takes ~3 minutes
         </p>
