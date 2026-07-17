@@ -6,10 +6,11 @@ import OpenQuestionScreen from './components/OpenQuestionScreen';
 import AIThinkingScreen from './components/AIThinkingScreen';
 import ResultsScreen from './components/ResultsScreen';
 import HRDashboard from './components/HRDashboard';
+import StatisticsScreen from './components/StatisticsScreen';
 import { questions, openQuestion } from './data/questions';
 import type { Option } from './data/questions';
 
-type Screen = 'landing' | 'assessment' | 'open-question' | 'ai-loading' | 'results' | 'hr-view';
+type Screen = 'landing' | 'assessment' | 'open-question' | 'ai-loading' | 'results' | 'hr-view' | 'statistics';
 
 export type MCQAnswer = {
   questionId: number;
@@ -132,7 +133,7 @@ export default function App() {
               transition={{ duration: 0.4 }}
               className="w-full flex justify-center"
             >
-              <LandingScreen onStart={handleStart} />
+              <LandingScreen onStart={handleStart} onStats={() => setScreen('statistics')} />
             </motion.div>
           )}
 
@@ -218,6 +219,19 @@ export default function App() {
                 aiResult={aiResult}
                 onBack={() => setScreen('results')}
               />
+            </motion.div>
+          )}
+
+          {screen === 'statistics' && (
+            <motion.div
+              key="statistics"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="w-full flex justify-center"
+            >
+              <StatisticsScreen onBack={() => setScreen('landing')} />
             </motion.div>
           )}
         </AnimatePresence>

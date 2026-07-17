@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Brain, BarChart3, Route } from 'lucide-react';
+import { ArrowRight, Sparkles, Brain, BarChart3, Route, TrendingUp } from 'lucide-react';
 
 const FEATURES = [
   { icon: Brain, label: 'AI-Powered Classification', desc: 'Claude Sonnet reasons holistically over your responses' },
@@ -7,7 +7,7 @@ const FEATURES = [
   { icon: BarChart3, label: 'Workforce Analytics', desc: 'HR-ready insights with human-in-the-loop governance' },
 ];
 
-export default function LandingScreen({ onStart }: { onStart: () => void }) {
+export default function LandingScreen({ onStart, onStats }: { onStart: () => void; onStats: () => void }) {
   return (
     <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center">
 
@@ -137,6 +137,17 @@ export default function LandingScreen({ onStart }: { onStart: () => void }) {
         <p className="text-xs text-muted-foreground/60 tracking-wide">
           5 questions + 1 open response · Takes ~3 minutes
         </p>
+
+        {/* Stats link */}
+        <motion.button
+          onClick={onStats}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-card-border/60 bg-card/30 hover:border-primary/30 hover:bg-card/50 transition-all text-sm text-muted-foreground hover:text-foreground"
+        >
+          <TrendingUp className="w-4 h-4 text-primary" />
+          View Workforce Statistics
+        </motion.button>
       </motion.div>
 
     </div>
