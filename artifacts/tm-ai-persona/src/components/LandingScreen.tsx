@@ -19,10 +19,9 @@ export default function LandingScreen({ onStart }: { onStart: () => void }) {
         className="flex flex-col items-center mb-14"
       >
         <img
-          src="/tm-logo.svg"
+          src="/tm-logo-official.png"
           alt="Telekom Malaysia"
-          className="h-12 md:h-14 w-auto object-contain mb-5"
-          style={{ filter: 'brightness(0) invert(1)' }}
+          className="h-16 md:h-20 w-auto object-contain mb-5"
         />
         <div className="flex items-center gap-3">
           <div className="h-px w-16 bg-gradient-to-r from-transparent to-primary/50" />
