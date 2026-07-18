@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { RefreshCw, ChevronRight, Bot, BarChart2, AlertCircle } from 'lucide-react';
+import { RefreshCw, ChevronRight, Bot, BarChart2, AlertCircle, FileText } from 'lucide-react';
 import { personas } from '../data/personas';
 import type { AIResult } from '../App';
 
@@ -9,12 +9,14 @@ export default function ResultsScreen({
   aiError,
   onRetake,
   onHRView,
+  onReport,
 }: {
   resultPersonaId: string;
   aiResult: AIResult | null;
   aiError: string | null;
   onRetake: () => void;
   onHRView: () => void;
+  onReport: () => void;
 }) {
   const result = personas[resultPersonaId];
   if (!result) return null;
@@ -215,6 +217,21 @@ export default function ResultsScreen({
         >
           <RefreshCw className="w-5 h-5 group-hover:-rotate-180 transition-transform duration-500" />
           Retake Assessment
+        </button>
+        <button
+          onClick={onReport}
+          className="group flex items-center gap-3 px-8 py-4 rounded-full border-2 transition-all font-semibold"
+          style={{
+            borderColor: `${result.color}50`,
+            color: result.color,
+            background: `${result.color}0d`,
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = `${result.color}1a`; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = `${result.color}0d`; }}
+        >
+          <FileText className="w-5 h-5" />
+          Download My Report
+          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
         <button
           onClick={onHRView}

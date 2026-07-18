@@ -6,12 +6,13 @@ import OpenQuestionScreen from './components/OpenQuestionScreen';
 import AIThinkingScreen from './components/AIThinkingScreen';
 import ResultsScreen from './components/ResultsScreen';
 import HRDashboard from './components/HRDashboard';
+import ReportScreen from './components/ReportScreen';
 import StatisticsScreen from './components/StatisticsScreen';
 import ContactScreen from './components/ContactScreen';
 import { questions, openQuestion } from './data/questions';
 import type { Option } from './data/questions';
 
-type Screen = 'landing' | 'assessment' | 'open-question' | 'ai-loading' | 'results' | 'hr-view' | 'statistics' | 'contact';
+type Screen = 'landing' | 'assessment' | 'open-question' | 'ai-loading' | 'results' | 'hr-view' | 'statistics' | 'contact' | 'report';
 
 export type MCQAnswer = {
   questionId: number;
@@ -35,6 +36,7 @@ export default function App() {
   const [mcqAnswers, setMcqAnswers] = useState<MCQAnswer[]>([]);
   const [aiResult, setAiResult] = useState<AIResult | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>('');
 
   const handleStart = () => {
     setScreen('assessment');
@@ -63,6 +65,7 @@ export default function App() {
   };
 
   const handleOpenSubmit = async (role: string, freeText: string) => {
+    setUserRole(role);
     setScreen('ai-loading');
 
     const answers = [
@@ -202,6 +205,7 @@ export default function App() {
                 aiError={aiError}
                 onRetake={handleStart}
                 onHRView={() => setScreen('hr-view')}
+                onReport={() => setScreen('report')}
               />
             </motion.div>
           )}
@@ -246,6 +250,24 @@ export default function App() {
               className="w-full flex justify-center"
             >
               <ContactScreen onBack={() => setScreen('landing')} />
+            </motion.div>
+          )}
+
+          {screen === 'report' && (
+            <motion.div
+              key="report"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.4 }}
+              className="w-full flex justify-center"
+            >
+              <ReportScreen
+                resultPersonaId={resultPersonaId}
+                aiResult={aiResult}
+                userRole={userRole}
+                onBack={() => setScreen('results')}
+              />
             </motion.div>
           )}
         </AnimatePresence>
