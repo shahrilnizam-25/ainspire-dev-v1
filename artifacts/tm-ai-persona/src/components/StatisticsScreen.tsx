@@ -599,11 +599,96 @@ export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
         </motion.div>
       </div>
 
+      {/* ── Cohort Benchmarking ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mb-10 p-6 rounded-2xl bg-card/40 border border-card-border/60"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-[#ec4899]/10 border border-[#ec4899]/20 flex items-center justify-center">
+            <Target className="w-4 h-4 text-[#ec4899]" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Cohort Benchmarking</h2>
+            <p className="text-xs text-muted-foreground">Division AI Readiness vs TM Average vs Telco Industry Benchmark</p>
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-6 mb-6 text-xs">
+          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#00d4ff]" />Division Score</span>
+          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#f59e0b]" />TM Org Average (67)</span>
+          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#ec4899]" />Telco Industry Benchmark (71)</span>
+        </div>
+
+        <div className="space-y-4">
+          {[...DIVISIONS].sort((a, b) => b.index - a.index).map((d) => {
+            const isFiltered = selectedDivision !== null && selectedDivision !== d.name;
+            const tmAvg = 67;
+            const industryBenchmark = 71;
+            const vsAvg = d.index - tmAvg;
+            const vsIndustry = d.index - industryBenchmark;
+            return (
+              <div key={d.name} className="transition-all" style={{ opacity: isFiltered ? 0.25 : 1 }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-muted-foreground w-16 flex-shrink-0">{d.name}</span>
+                    <span className="text-xs text-muted-foreground/60 hidden md:block">{d.full}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs font-semibold">
+                    <span style={{ color: vsAvg >= 0 ? '#22c55e' : '#ef4444' }}>
+                      {vsAvg >= 0 ? '+' : ''}{vsAvg} vs TM avg
+                    </span>
+                    <span style={{ color: vsIndustry >= 0 ? '#22c55e' : '#ef4444' }}>
+                      {vsIndustry >= 0 ? '+' : ''}{vsIndustry} vs industry
+                    </span>
+                    <span className="font-black text-foreground w-6 text-right">{d.index}</span>
+                  </div>
+                </div>
+                <div className="relative h-6 bg-muted rounded-full overflow-hidden">
+                  {/* Division bar */}
+                  <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-2"
+                    style={{ background: 'linear-gradient(90deg, #00d4ff44, #00d4ff)', zIndex: 3 }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${d.index}%` }}
+                    transition={{ duration: 0.9, ease: 'easeOut' }}
+                  >
+                    <span className="text-[10px] font-black text-white">{d.index}</span>
+                  </motion.div>
+                  {/* TM average line */}
+                  <div className="absolute inset-y-1 w-0.5 rounded-full bg-[#f59e0b] z-10" style={{ left: `${tmAvg}%` }} />
+                  {/* Industry benchmark line */}
+                  <div className="absolute inset-y-1 w-0.5 rounded-full bg-[#ec4899] z-10" style={{ left: `${industryBenchmark}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Summary callouts */}
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-5 border-t border-card-border/40">
+          {[
+            { label: 'Above Industry Benchmark', value: DIVISIONS.filter(d => d.index >= 71).length, color: '#22c55e', sub: 'divisions performing above Telco industry avg' },
+            { label: 'At TM Average', value: DIVISIONS.filter(d => d.index >= 65 && d.index < 71).length, color: '#f59e0b', sub: 'divisions within ±2 pts of TM organisation average' },
+            { label: 'Below Average', value: DIVISIONS.filter(d => d.index < 65).length, color: '#ef4444', sub: 'divisions requiring targeted intervention' },
+          ].map(c => (
+            <div key={c.label} className="p-4 rounded-xl border border-card-border/60 bg-card/30 text-center">
+              <div className="text-3xl font-black mb-1" style={{ color: c.color }}>{c.value}</div>
+              <div className="text-xs font-bold text-foreground mb-1">{c.label}</div>
+              <div className="text-xs text-muted-foreground">{c.sub}</div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
       {/* ── Footer note ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.7 }}
+        transition={{ delay: 0.75 }}
         className="text-center text-xs text-muted-foreground/50 pb-6"
       >
         Data is simulated for demonstration purposes · AiNspire Workforce Intelligence Platform · Telekom Malaysia Berhad
