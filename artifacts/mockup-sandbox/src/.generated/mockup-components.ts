@@ -4,5 +4,6 @@ export const modules: ModuleMap = {
   "./components/mockups/division-analytics/DivisionAnalytics.tsx": () => import("../components/mockups/division-analytics/DivisionAnalytics.tsx"),
   "./components/mockups/hr-portal/HRPortal.tsx": () => import("../components/mockups/hr-portal/HRPortal.tsx"),
   "./components/mockups/pdf-report/PDFReport.tsx": () => import("../components/mockups/pdf-report/PDFReport.tsx"),
+  "./components/mockups/persistent-db/PersistentDB.tsx": () => import("../components/mockups/persistent-db/PersistentDB.tsx"),
   "./components/mockups/sso-login/SSOLogin.tsx": () => import("../components/mockups/sso-login/SSOLogin.tsx")
 };
