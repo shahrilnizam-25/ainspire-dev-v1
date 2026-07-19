@@ -1,6 +1,24 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Brain, BarChart3, Route, TrendingUp, Mail } from 'lucide-react';
+import { ArrowRight, Sparkles, Brain, BarChart3, Route, TrendingUp, Mail,
+         GraduationCap, Target, Shield, Users, Lock, LineChart } from 'lucide-react';
 import { translations, type Lang } from '../i18n';
+
+/* ─── Floating badge definitions ─────────────────────────────────────────── */
+const FLOAT_BADGES = [
+  { icon: Brain,        label: 'AI Insights',     side: 'left',  top: '18%', delay: 0.6 },
+  { icon: Users,        label: 'Employee-Centric', side: 'left',  top: '46%', delay: 0.8 },
+  { icon: GraduationCap,label: 'Learning Paths',  side: 'right', top: '18%', delay: 0.7 },
+  { icon: Target,       label: 'Goal Tracking',   side: 'right', top: '48%', delay: 0.9 },
+  { icon: LineChart,    label: 'Analytics',        side: 'right', top: '72%', delay: 1.0 },
+];
+
+/* ─── Trust badge definitions ─────────────────────────────────────────────── */
+const TRUST_BADGES = [
+  { icon: Shield,    label: 'AI-Driven' },
+  { icon: Users,     label: 'Employee-Centric' },
+  { icon: Lock,      label: 'Secure & Trusted' },
+  { icon: LineChart, label: 'Future-Ready' },
+];
 
 export default function LandingScreen({
   lang,
@@ -16,15 +34,17 @@ export default function LandingScreen({
   const t = translations[lang];
 
   const FEATURES = [
-    { icon: Brain,    label: t.feature1Label, desc: t.feature1Desc },
-    { icon: Route,    label: t.feature2Label, desc: t.feature2Desc },
-    { icon: BarChart3,label: t.feature3Label, desc: t.feature3Desc },
+    { icon: Brain,     label: t.feature1Label, desc: t.feature1Desc },
+    { icon: Route,     label: t.feature2Label, desc: t.feature2Desc },
+    { icon: BarChart3, label: t.feature3Label, desc: t.feature3Desc },
   ];
 
   return (
     <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center relative">
 
-      {/* ── TM logo + AiNspire pill — single row "TM AiNspire" ── */}
+      {/* ══════════════════════════════════════════════
+          HEADER — TM AiNspire + platform title
+      ══════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -39,18 +59,18 @@ export default function LandingScreen({
           style={{ height: 'clamp(2.4rem, 4.5vw, 3.2rem)' }}
         />
 
-        {/* AiNspire glassy pill — sized to match TM logo height */}
+        {/* AiNspire glassy pill */}
         <div className="relative">
           <div
             className="absolute inset-0 rounded-full blur-xl"
-            style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,255,0.15) 0%, rgba(139,92,246,0.10) 60%, transparent 100%)' }}
+            style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,255,0.18) 0%, rgba(139,92,246,0.12) 60%, transparent 100%)' }}
           />
           <div
             className="relative flex items-center select-none px-5 py-2 rounded-full"
             style={{
               background: 'linear-gradient(135deg, rgba(0,20,40,0.75) 0%, rgba(10,5,30,0.82) 100%)',
-              border: '1.5px solid rgba(0,212,255,0.35)',
-              boxShadow: '0 0 24px rgba(0,212,255,0.12), 0 0 40px rgba(139,92,246,0.08), inset 0 1px 0 rgba(255,255,255,0.08)',
+              border: '1.5px solid rgba(0,212,255,0.38)',
+              boxShadow: '0 0 24px rgba(0,212,255,0.14), 0 0 40px rgba(139,92,246,0.10), inset 0 1px 0 rgba(255,255,255,0.08)',
               backdropFilter: 'blur(10px)',
             }}
           >
@@ -83,17 +103,19 @@ export default function LandingScreen({
         </div>
       </motion.div>
 
-      {/* ── Platform title — plain text, no oval ── */}
+      {/* Platform title — plain text */}
       <motion.p
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.12 }}
-        className="mb-7 text-sm font-semibold uppercase tracking-widest text-white/45"
+        className="mb-6 text-sm font-semibold uppercase tracking-widest text-white/45"
       >
         {t.platformLabel}
       </motion.p>
 
-      {/* ── Hero headline ── */}
+      {/* ══════════════════════════════════════════════
+          HEADLINE
+      ══════════════════════════════════════════════ */}
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -108,23 +130,92 @@ export default function LandingScreen({
         <span className="text-white/80 text-4xl md:text-5xl font-bold">{t.headline2}</span>
       </motion.h1>
 
-      {/* ── Description — single horizontal line ── */}
+      {/* Description — single line */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.28 }}
-        className="text-base md:text-lg text-muted-foreground mb-10 whitespace-nowrap"
+        className="text-base md:text-lg text-muted-foreground mb-8 whitespace-nowrap"
       >
         {t.description}{' '}
         <span className="text-foreground font-semibold">{t.descriptionBold}</span>
       </motion.p>
 
-      {/* ── Feature cards ── */}
+      {/* ══════════════════════════════════════════════
+          CINEMATIC HERO IMAGE + FLOATING BADGES
+      ══════════════════════════════════════════════ */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.35 }}
+        className="relative w-full mb-10 rounded-2xl overflow-hidden"
+        style={{ aspectRatio: '21/9' }}
+      >
+        {/* Hero image */}
+        <img
+          src="/hero-cinematic.jpg"
+          alt="AI future portal"
+          className="w-full h-full object-cover"
+          style={{ objectPosition: 'center center' }}
+        />
+
+        {/* Top + bottom fade vignette to blend with page bg */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(to bottom, rgba(3,7,18,0.55) 0%, transparent 20%, transparent 75%, rgba(3,7,18,0.80) 100%)',
+          }}
+        />
+        {/* Side fades */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(to right, rgba(3,7,18,0.55) 0%, transparent 18%, transparent 82%, rgba(3,7,18,0.55) 100%)',
+          }}
+        />
+
+        {/* ── Floating AI badges ── */}
+        {FLOAT_BADGES.map((b) => {
+          const Icon = b.icon;
+          const isLeft = b.side === 'left';
+          return (
+            <motion.div
+              key={b.label}
+              initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: b.delay }}
+              className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none"
+              style={{
+                top: b.top,
+                ...(isLeft ? { left: '3%' } : { right: '3%' }),
+                background: 'rgba(3,10,28,0.72)',
+                border: '1px solid rgba(0,212,255,0.28)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.40), 0 0 12px rgba(0,212,255,0.10)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <div
+                className="p-1.5 rounded-lg"
+                style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.25)' }}
+              >
+                <Icon className="w-3.5 h-3.5 text-cyan-400" />
+              </div>
+              <span className="text-xs font-semibold text-white/85 whitespace-nowrap">{b.label}</span>
+            </motion.div>
+          );
+        })}
+      </motion.div>
+
+      {/* ══════════════════════════════════════════════
+          FEATURE CARDS
+      ══════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-        className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-12"
+        transition={{ duration: 0.5, delay: 0.5 }}
+        className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-10"
       >
         {FEATURES.map((f, i) => {
           const Icon = f.icon;
@@ -133,7 +224,7 @@ export default function LandingScreen({
               key={f.label}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 + i * 0.08 }}
+              transition={{ delay: 0.55 + i * 0.08 }}
               className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-card-border bg-card/40 backdrop-blur-sm text-left"
             >
               <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
@@ -148,14 +239,15 @@ export default function LandingScreen({
         })}
       </motion.div>
 
-      {/* ── CTA buttons ── */}
+      {/* ══════════════════════════════════════════════
+          CTA BUTTONS
+      ══════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.55 }}
-        className="flex flex-col items-center gap-4 w-full"
+        transition={{ duration: 0.5, delay: 0.7 }}
+        className="flex flex-col items-center gap-4 w-full mb-10"
       >
-        {/* Begin Assessment — primary */}
         <motion.button
           onClick={onStart}
           whileHover={{ scale: 1.02 }}
@@ -174,7 +266,6 @@ export default function LandingScreen({
 
         <p className="text-xs text-muted-foreground font-mono">{t.beginSub}</p>
 
-        {/* Secondary row */}
         <div className="flex flex-col sm:flex-row gap-3 mt-1">
           <motion.button
             onClick={onStats}
@@ -198,12 +289,38 @@ export default function LandingScreen({
         </div>
       </motion.div>
 
-      {/* ── Powered by badge ── */}
+      {/* ══════════════════════════════════════════════
+          TRUST BADGES ROW
+      ══════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="mt-12 text-xs text-muted-foreground/50 font-mono"
+        transition={{ duration: 0.6, delay: 0.85 }}
+        className="w-full flex flex-wrap justify-center gap-6 pt-6 border-t border-white/8"
+      >
+        {TRUST_BADGES.map((b, i) => {
+          const Icon = b.icon;
+          return (
+            <motion.div
+              key={b.label}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 + i * 0.07 }}
+              className="flex items-center gap-2 text-white/50 text-xs font-semibold"
+            >
+              <Icon className="w-4 h-4 text-primary/60" />
+              {b.label}
+            </motion.div>
+          );
+        })}
+      </motion.div>
+
+      {/* Powered by */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.1 }}
+        className="mt-8 text-xs text-muted-foreground/50 font-mono"
       >
         {t.poweredBy}
       </motion.div>
