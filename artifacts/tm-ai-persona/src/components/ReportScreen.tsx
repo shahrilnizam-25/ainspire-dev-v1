@@ -134,30 +134,10 @@ export default function ReportScreen({
       const pageH = pdf.internal.pageSize.getHeight(); // 297 mm
       const imgData = canvas.toDataURL('image/jpeg', 0.93);
 
-      // Natural image size at A4 width
-      const naturalImgH = (canvas.height * pageW) / canvas.width;
-
-      // If the image overflows by less than 15 mm it's a near-miss (sub-pixel
-      // rendering artefacts / padding). Scale it to fit one page exactly so we
-      // never produce a near-blank second page.
-      const fitsOnOnePage = naturalImgH <= pageH + 15;
-      const imgW = fitsOnOnePage
-        ? pageW * (pageH / Math.max(naturalImgH, pageH)) // scale down to page height
-        : pageW;
-      const imgH = fitsOnOnePage ? pageH : naturalImgH;
-      const xOff = (pageW - imgW) / 2; // centre horizontally if scaled
-
-      if (fitsOnOnePage) {
-        pdf.addImage(imgData, 'JPEG', xOff, 0, imgW, imgH);
-      } else {
-        // Genuine multi-page: slice the image across pages
-        let yOffset = 0;
-        while (yOffset < imgH - 1) {
-          if (yOffset > 0) pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, -yOffset, imgW, imgH);
-          yOffset += pageH;
-        }
-      }
+      // The report is a single-page layout. Stretch the canvas image to fill
+      // exactly one A4 page — this eliminates any phantom blank second page
+      // regardless of how many pixels the browser rendered.
+      pdf.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
 
       const safeName = (userRole || 'AI-Persona').replace(/[^a-zA-Z0-9]/g, '_');
       pdf.save(`AiNspire_Report_${safeName}.pdf`);
