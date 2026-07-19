@@ -1,15 +1,18 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Brain, BarChart3, Route, TrendingUp, Mail,
-         GraduationCap, Target, Shield, Users, Lock, LineChart } from 'lucide-react';
+         GraduationCap, Target, Shield, Users, Lock, LineChart, UserCircle } from 'lucide-react';
 import { translations, type Lang } from '../i18n';
 
 /* ─── Floating badge definitions ─────────────────────────────────────────── */
-const FLOAT_BADGES = [
-  { icon: Brain,        label: 'AI Insights',     side: 'left',  top: '18%', delay: 0.6 },
-  { icon: Users,        label: 'Employee-Centric', side: 'left',  top: '46%', delay: 0.8 },
-  { icon: GraduationCap,label: 'Learning Paths',  side: 'right', top: '18%', delay: 0.7 },
-  { icon: Target,       label: 'Goal Tracking',   side: 'right', top: '48%', delay: 0.9 },
-  { icon: LineChart,    label: 'Analytics',        side: 'right', top: '72%', delay: 1.0 },
+const LEFT_BADGES = [
+  { icon: Brain,      label: 'AI Insights',        top: '22%', delay: 0.6 },
+  { icon: UserCircle, label: 'Employee Profile',    top: '50%', delay: 0.75 },
+  { icon: BarChart3,  label: 'Workforce Analytics', top: '74%', delay: 0.9 },
+];
+const RIGHT_BADGES = [
+  { icon: GraduationCap, label: 'Learning Paths', top: '22%', delay: 0.65 },
+  { icon: Target,        label: 'AI Goals',       top: '50%', delay: 0.80 },
+  { icon: LineChart,     label: 'Career Growth',  top: '74%', delay: 0.95 },
 ];
 
 /* ─── Trust badge definitions ─────────────────────────────────────────────── */
@@ -40,16 +43,39 @@ export default function LandingScreen({
   ];
 
   return (
-    <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center relative">
+    <div className="w-full max-w-5xl px-6 py-8 flex flex-col items-center text-center relative">
 
       {/* ══════════════════════════════════════════════
-          HEADER — TM AiNspire + platform title
+          PLATFORM PILL — top centre
+      ══════════════════════════════════════════════ */}
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.0 }}
+        className="mb-5"
+      >
+        <div
+          className="inline-flex items-center px-5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest"
+          style={{
+            background: 'rgba(8,16,40,0.80)',
+            border: '1px solid rgba(0,212,255,0.25)',
+            color: 'rgba(255,255,255,0.55)',
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 0 16px rgba(0,212,255,0.08)',
+          }}
+        >
+          {t.platformLabel}
+        </div>
+      </motion.div>
+
+      {/* ══════════════════════════════════════════════
+          HEADER — TM logo + AiNspire pill
       ══════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.05 }}
-        className="mb-3 flex items-center gap-3"
+        transition={{ duration: 0.6, delay: 0.08 }}
+        className="mb-4 flex items-center gap-3"
       >
         {/* TM logo — original brand colours */}
         <img
@@ -103,24 +129,14 @@ export default function LandingScreen({
         </div>
       </motion.div>
 
-      {/* Platform title — plain text */}
-      <motion.p
-        initial={{ opacity: 0, y: -6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.12 }}
-        className="mb-6 text-sm font-semibold uppercase tracking-widest text-white/45"
-      >
-        {t.platformLabel}
-      </motion.p>
-
       {/* ══════════════════════════════════════════════
           HEADLINE
       ══════════════════════════════════════════════ */}
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.18 }}
-        className="text-5xl md:text-7xl font-black tracking-tight mb-4 leading-[1.05]"
+        transition={{ duration: 0.7, delay: 0.16 }}
+        className="text-5xl md:text-7xl font-black tracking-tight mb-3 leading-[1.05]"
       >
         <span className="text-white">{t.headline1} </span>
         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.5)]">
@@ -130,41 +146,41 @@ export default function LandingScreen({
         <span className="text-white/80 text-4xl md:text-5xl font-bold">{t.headline2}</span>
       </motion.h1>
 
-      {/* Description — single line */}
+      {/* Description */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.28 }}
-        className="text-base md:text-lg text-muted-foreground mb-8 whitespace-nowrap"
+        transition={{ duration: 0.6, delay: 0.26 }}
+        className="text-base md:text-lg text-muted-foreground mb-6 whitespace-nowrap"
       >
         {t.description}{' '}
         <span className="text-foreground font-semibold">{t.descriptionBold}</span>
       </motion.p>
 
       {/* ══════════════════════════════════════════════
-          CINEMATIC HERO IMAGE + FLOATING BADGES
+          CINEMATIC HERO — seamless bleed, no frame
       ══════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.35 }}
-        className="relative w-full mb-10 rounded-2xl overflow-hidden"
-        style={{ aspectRatio: '21/9' }}
+        transition={{ duration: 1.0, delay: 0.32 }}
+        className="relative w-full mb-0"
+        style={{ aspectRatio: '16/7' }}
       >
         {/* Hero image */}
         <img
-          src="/hero-cinematic.jpg"
+          src="/hero-v2.jpg"
           alt="AI future portal"
           className="w-full h-full object-cover"
           style={{ objectPosition: 'center center' }}
         />
 
-        {/* Top + bottom fade vignette to blend with page bg */}
+        {/* Top fade — blends into page background */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to bottom, rgba(3,7,18,0.55) 0%, transparent 20%, transparent 75%, rgba(3,7,18,0.80) 100%)',
+              'linear-gradient(to bottom, rgba(3,7,18,0.60) 0%, transparent 22%, transparent 68%, rgba(3,7,18,0.72) 100%)',
           }}
         />
         {/* Side fades */}
@@ -172,35 +188,64 @@ export default function LandingScreen({
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, rgba(3,7,18,0.55) 0%, transparent 18%, transparent 82%, rgba(3,7,18,0.55) 100%)',
+              'linear-gradient(to right, rgba(3,7,18,0.60) 0%, transparent 16%, transparent 84%, rgba(3,7,18,0.60) 100%)',
           }}
         />
 
-        {/* ── Floating AI badges ── */}
-        {FLOAT_BADGES.map((b) => {
+        {/* ── LEFT floating badges — cyan/blue ── */}
+        {LEFT_BADGES.map((b) => {
           const Icon = b.icon;
-          const isLeft = b.side === 'left';
           return (
             <motion.div
               key={b.label}
-              initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
+              initial={{ opacity: 0, x: -24 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: b.delay }}
               className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none"
               style={{
                 top: b.top,
-                ...(isLeft ? { left: '3%' } : { right: '3%' }),
-                background: 'rgba(3,10,28,0.72)',
-                border: '1px solid rgba(0,212,255,0.28)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.40), 0 0 12px rgba(0,212,255,0.10)',
-                backdropFilter: 'blur(8px)',
+                left: '2%',
+                background: 'rgba(0,12,30,0.70)',
+                border: '1px solid rgba(0,212,255,0.32)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.40), 0 0 14px rgba(0,212,255,0.12)',
+                backdropFilter: 'blur(10px)',
               }}
             >
               <div
                 className="p-1.5 rounded-lg"
-                style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.25)' }}
+                style={{ background: 'rgba(0,212,255,0.14)', border: '1px solid rgba(0,212,255,0.28)' }}
               >
                 <Icon className="w-3.5 h-3.5 text-cyan-400" />
+              </div>
+              <span className="text-xs font-semibold text-white/85 whitespace-nowrap">{b.label}</span>
+            </motion.div>
+          );
+        })}
+
+        {/* ── RIGHT floating badges — purple/magenta ── */}
+        {RIGHT_BADGES.map((b) => {
+          const Icon = b.icon;
+          return (
+            <motion.div
+              key={b.label}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: b.delay }}
+              className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none"
+              style={{
+                top: b.top,
+                right: '2%',
+                background: 'rgba(15,5,35,0.70)',
+                border: '1px solid rgba(167,139,250,0.32)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.40), 0 0 14px rgba(139,92,246,0.14)',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <div
+                className="p-1.5 rounded-lg"
+                style={{ background: 'rgba(139,92,246,0.16)', border: '1px solid rgba(167,139,250,0.28)' }}
+              >
+                <Icon className="w-3.5 h-3.5 text-violet-400" />
               </div>
               <span className="text-xs font-semibold text-white/85 whitespace-nowrap">{b.label}</span>
             </motion.div>
@@ -209,34 +254,55 @@ export default function LandingScreen({
       </motion.div>
 
       {/* ══════════════════════════════════════════════
-          FEATURE CARDS
+          FEATURE CARDS — unified glassmorphism panel
+          with vertical dividers (matches snapshot)
       ══════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-        className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-10"
+        transition={{ duration: 0.6, delay: 0.55 }}
+        className="w-full mb-8 overflow-hidden"
+        style={{
+          background: 'rgba(6,12,30,0.82)',
+          border: '1px solid rgba(0,212,255,0.14)',
+          borderTop: 'none',
+          borderRadius: '0 0 1.25rem 1.25rem',
+          backdropFilter: 'blur(14px)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.45)',
+        }}
       >
-        {FEATURES.map((f, i) => {
-          const Icon = f.icon;
-          return (
-            <motion.div
-              key={f.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55 + i * 0.08 }}
-              className="flex flex-col items-start gap-3 p-5 rounded-2xl border border-card-border bg-card/40 backdrop-blur-sm text-left"
-            >
-              <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
-                <Icon className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <div className="font-semibold text-sm text-foreground mb-1">{f.label}</div>
-                <div className="text-xs text-muted-foreground leading-relaxed">{f.desc}</div>
-              </div>
-            </motion.div>
-          );
-        })}
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/8">
+          {FEATURES.map((f, i) => {
+            const Icon = f.icon;
+            return (
+              <motion.div
+                key={f.label}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.60 + i * 0.08 }}
+                className="flex items-start gap-4 p-5 text-left"
+              >
+                {/* Icon box */}
+                <div
+                  className="flex-shrink-0 p-2.5 rounded-xl mt-0.5"
+                  style={{
+                    background: 'rgba(0,212,255,0.09)',
+                    border: '1px solid rgba(0,212,255,0.20)',
+                    boxShadow: '0 0 12px rgba(0,212,255,0.08)',
+                  }}
+                >
+                  <Icon className="w-5 h-5 text-cyan-400" />
+                </div>
+
+                {/* Text */}
+                <div>
+                  <div className="font-bold text-sm text-white mb-1">{f.label}</div>
+                  <div className="text-xs text-white/45 leading-relaxed">{f.desc}</div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
       </motion.div>
 
       {/* ══════════════════════════════════════════════
@@ -245,7 +311,7 @@ export default function LandingScreen({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
+        transition={{ duration: 0.5, delay: 0.72 }}
         className="flex flex-col items-center gap-4 w-full mb-10"
       >
         <motion.button
@@ -295,8 +361,8 @@ export default function LandingScreen({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.85 }}
-        className="w-full flex flex-wrap justify-center gap-6 pt-6 border-t border-white/8"
+        transition={{ duration: 0.6, delay: 0.88 }}
+        className="w-full flex flex-wrap justify-center gap-8 pt-6 border-t border-white/8"
       >
         {TRUST_BADGES.map((b, i) => {
           const Icon = b.icon;
@@ -305,7 +371,7 @@ export default function LandingScreen({
               key={b.label}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 + i * 0.07 }}
+              transition={{ delay: 0.92 + i * 0.07 }}
               className="flex items-center gap-2 text-white/50 text-xs font-semibold"
             >
               <Icon className="w-4 h-4 text-primary/60" />
