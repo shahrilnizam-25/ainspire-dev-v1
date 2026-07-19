@@ -24,53 +24,40 @@ export default function LandingScreen({
   return (
     <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center relative">
 
-      {/* ── Platform badge ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.05 }}
-        className="mb-5 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/8 text-primary text-xs font-bold uppercase tracking-widest"
-      >
-        {t.platformLabel}
-      </motion.div>
-
-      {/* ── TM logo  +  AiNspire pill — same row, reads "TM AiNspire" ── */}
+      {/* ── TM logo + AiNspire pill — single row "TM AiNspire" ── */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="mb-8 flex items-center gap-5"
+        transition={{ duration: 0.6, delay: 0.05 }}
+        className="mb-3 flex items-center gap-3"
       >
-        {/* TM logo — original brand colours, large */}
+        {/* TM logo — original brand colours */}
         <img
           src="/tm-logo-official.png"
           alt="Telekom Malaysia"
           className="w-auto object-contain"
-          style={{ height: 'clamp(3.5rem, 7vw, 5.5rem)' }}
+          style={{ height: 'clamp(2.4rem, 4.5vw, 3.2rem)' }}
         />
 
-        {/* AiNspire glassy pill */}
+        {/* AiNspire glassy pill — sized to match TM logo height */}
         <div className="relative">
-          {/* Ambient glow */}
           <div
-            className="absolute inset-0 rounded-full blur-2xl"
-            style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,255,0.18) 0%, rgba(139,92,246,0.12) 60%, transparent 100%)' }}
+            className="absolute inset-0 rounded-full blur-xl"
+            style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,255,0.15) 0%, rgba(139,92,246,0.10) 60%, transparent 100%)' }}
           />
-          {/* Pill */}
           <div
-            className="relative flex items-center select-none px-10 py-4 rounded-full"
+            className="relative flex items-center select-none px-5 py-2 rounded-full"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,20,40,0.72) 0%, rgba(10,5,30,0.80) 100%)',
+              background: 'linear-gradient(135deg, rgba(0,20,40,0.75) 0%, rgba(10,5,30,0.82) 100%)',
               border: '1.5px solid rgba(0,212,255,0.35)',
-              boxShadow: '0 0 32px rgba(0,212,255,0.14), 0 0 60px rgba(139,92,246,0.10), inset 0 1px 0 rgba(255,255,255,0.08)',
+              boxShadow: '0 0 24px rgba(0,212,255,0.12), 0 0 40px rgba(139,92,246,0.08), inset 0 1px 0 rgba(255,255,255,0.08)',
               backdropFilter: 'blur(10px)',
             }}
           >
-            {/* "Ai" — cyan gradient */}
             <span
               className="font-black tracking-tight leading-none"
               style={{
-                fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
+                fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
                 background: 'linear-gradient(135deg, #a5f3fc 0%, #22d3ee 40%, #00b4d8 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -79,16 +66,15 @@ export default function LandingScreen({
             >
               Ai
             </span>
-            {/* "Nspire" — purple with glow */}
             <span
               className="font-black tracking-tight leading-none"
               style={{
-                fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
+                fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
                 background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 40%, #8b5cf6 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 14px rgba(167,139,250,0.65))',
+                filter: 'drop-shadow(0 0 10px rgba(167,139,250,0.60))',
               }}
             >
               Nspire
@@ -96,6 +82,16 @@ export default function LandingScreen({
           </div>
         </div>
       </motion.div>
+
+      {/* ── Platform title — plain text, no oval ── */}
+      <motion.p
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.12 }}
+        className="mb-7 text-sm font-semibold uppercase tracking-widest text-white/45"
+      >
+        {t.platformLabel}
+      </motion.p>
 
       {/* ── Hero headline ── */}
       <motion.h1
