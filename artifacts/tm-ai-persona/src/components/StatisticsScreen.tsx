@@ -187,15 +187,16 @@ function SectionHeader({ icon: Icon, color, badge, title, description }: {
   color: string; badge: string; title: string; description: string;
 }) {
   return (
-    <div className="flex items-start gap-4 mb-8">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-        style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-        <Icon className="w-5 h-5" style={{ color }} />
+    <div className="w-full rounded-2xl px-7 py-6 mb-8 flex items-center gap-5"
+      style={{ background: `linear-gradient(135deg, ${color}0f 0%, ${color}06 100%)`, border: `1.5px solid ${color}35`, boxShadow: `0 0 40px ${color}0a` }}>
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ background: `${color}18`, border: `1.5px solid ${color}40` }}>
+        <Icon className="w-6 h-6" style={{ color }} />
       </div>
-      <div>
-        <div className="text-xs font-black uppercase tracking-widest mb-1" style={{ color }}>{badge}</div>
-        <h2 className="text-2xl font-black text-foreground">{title}</h2>
-        <p className="text-sm text-muted-foreground mt-1">{description}</p>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-black uppercase tracking-[0.18em] mb-1.5" style={{ color }}>{badge}</div>
+        <h2 className="text-3xl font-black text-foreground leading-tight">{title}</h2>
+        <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{description}</p>
       </div>
     </div>
   );
