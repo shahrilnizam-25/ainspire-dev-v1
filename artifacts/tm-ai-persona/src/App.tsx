@@ -93,7 +93,7 @@ export default function App() {
       const res = await fetch('/api/classify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers }),
+        body: JSON.stringify({ answers, lang }),
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

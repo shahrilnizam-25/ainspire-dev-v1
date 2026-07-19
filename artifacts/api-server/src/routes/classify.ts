@@ -24,8 +24,14 @@ const PERSONA_DEFS: Record<string, string> = {
     "transformational — shapes long-term AI direction, inspires others, influences policy and thought leadership at an industry level",
 };
 
+const LANG_LABELS: Record<string, string> = {
+  EN: "English",
+  BM: "Bahasa Melayu (Malay)",
+  CN: "Simplified Chinese (简体中文)",
+};
+
 router.post("/classify", async (req, res) => {
-  const { answers } = req.body as { answers: AnswerItem[] };
+  const { answers, lang } = req.body as { answers: AnswerItem[]; lang?: string };
 
   if (!answers || !Array.isArray(answers) || answers.length === 0) {
     return res.status(400).json({ error: "answers array is required" });
@@ -54,7 +60,13 @@ router.post("/classify", async (req, res) => {
     ? `\n\nOpen-ended response:\nQ${openAnswer.questionId}: "${openAnswer.questionText}"\nEmployee wrote: "${openAnswer.freeText}"`
     : "";
 
-  const prompt = `You are an expert AI talent classifier for Telekom Malaysia's workforce development programme. Analyse this employee's self-assessment holistically and classify them into the most fitting AI persona.
+  const outputLang = LANG_LABELS[lang ?? "EN"] ?? LANG_LABELS["EN"];
+  const langInstruction =
+    lang && lang !== "EN"
+      ? `\n\n## Language Requirement\nYou MUST write ALL text in the JSON output — every word in "reasoning", "narrative", all recommendation "title" and "description" fields — entirely in ${outputLang}. Do not mix in any English phrases.`
+      : "";
+
+  const prompt = `You are an expert AI talent classifier for Telekom Malaysia's workforce development programme. Analyse this employee's self-assessment holistically and classify them into the most fitting AI persona.${langInstruction}
 
 ## The Four AI Personas
 ${Object.entries(PERSONA_DEFS)

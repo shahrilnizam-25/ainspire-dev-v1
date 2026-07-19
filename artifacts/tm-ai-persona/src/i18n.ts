@@ -253,8 +253,8 @@ export const translations = {
 
     // ── Report screen ──
     reportBackToResults: 'Back to Results',
-    reportDownload:      'Download / Print PDF',
-    reportSaveBtn:       'Save as PDF — Print Report',
+    reportDownload:      'Download PDF',
+    reportSaveBtn:       'Download PDF',
     reportBrandSub:      'Personalised AI Readiness Report',
     reportTitle:         'Your AI Readiness Report',
     reportAiPersona:     'AI Persona',
@@ -464,8 +464,8 @@ export const translations = {
 
     // ── Report screen ──
     reportBackToResults: 'Kembali ke Keputusan',
-    reportDownload:      'Muat Turun / Cetak PDF',
-    reportSaveBtn:       'Simpan sebagai PDF — Cetak Laporan',
+    reportDownload:      'Muat Turun PDF',
+    reportSaveBtn:       'Muat Turun PDF',
     reportBrandSub:      'Laporan Kesediaan AI Peribadi',
     reportTitle:         'Laporan Kesediaan AI Anda',
     reportAiPersona:     'Persona AI',
@@ -675,8 +675,8 @@ export const translations = {
 
     // ── Report screen ──
     reportBackToResults: '返回结果',
-    reportDownload:      '下载 / 打印 PDF',
-    reportSaveBtn:       '另存为 PDF — 打印报告',
+    reportDownload:      '下载 PDF',
+    reportSaveBtn:       '下载 PDF',
     reportBrandSub:      '个性化 AI 准备度报告',
     reportTitle:         '您的 AI 准备度报告',
     reportAiPersona:     'AI 人设',
