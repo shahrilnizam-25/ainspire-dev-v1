@@ -292,6 +292,20 @@ export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
   return (
     <div className="w-full min-h-screen px-4 md:px-8 py-8 max-w-7xl mx-auto">
 
+      {/* ── Back Button ── */}
+      <motion.button
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4 }}
+        onClick={onBack}
+        className="flex items-center gap-2 mb-6 px-4 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-sm text-muted-foreground hover:text-white transition-all"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Main Page
+      </motion.button>
+
       {/* ── Hero ── */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center text-center mb-14">
         <div className="mb-4 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/8 text-primary text-xs font-bold uppercase tracking-widest">
