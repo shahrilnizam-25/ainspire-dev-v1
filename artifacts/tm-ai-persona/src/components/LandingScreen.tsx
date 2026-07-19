@@ -24,12 +24,12 @@ export default function LandingScreen({
   return (
     <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center relative">
 
-      {/* ── TM Logo ── */}
+      {/* ── TM Logo + AiNspire wordmark ── */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-6"
+        className="mb-6 flex flex-col items-center gap-2"
       >
         <img
           src="/tm-logo-official.png"
@@ -37,6 +37,22 @@ export default function LandingScreen({
           className="h-12 object-contain"
           style={{ filter: 'brightness(0) invert(1) opacity(0.9)' }}
         />
+        {/* AiNspire wordmark */}
+        <div className="flex items-baseline gap-[2px] select-none">
+          <span
+            className="text-2xl font-black tracking-tight"
+            style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #00d4ff 60%, #a855f7 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'drop-shadow(0 0 12px rgba(0,212,255,0.4))',
+            }}
+          >
+            Ai
+          </span>
+          <span className="text-2xl font-black tracking-tight text-white/90">Nspire</span>
+        </div>
       </motion.div>
 
       {/* ── Platform badge ── */}
