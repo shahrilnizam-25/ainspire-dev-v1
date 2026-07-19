@@ -135,8 +135,9 @@ export default function ReportScreen({
       const pageH = pdf.internal.pageSize.getHeight();
       const imgData = canvas.toDataURL('image/jpeg', 0.93);
 
+      // Use a 1 mm tolerance so floating-point overshoot doesn't add a blank last page
       let yOffset = 0;
-      while (yOffset < imgH) {
+      while (yOffset < imgH - 1) {
         if (yOffset > 0) pdf.addPage();
         pdf.addImage(imgData, 'JPEG', 0, -yOffset, imgW, imgH);
         yOffset += pageH;
