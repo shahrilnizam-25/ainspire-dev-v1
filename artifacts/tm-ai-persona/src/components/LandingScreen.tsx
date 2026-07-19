@@ -24,20 +24,6 @@ export default function LandingScreen({
   return (
     <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center relative">
 
-      {/* ── TM Logo (centred, original colours) ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-4"
-      >
-        <img
-          src="/tm-logo-official.png"
-          alt="Telekom Malaysia"
-          className="h-14 w-auto object-contain"
-        />
-      </motion.div>
-
       {/* ── Platform badge ── */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -48,55 +34,66 @@ export default function LandingScreen({
         {t.platformLabel}
       </motion.div>
 
-      {/* ── AiNspire glassy pill — large, matching reference ── */}
+      {/* ── TM logo  +  AiNspire pill — same row, reads "TM AiNspire" ── */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="mb-8 relative"
+        className="mb-8 flex items-center gap-5"
       >
-        {/* Ambient glow behind pill */}
-        <div
-          className="absolute inset-0 rounded-full blur-2xl"
-          style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,255,0.18) 0%, rgba(139,92,246,0.12) 60%, transparent 100%)' }}
+        {/* TM logo — original brand colours, large */}
+        <img
+          src="/tm-logo-official.png"
+          alt="Telekom Malaysia"
+          className="w-auto object-contain"
+          style={{ height: 'clamp(3.5rem, 7vw, 5.5rem)' }}
         />
-        {/* Pill */}
-        <div
-          className="relative flex items-center select-none px-10 py-4 rounded-full"
-          style={{
-            background: 'linear-gradient(135deg, rgba(0,20,40,0.72) 0%, rgba(10,5,30,0.80) 100%)',
-            border: '1.5px solid rgba(0,212,255,0.35)',
-            boxShadow: '0 0 32px rgba(0,212,255,0.14), 0 0 60px rgba(139,92,246,0.10), inset 0 1px 0 rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(10px)',
-          }}
-        >
-          {/* "Ai" — cyan gradient */}
-          <span
-            className="font-black tracking-tight leading-none"
+
+        {/* AiNspire glassy pill */}
+        <div className="relative">
+          {/* Ambient glow */}
+          <div
+            className="absolute inset-0 rounded-full blur-2xl"
+            style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,255,0.18) 0%, rgba(139,92,246,0.12) 60%, transparent 100%)' }}
+          />
+          {/* Pill */}
+          <div
+            className="relative flex items-center select-none px-10 py-4 rounded-full"
             style={{
-              fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
-              background: 'linear-gradient(135deg, #a5f3fc 0%, #22d3ee 40%, #00b4d8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              background: 'linear-gradient(135deg, rgba(0,20,40,0.72) 0%, rgba(10,5,30,0.80) 100%)',
+              border: '1.5px solid rgba(0,212,255,0.35)',
+              boxShadow: '0 0 32px rgba(0,212,255,0.14), 0 0 60px rgba(139,92,246,0.10), inset 0 1px 0 rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(10px)',
             }}
           >
-            Ai
-          </span>
-          {/* "Nspire" — purple with glow */}
-          <span
-            className="font-black tracking-tight leading-none"
-            style={{
-              fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
-              background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 40%, #8b5cf6 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: 'drop-shadow(0 0 14px rgba(167,139,250,0.65))',
-            }}
-          >
-            Nspire
-          </span>
+            {/* "Ai" — cyan gradient */}
+            <span
+              className="font-black tracking-tight leading-none"
+              style={{
+                fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
+                background: 'linear-gradient(135deg, #a5f3fc 0%, #22d3ee 40%, #00b4d8 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              Ai
+            </span>
+            {/* "Nspire" — purple with glow */}
+            <span
+              className="font-black tracking-tight leading-none"
+              style={{
+                fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
+                background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 40%, #8b5cf6 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                filter: 'drop-shadow(0 0 14px rgba(167,139,250,0.65))',
+              }}
+            >
+              Nspire
+            </span>
+          </div>
         </div>
       </motion.div>
 
