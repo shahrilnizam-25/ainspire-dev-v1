@@ -120,10 +120,13 @@ export default function ReportScreen({
       const canvas = await toCanvas(node, {
         pixelRatio: 2,
         backgroundColor: '#0d1117',
-        // Skip the backdrop-blur re-classifying overlay (unsupported in SVG)
-        filter: (el) =>
-          !(el as HTMLElement).style?.backdropFilter &&
-          !el.classList.contains('backdrop-blur-[2px]'),
+        // Skip the backdrop-blur re-classifying overlay (unsupported in SVG).
+        // Guard against text/comment nodes that have no classList or style.
+        filter: (el) => {
+          if (!(el instanceof Element)) return true;
+          const htm = el as HTMLElement;
+          return !htm.style?.backdropFilter && !el.classList.contains('backdrop-blur-[2px]');
+        },
       });
 
       const imgW  = 210; // A4 width mm
