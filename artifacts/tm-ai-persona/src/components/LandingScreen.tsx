@@ -24,34 +24,59 @@ export default function LandingScreen({
   return (
     <div className="w-full max-w-5xl px-6 py-10 flex flex-col items-center text-center relative">
 
-      {/* ── TM Logo + AiNspire wordmark ── */}
+      {/* ── TM Logo  |  AiNspire wordmark ── */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-6 flex flex-col items-center gap-2"
+        className="mb-8 flex items-center gap-6"
       >
+        {/* TM logo — original brand colours, no filter */}
         <img
           src="/tm-logo-official.png"
           alt="Telekom Malaysia"
-          className="h-12 object-contain"
-          style={{ filter: 'brightness(0) invert(1) opacity(0.9)' }}
+          className="h-14 w-auto object-contain"
         />
-        {/* AiNspire wordmark */}
-        <div className="flex items-baseline gap-[2px] select-none">
+
+        {/* Divider */}
+        <div className="h-10 w-px bg-white/20 rounded-full" />
+
+        {/* AiNspire glassy pill wordmark */}
+        <div
+          className="relative flex items-center select-none px-5 py-2 rounded-full"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1.5px solid rgba(100,200,255,0.28)',
+            boxShadow:
+              '0 0 18px rgba(0,212,255,0.12), inset 0 1px 0 rgba(255,255,255,0.07)',
+            backdropFilter: 'blur(6px)',
+          }}
+        >
+          {/* "Ai" — cyan */}
           <span
-            className="text-2xl font-black tracking-tight"
+            className="text-3xl font-black tracking-tight leading-none"
             style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #00d4ff 60%, #a855f7 100%)',
+              background: 'linear-gradient(135deg, #67e8f9 0%, #00d4ff 50%, #38bdf8 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              filter: 'drop-shadow(0 0 12px rgba(0,212,255,0.4))',
             }}
           >
             Ai
           </span>
-          <span className="text-2xl font-black tracking-tight text-white/90">Nspire</span>
+          {/* "Nspire" — purple with glow */}
+          <span
+            className="text-3xl font-black tracking-tight leading-none"
+            style={{
+              background: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'drop-shadow(0 0 10px rgba(139,92,246,0.55))',
+            }}
+          >
+            Nspire
+          </span>
         </div>
       </motion.div>
 
