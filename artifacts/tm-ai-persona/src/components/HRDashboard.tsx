@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { personas } from '../data/personas';
 import type { AIResult } from '../App';
+import type { Lang } from '../i18n';
+import { translations } from '../i18n';
 
 // ── Team Data ────────────────────────────────────────────────────────
 const DEMO_TEAM = [
@@ -745,8 +747,8 @@ function ActionPlanTab({ counts, completed, dominant }: { counts: Record<string,
 }
 
 // ── Main Component ───────────────────────────────────────────────────
-export default function HRDashboard({ currentUserPersona, aiResult, onBack }: {
-  currentUserPersona: string; aiResult: AIResult | null; onBack: () => void;
+export default function HRDashboard({ lang = 'EN', currentUserPersona, aiResult, onBack }: {
+  lang?: Lang; currentUserPersona: string; aiResult: AIResult | null; onBack: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [approved, setApproved] = useState(false);
@@ -763,11 +765,12 @@ export default function HRDashboard({ currentUserPersona, aiResult, onBack }: {
   const dominant = (Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'explorer') as string;
   const dominantP = personas[dominant];
 
+  const ht = translations[lang];
   const TABS: { id: Tab; label: string; icon: any }[] = [
-    { id: 'overview',    label: 'Team Overview',       icon: Users },
-    { id: 'skillsgap',   label: 'Skills Gap Analysis', icon: Target },
-    { id: 'succession',  label: 'Succession Planning', icon: Star },
-    { id: 'actionplan',  label: 'Action Plan',         icon: Zap },
+    { id: 'overview',    label: ht.hrTab1, icon: Users },
+    { id: 'skillsgap',   label: ht.hrTab2, icon: Target },
+    { id: 'succession',  label: ht.hrTab3, icon: Star },
+    { id: 'actionplan',  label: ht.hrTab4, icon: Zap },
   ];
 
   return (
@@ -779,14 +782,14 @@ export default function HRDashboard({ currentUserPersona, aiResult, onBack }: {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <div className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-1">HR Manager Dashboard</div>
-            <h1 className="text-3xl font-black">Team AI Readiness</h1>
+            <div className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-1">{ht.hrTitle}</div>
+            <h1 className="text-3xl font-black">{ht.hrSubtitle}</h1>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => exportCSV(DEMO_TEAM, { name: 'You (current)', persona: currentUserPersona, score: currentScore })}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-card-border hover:border-primary/40 hover:bg-primary/5 transition-all text-sm font-semibold text-muted-foreground hover:text-foreground">
-            <Download className="w-4 h-4" />Export CSV
+            <Download className="w-4 h-4" />{ht.hrExportCSV}
           </button>
         </div>
       </motion.div>
@@ -795,8 +798,8 @@ export default function HRDashboard({ currentUserPersona, aiResult, onBack }: {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }} className="mb-6 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
         <div>
-          <div className="font-semibold text-yellow-300 text-sm mb-1">Human Review Required — AI Recommendations are Advisory Only</div>
-          <div className="text-muted-foreground text-sm">All AI-generated training recommendations require explicit HR Manager approval. Employees are never automatically routed — you decide.</div>
+          <div className="font-semibold text-yellow-300 text-sm mb-1">{ht.hrGovernance}</div>
+          <div className="text-muted-foreground text-sm">{ht.hrGovernanceDesc}</div>
         </div>
       </motion.div>
 

@@ -9,7 +9,7 @@ import HRDashboard from './components/HRDashboard';
 import ReportScreen from './components/ReportScreen';
 import StatisticsScreen from './components/StatisticsScreen';
 import ContactScreen from './components/ContactScreen';
-import { questions, openQuestion } from './data/questions';
+import { questionsByLang, openQuestionByLang, type Lang } from './i18n';
 import type { Option } from './data/questions';
 
 type Screen = 'landing' | 'assessment' | 'open-question' | 'ai-loading' | 'results' | 'hr-view' | 'statistics' | 'contact' | 'report';
@@ -30,13 +30,20 @@ export type AIResult = {
   recommendations: Array<{ title: string; description: string }>;
 };
 
+const LANGS: Lang[] = ['EN', 'BM', 'CN'];
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>('landing');
+  const [lang, setLang] = useState<Lang>('EN');
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [mcqAnswers, setMcqAnswers] = useState<MCQAnswer[]>([]);
   const [aiResult, setAiResult] = useState<AIResult | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string>('');
+
+  // Active language-specific data
+  const questions = questionsByLang[lang];
+  const openQuestion = openQuestionByLang[lang];
 
   const handleStart = () => {
     setScreen('assessment');
@@ -72,7 +79,7 @@ export default function App() {
       ...mcqAnswers,
       {
         questionId: 6,
-        questionText: "What is your current role in Telekom Malaysia?",
+        questionText: 'What is your current role in Telekom Malaysia?',
         freeText: role,
       },
       {
@@ -97,7 +104,7 @@ export default function App() {
       console.error('Classification error:', err);
       setAiError(String(err));
       setAiResult(null);
-      setScreen('results'); // Fall back to rule-based result
+      setScreen('results');
     }
   };
 
@@ -126,6 +133,30 @@ export default function App() {
       <div className="fixed inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-background to-background opacity-50" />
       <div className="fixed inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-secondary/10 via-background to-background opacity-50" />
 
+      {/* ── Global Language Switcher ── */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-1 p-1 rounded-full border border-white/10 bg-black/50 backdrop-blur-md shadow-lg">
+        {LANGS.map((l) => (
+          <button
+            key={l}
+            onClick={() => setLang(l)}
+            className={`relative px-3 py-1.5 rounded-full text-xs font-bold tracking-wider transition-all duration-200 ${
+              lang === l
+                ? 'text-background'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {lang === l && (
+              <motion.div
+                layoutId="global-lang-pill"
+                className="absolute inset-0 rounded-full bg-primary"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">{l}</span>
+          </button>
+        ))}
+      </div>
+
       <main className="flex-1 relative z-10 flex flex-col items-center justify-center min-h-[100dvh] w-full py-8">
         <AnimatePresence mode="wait">
           {screen === 'landing' && (
@@ -137,7 +168,12 @@ export default function App() {
               transition={{ duration: 0.4 }}
               className="w-full flex justify-center"
             >
-              <LandingScreen onStart={handleStart} onStats={() => setScreen('statistics')} onContact={() => setScreen('contact')} />
+              <LandingScreen
+                lang={lang}
+                onStart={handleStart}
+                onStats={() => setScreen('statistics')}
+                onContact={() => setScreen('contact')}
+              />
             </motion.div>
           )}
 
@@ -151,9 +187,10 @@ export default function App() {
               className="w-full flex justify-center"
             >
               <QuestionScreen
+                lang={lang}
                 question={questions[currentQuestionIdx]}
                 currentIndex={currentQuestionIdx}
-                totalQuestions={questions.length + 1} // +1 for open question
+                totalQuestions={questions.length + 1}
                 onAnswer={handleAnswer}
               />
             </motion.div>
@@ -169,6 +206,7 @@ export default function App() {
               className="w-full flex justify-center"
             >
               <OpenQuestionScreen
+                lang={lang}
                 question={openQuestion}
                 currentIndex={questions.length}
                 totalQuestions={questions.length + 1}
@@ -186,7 +224,7 @@ export default function App() {
               transition={{ duration: 0.4 }}
               className="w-full flex justify-center"
             >
-              <AIThinkingScreen />
+              <AIThinkingScreen lang={lang} />
             </motion.div>
           )}
 
@@ -200,6 +238,7 @@ export default function App() {
               className="w-full flex justify-center"
             >
               <ResultsScreen
+                lang={lang}
                 resultPersonaId={resultPersonaId}
                 aiResult={aiResult}
                 aiError={aiError}
@@ -220,6 +259,7 @@ export default function App() {
               className="w-full flex justify-center"
             >
               <HRDashboard
+                lang={lang}
                 currentUserPersona={resultPersonaId}
                 aiResult={aiResult}
                 onBack={() => setScreen('results')}
@@ -236,7 +276,7 @@ export default function App() {
               transition={{ duration: 0.4 }}
               className="w-full flex justify-center"
             >
-              <StatisticsScreen onBack={() => setScreen('landing')} />
+              <StatisticsScreen lang={lang} onBack={() => setScreen('landing')} />
             </motion.div>
           )}
 
@@ -249,7 +289,7 @@ export default function App() {
               transition={{ duration: 0.4 }}
               className="w-full flex justify-center"
             >
-              <ContactScreen onBack={() => setScreen('landing')} />
+              <ContactScreen lang={lang} onBack={() => setScreen('landing')} />
             </motion.div>
           )}
 
@@ -263,6 +303,7 @@ export default function App() {
               className="w-full flex justify-center"
             >
               <ReportScreen
+                lang={lang}
                 resultPersonaId={resultPersonaId}
                 aiResult={aiResult}
                 userRole={userRole}

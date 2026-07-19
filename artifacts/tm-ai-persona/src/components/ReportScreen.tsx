@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Download, Bot, TrendingUp, CheckCircle, ArrowUpRight } from 'lucide-react';
 import { personas } from '../data/personas';
 import type { AIResult } from '../App';
+import type { Lang } from '../i18n';
+import { translations } from '../i18n';
 
 const DIMENSION_LABELS = [
   'AI Awareness',
@@ -41,11 +43,13 @@ const GROWTH: Record<string, string[]> = {
 };
 
 export default function ReportScreen({
+  lang,
   resultPersonaId,
   aiResult,
   userRole,
   onBack,
 }: {
+  lang: Lang;
   resultPersonaId: string;
   aiResult: AIResult | null;
   userRole: string;
@@ -54,6 +58,7 @@ export default function ReportScreen({
   const persona = personas[resultPersonaId];
   if (!persona) return null;
 
+  const t = translations[lang];
   const confidence = aiResult ? Math.round(aiResult.confidence * 100) : 75;
   const dimensions = getDimensions(aiResult?.confidence ?? 0.75, resultPersonaId);
   const Icon = persona.icon;
@@ -86,7 +91,7 @@ export default function ReportScreen({
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Results
+            {t.reportBackToResults}
           </button>
           <button
             onClick={handlePrint}
@@ -98,7 +103,7 @@ export default function ReportScreen({
             }}
           >
             <Download className="w-4 h-4" />
-            Download / Print PDF
+            {t.reportDownload}
           </button>
         </motion.div>
 
@@ -124,10 +129,10 @@ export default function ReportScreen({
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center font-black text-sm text-white" style={{ background: 'linear-gradient(135deg, #0066cc, #00a3e0)' }}>TM</div>
                 <div>
                   <div className="text-base font-bold text-white leading-none">AiNspire</div>
-                  <div className="text-xs font-semibold tracking-widest uppercase mt-0.5" style={{ color: 'rgba(0,212,200,0.8)' }}>Personalised AI Readiness Report</div>
+                  <div className="text-xs font-semibold tracking-widest uppercase mt-0.5" style={{ color: 'rgba(0,212,200,0.8)' }}>{t.reportBrandSub}</div>
                 </div>
               </div>
-              <div className="text-2xl font-black text-white mb-1">Your AI Readiness Report</div>
+              <div className="text-2xl font-black text-white mb-1">{t.reportTitle}</div>
               <div className="text-sm font-medium mb-1" style={{ color: `${persona.color}cc` }}>
                 {userRole || 'Telekom Malaysia Employee'}
               </div>
@@ -139,7 +144,7 @@ export default function ReportScreen({
 
             {/* Persona badge */}
             <div className="text-right flex-shrink-0 ml-6">
-              <div className="text-xs font-bold uppercase tracking-widest text-white/40 mb-2">AI Persona</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-white/40 mb-2">{t.reportAiPersona}</div>
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 ml-auto"
                 style={{ background: `${persona.color}18`, border: `1px solid ${persona.color}50` }}
@@ -148,7 +153,7 @@ export default function ReportScreen({
               </div>
               <div className="text-2xl font-black" style={{ color: persona.color }}>{persona.name}</div>
               <div className="text-xs text-white/40 mt-1">
-                Confidence&nbsp;
+                {t.reportConfidence}&nbsp;
                 <span className="font-bold text-green-400">{confidence}%</span>
               </div>
             </div>
@@ -160,7 +165,7 @@ export default function ReportScreen({
             <div>
               <div className="flex items-center gap-2 mb-5">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ background: persona.color }} />
-                <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/70">Readiness Dimensions</h3>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/70">{t.reportDimensions}</h3>
               </div>
               <div className="grid grid-cols-2 gap-x-10 gap-y-5">
                 {dimensions.map((d) => (
@@ -188,7 +193,7 @@ export default function ReportScreen({
               <div className="p-5 rounded-2xl border" style={{ background: `${persona.color}08`, borderColor: `${persona.color}25` }}>
                 <div className="flex items-center gap-2 mb-3">
                   <Bot className="w-3.5 h-3.5" style={{ color: persona.color }} />
-                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: persona.color }}>AI Assessment Narrative</span>
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: persona.color }}>{t.reportNarrativeLabel}</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {aiResult?.narrative ?? `You demonstrate strong ${persona.name.toLowerCase()} characteristics in your approach to AI adoption and strategy.`}
@@ -198,7 +203,7 @@ export default function ReportScreen({
               <div className="p-5 rounded-2xl border border-white/8 bg-white/3">
                 <div className="flex items-center gap-2 mb-3">
                   <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
-                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">AI Reasoning</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.reportReasoningLabel}</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {aiResult?.reasoning ?? `Your responses reflect a consistent pattern aligned with the ${persona.name} profile across all assessment dimensions.`}
@@ -211,7 +216,7 @@ export default function ReportScreen({
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/70">Key Strengths</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/70">{t.reportStrengths}</h3>
                 </div>
                 <div className="space-y-2">
                   {strengths.map((s) => (
@@ -226,7 +231,7 @@ export default function ReportScreen({
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#f59e0b' }} />
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/70">Growth Areas</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/70">{t.reportGrowthAreas}</h3>
                 </div>
                 <div className="space-y-2">
                   {growth.map((g) => (
@@ -244,8 +249,8 @@ export default function ReportScreen({
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#8b5cf6' }} />
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/70">Recommended Learning Pathway</h3>
-                  <span className="text-xs text-muted-foreground ml-1">— tailored for {persona.name}</span>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-foreground/70">{t.reportLearningPath}</h3>
+                  <span className="text-xs text-muted-foreground ml-1">{t.reportTailoredFor} {persona.name}</span>
                 </div>
                 <div className="grid grid-cols-1 gap-3">
                   {aiResult.recommendations.map((rec, i) => (
@@ -263,13 +268,16 @@ export default function ReportScreen({
                     </div>
                   ))}
                 </div>
+                {lang !== 'EN' && (
+                  <p className="mt-2 text-xs text-muted-foreground/40 italic">{t.resultsAiContentNote}</p>
+                )}
               </div>
             )}
 
             {/* Footer */}
             <div className="pt-4 border-t border-white/8 flex items-center justify-between">
               <div className="text-xs text-muted-foreground/60">
-                Generated by AiNspire · Powered by Claude AI · Confidential — For personal development use only
+                {t.reportFooter}
               </div>
               <div className="text-xs text-muted-foreground/60">
                 Telekom Malaysia Berhad · {new Date().getFullYear()}
@@ -296,7 +304,7 @@ export default function ReportScreen({
             }}
           >
             <Download className="w-5 h-5" />
-            Save as PDF — Print Report
+            {t.reportSaveBtn}
           </button>
         </motion.div>
       </div>

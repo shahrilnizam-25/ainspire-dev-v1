@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { Lang } from '../i18n';
+import { translations } from '../i18n';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, Line, Area, AreaChart, LineChart,
@@ -229,7 +231,7 @@ function Panel({ icon: Icon, iconColor, title, tooltip, subtitle, delay = 0, chi
 }
 
 // ── Main component ────────────────────────────────────────────────
-export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
+export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang; onBack: () => void }) {
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
 
   const activeDivision     = selectedDivision ? DIVISIONS.find(d => d.name === selectedDivision) ?? null : null;
@@ -303,13 +305,13 @@ export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
-        Back to Main Page
+        {translations[lang].backToMain}
       </motion.button>
 
       {/* ── Hero ── */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center text-center mb-14">
         <div className="mb-4 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/8 text-primary text-xs font-bold uppercase tracking-widest">
-          ✦ Live Workforce Intelligence · AiNspire
+          {translations[lang].statsLiveBadge}
         </div>
 
         <div className="w-full max-w-lg mb-10 px-8 py-6 rounded-3xl bg-card/60 border border-primary/20 backdrop-blur-md shadow-[0_0_60px_rgba(0,212,255,0.08)]">
@@ -365,9 +367,9 @@ export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
         <SectionHeader
           icon={BarChart3}
           color="#00d4ff"
-          badge="Section 1 · Workforce Analytics Statistics"
-          title="Workforce Analytics"
-          description="Organisation-wide participation, persona distribution, readiness indices, and division-level benchmarking across Telekom Malaysia."
+          badge={`${translations[lang].statsSection1Badge} · ${translations[lang].statsSection1Title}`}
+          title={translations[lang].statsSection1Title}
+          description={translations[lang].statsSection1Desc}
         />
       </motion.div>
 
@@ -591,9 +593,9 @@ export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
         <SectionHeader
           icon={BookOpen}
           color="#a855f7"
-          badge="Section 2 · Learning Pathway Statistics"
-          title="Learning Pathway Statistics"
-          description="From organisation-wide learning activity down to persona-level course alignment — tracking how TM employees develop AI skills on the platform."
+          badge={`${translations[lang].statsSection2Badge} · ${translations[lang].statsSection2Title}`}
+          title={translations[lang].statsSection2Title}
+          description={translations[lang].statsSection2Desc}
         />
       </motion.div>
 
@@ -841,7 +843,7 @@ export default function StatisticsScreen({ onBack }: { onBack: () => void }) {
       <motion.button onClick={onBack} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }}
         className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-card-border/60 bg-card/30 hover:border-primary/30 hover:bg-card/50 transition-all text-sm text-muted-foreground hover:text-foreground mb-8 group">
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-        Back to Main Page
+        {translations[lang].backToMain}
       </motion.button>
 
     </div>

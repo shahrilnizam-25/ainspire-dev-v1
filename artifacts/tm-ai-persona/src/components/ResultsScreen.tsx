@@ -2,8 +2,11 @@ import { motion } from 'framer-motion';
 import { RefreshCw, ChevronRight, Bot, BarChart2, AlertCircle, FileText } from 'lucide-react';
 import { personas } from '../data/personas';
 import type { AIResult } from '../App';
+import type { Lang } from '../i18n';
+import { translations } from '../i18n';
 
 export default function ResultsScreen({
+  lang,
   resultPersonaId,
   aiResult,
   aiError,
@@ -11,6 +14,7 @@ export default function ResultsScreen({
   onHRView,
   onReport,
 }: {
+  lang: Lang;
   resultPersonaId: string;
   aiResult: AIResult | null;
   aiError: string | null;
@@ -21,6 +25,7 @@ export default function ResultsScreen({
   const result = personas[resultPersonaId];
   if (!result) return null;
 
+  const t = translations[lang];
   const Icon = result.icon;
   const confidence = aiResult ? Math.round(aiResult.confidence * 100) : null;
 
@@ -39,12 +44,12 @@ export default function ResultsScreen({
         {aiResult ? (
           <>
             <Bot className="w-3.5 h-3.5" />
-            AI-Classified · {confidence}% Confidence
+            {t.resultsAiClassified} · {confidence}% {t.resultsConfidence}
           </>
         ) : (
           <>
             <AlertCircle className="w-3.5 h-3.5" />
-            Rule-Based Result {aiError ? '(AI unavailable)' : ''}
+            {t.resultsRuleBased} {aiError ? t.resultsAiUnavail : ''}
           </>
         )}
       </motion.div>
@@ -62,7 +67,7 @@ export default function ResultsScreen({
           transition={{ delay: 0.2 }}
           className="text-muted-foreground uppercase tracking-[0.2em] text-sm font-bold mb-8"
         >
-          Your AI Persona
+          {t.resultsYourPersona}
         </motion.div>
 
         <motion.div
@@ -123,7 +128,7 @@ export default function ResultsScreen({
         >
           <div className="flex items-center gap-2 mb-3 text-primary text-xs font-bold uppercase tracking-widest">
             <Bot className="w-4 h-4" />
-            AI Reasoning
+            {t.resultsAiReasoning}
           </div>
           <p className="text-muted-foreground leading-relaxed">{aiResult.reasoning}</p>
         </motion.div>
@@ -137,7 +142,7 @@ export default function ResultsScreen({
           transition={{ delay: 0.8 }}
           className="w-full max-w-3xl mb-12"
         >
-          <h3 className="text-lg font-bold mb-4 text-foreground">Your AI Learning Path</h3>
+          <h3 className="text-lg font-bold mb-4 text-foreground">{t.resultsLearningPath}</h3>
           <div className="space-y-3">
             {aiResult.recommendations.map((rec, i) => (
               <motion.div
@@ -160,6 +165,10 @@ export default function ResultsScreen({
               </motion.div>
             ))}
           </div>
+          {/* AI content language note */}
+          {lang !== 'EN' && (
+            <p className="mt-3 text-xs text-muted-foreground/50 italic">{t.resultsAiContentNote}</p>
+          )}
         </motion.div>
       )}
 
@@ -196,7 +205,7 @@ export default function ResultsScreen({
                   className="mt-3 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-background border"
                   style={{ borderColor: p.color, color: p.color }}
                 >
-                  You
+                  {t.resultsYouBadge}
                 </div>
               )}
             </div>
@@ -216,7 +225,7 @@ export default function ResultsScreen({
           className="group flex items-center gap-3 px-8 py-4 rounded-full border-2 border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/10 transition-all text-muted-foreground hover:text-foreground font-semibold"
         >
           <RefreshCw className="w-5 h-5 group-hover:-rotate-180 transition-transform duration-500" />
-          Retake Assessment
+          {t.resultsRetake}
         </button>
         <button
           onClick={onReport}
@@ -230,7 +239,7 @@ export default function ResultsScreen({
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = `${result.color}0d`; }}
         >
           <FileText className="w-5 h-5" />
-          Download My Report
+          {t.resultsDownloadReport}
           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
         <button
@@ -238,7 +247,7 @@ export default function ResultsScreen({
           className="group flex items-center gap-3 px-8 py-4 rounded-full border-2 border-orange-500/40 hover:border-orange-400/70 hover:bg-orange-500/10 transition-all text-orange-400 hover:text-orange-300 font-semibold"
         >
           <BarChart2 className="w-5 h-5" />
-          HR Manager View
+          {t.resultsHRView}
           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
       </motion.div>

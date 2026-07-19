@@ -1,43 +1,22 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Brain, Lightbulb, Sparkles, CheckCircle } from 'lucide-react';
-
-const STEPS = [
-  {
-    id: 'observe',
-    icon: Eye,
-    label: 'OBSERVE',
-    detail: 'Reading all 6 responses including your open-ended answer…',
-    color: '#00d4ff',
-  },
-  {
-    id: 'reason',
-    icon: Brain,
-    label: 'REASON',
-    detail: 'Detecting patterns, resolving mixed signals, weighing free-text…',
-    color: '#a855f7',
-  },
-  {
-    id: 'decide',
-    icon: Lightbulb,
-    label: 'DECIDE',
-    detail: 'Classifying your AI persona and scoring confidence…',
-    color: '#f59e0b',
-  },
-  {
-    id: 'produce',
-    icon: Sparkles,
-    label: 'PRODUCE',
-    detail: 'Crafting your personalised narrative and learning path…',
-    color: '#10b981',
-  },
-];
+import type { Lang } from '../i18n';
+import { translations } from '../i18n';
 
 const STEP_DURATION = 1900; // ms per step
 
-export default function AIThinkingScreen() {
+export default function AIThinkingScreen({ lang }: { lang: Lang }) {
   const [activeStep, setActiveStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const t = translations[lang];
+
+  const STEPS = [
+    { id: 'observe',  icon: Eye,       label: t.thinkStep1Label, detail: t.thinkStep1Detail, color: '#00d4ff' },
+    { id: 'reason',   icon: Brain,     label: t.thinkStep2Label, detail: t.thinkStep2Detail, color: '#a855f7' },
+    { id: 'decide',   icon: Lightbulb, label: t.thinkStep3Label, detail: t.thinkStep3Detail, color: '#f59e0b' },
+    { id: 'produce',  icon: Sparkles,  label: t.thinkStep4Label, detail: t.thinkStep4Detail, color: '#10b981' },
+  ];
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -69,7 +48,8 @@ export default function AIThinkingScreen() {
     );
 
     return () => timers.forEach(clearTimeout);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   return (
     <div className="w-full max-w-2xl px-6 py-16 flex flex-col items-center text-center">
@@ -79,7 +59,7 @@ export default function AIThinkingScreen() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-3 px-4 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest"
       >
-        ✦ Claude Sonnet · Agentic Reasoning
+        {t.thinkingBadge}
       </motion.div>
 
       <motion.h2
@@ -88,7 +68,7 @@ export default function AIThinkingScreen() {
         transition={{ delay: 0.2 }}
         className="text-3xl md:text-4xl font-bold mb-4"
       >
-        Analysing Your Responses
+        {t.thinkingTitle}
       </motion.h2>
 
       <motion.p
@@ -97,8 +77,7 @@ export default function AIThinkingScreen() {
         transition={{ delay: 0.3 }}
         className="text-muted-foreground mb-14 text-lg max-w-md"
       >
-        Our AI agent is reasoning through your complete assessment to discover
-        your unique AI persona.
+        {t.thinkingSubtitle}
       </motion.p>
 
       {/* Step pipeline */}
@@ -124,10 +103,7 @@ export default function AIThinkingScreen() {
                 }`}
               style={
                 isActive
-                  ? {
-                      borderColor: step.color,
-                      boxShadow: `0 0 24px ${step.color}30`,
-                    }
+                  ? { borderColor: step.color, boxShadow: `0 0 24px ${step.color}30` }
                   : isDone
                     ? { borderColor: `${step.color}50` }
                     : {}

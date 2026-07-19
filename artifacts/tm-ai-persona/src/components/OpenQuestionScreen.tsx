@@ -1,35 +1,41 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send } from 'lucide-react';
-import type { OpenQuestion } from '../data/questions';
+import type { TranslatedOpenQuestion, Lang } from '../i18n';
+import { translations } from '../i18n';
 
 const MIN_CHARS = 20;
 
 export default function OpenQuestionScreen({
+  lang,
   question,
   currentIndex,
   totalQuestions,
   onSubmit,
 }: {
-  question: OpenQuestion;
+  lang: Lang;
+  question: TranslatedOpenQuestion;
   currentIndex: number;
   totalQuestions: number;
   onSubmit: (role: string, freeText: string) => void;
 }) {
   const [role, setRole] = useState('');
   const [text, setText] = useState('');
+  const t = translations[lang];
 
   const trimmedRole = role.trim();
   const trimmedText = text.trim();
   const canSubmit = trimmedRole.length > 0 && trimmedText.length >= MIN_CHARS;
+
+  const numStr = (n: number) => String(n).padStart(2, '0');
 
   return (
     <div className="w-full max-w-3xl px-6 py-8 flex flex-col items-center">
       {/* Progress */}
       <div className="w-full mb-12 space-y-4">
         <div className="flex justify-between text-sm font-medium text-muted-foreground font-mono">
-          <span>0{currentIndex + 1}</span>
-          <span>0{totalQuestions}</span>
+          <span>{numStr(currentIndex + 1)}</span>
+          <span>{numStr(totalQuestions)}</span>
         </div>
         <div className="h-1 bg-muted rounded-full overflow-hidden">
           <motion.div
@@ -47,7 +53,7 @@ export default function OpenQuestionScreen({
         animate={{ opacity: 1, y: 0 }}
         className="mb-6 px-4 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest"
       >
-        ✦ AI-Analysed Open Response
+        {t.openAiBadge}
       </motion.div>
 
       <motion.h2
@@ -56,7 +62,7 @@ export default function OpenQuestionScreen({
         transition={{ delay: 0.1 }}
         className="text-3xl md:text-4xl font-bold mb-3 leading-tight text-center"
       >
-        Question 6
+        {t.openTitle}
       </motion.h2>
 
       <motion.p
@@ -65,8 +71,7 @@ export default function OpenQuestionScreen({
         transition={{ delay: 0.2 }}
         className="text-muted-foreground text-base mb-10 text-center max-w-xl"
       >
-        Your answers here carry real weight — the AI agent reads them holistically
-        alongside your multiple-choice responses before classifying your persona.
+        {t.openSubtitle}
       </motion.p>
 
       <motion.div
@@ -79,25 +84,25 @@ export default function OpenQuestionScreen({
         <div className="w-full">
           <div className="flex items-center gap-3 mb-3">
             <span className="px-2.5 py-0.5 rounded-md bg-primary/20 text-primary text-xs font-bold uppercase tracking-widest border border-primary/30">
-              Part A
+              {t.openPartA}
             </span>
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-              Required
+              {t.openRequired}
             </span>
           </div>
           <label className="block text-lg font-semibold mb-3 leading-snug">
-            What is your current role in Telekom Malaysia?
+            {t.openPartAQuestion}
           </label>
           <input
             type="text"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            placeholder="e.g. Senior Network Engineer, Product Manager, Data Analyst…"
+            placeholder={t.openPartAPlaceholder}
             className="w-full bg-card border-2 border-card-border rounded-xl px-5 py-4 text-base text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/60 transition-colors"
           />
           {trimmedRole.length === 0 && (
             <p className="mt-2 text-xs text-muted-foreground">
-              Please enter your current role to continue.
+              {t.openPartAHint}
             </p>
           )}
         </div>
@@ -109,10 +114,10 @@ export default function OpenQuestionScreen({
         <div className="w-full">
           <div className="flex items-center gap-3 mb-3">
             <span className="px-2.5 py-0.5 rounded-md bg-secondary/20 text-secondary text-xs font-bold uppercase tracking-widest border border-secondary/30">
-              Part B
+              {t.openPartB}
             </span>
             <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-              Required · {MIN_CHARS} characters minimum
+              {t.openRequired} · {MIN_CHARS} {t.openCharMin}
             </span>
           </div>
           <label className="block text-lg font-semibold mb-3 leading-snug">
@@ -131,7 +136,7 @@ export default function OpenQuestionScreen({
                 trimmedText.length < MIN_CHARS ? 'text-muted-foreground' : 'text-primary'
               }`}
             >
-              {trimmedText.length} / {MIN_CHARS} characters minimum
+              {trimmedText.length} / {MIN_CHARS} {t.openCharMin}
             </span>
           </div>
         </div>
@@ -151,7 +156,7 @@ export default function OpenQuestionScreen({
               }`}
           >
             <Send className="w-4 h-4" />
-            Analyse with AI
+            {t.openSubmitBtn}
           </motion.button>
         </div>
       </motion.div>

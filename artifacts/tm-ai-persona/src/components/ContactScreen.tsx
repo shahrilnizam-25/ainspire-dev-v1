@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Mail, Send, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Mail, Send, CheckCircle2, ChevronDown } from 'lucide-react';
+import type { Lang } from '../i18n';
+import { translations } from '../i18n';
 
-const PURPOSE_OPTIONS = [
-  'Suggestion',
-  'Complaint',
-  'Technical Issue',
-  'General Inquiry',
-  'Collaboration / Partnership',
-  'Others',
-];
+export default function ContactScreen({
+  lang,
+  onBack,
+}: {
+  lang: Lang;
+  onBack: () => void;
+}) {
+  const t = translations[lang];
+  const PURPOSE_OPTIONS = t.contactPurposeOptions as readonly string[];
 
-export default function ContactScreen({ onBack }: { onBack: () => void }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [purpose, setPurpose] = useState('');
@@ -48,7 +50,7 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
-        Back to Main Page
+        {t.backToMain}
       </motion.button>
 
       {/* Page Header */}
@@ -59,14 +61,13 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
         className="text-center mb-10"
       >
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-          <span className="text-white">Contact </span>
+          <span className="text-white">{t.contactTitle1} </span>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.35)]">
-            Us
+            {t.contactTitle2}
           </span>
         </h1>
         <p className="mt-4 text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-          Whether you wish to share a suggestion, raise a concern,<br className="hidden sm:block" />
-          or explore collaboration opportunities, we would love to hear from you.
+          {t.contactSubtitle}
         </p>
       </motion.div>
 
@@ -80,8 +81,8 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
           className="md:col-span-3 rounded-2xl border border-card-border/60 bg-card/40 backdrop-blur-sm p-7"
         >
           {/* Section label */}
-          <p className="text-[10px] font-bold tracking-[0.2em] text-primary uppercase mb-1">// AINSPIRE</p>
-          <h2 className="text-2xl font-bold text-foreground mb-6">Talk to us</h2>
+          <p className="text-[10px] font-bold tracking-[0.2em] text-primary uppercase mb-1">{t.contactFormLabel}</p>
+          <h2 className="text-2xl font-bold text-foreground mb-6">{t.contactFormTitle}</h2>
 
           {submitted ? (
             <motion.div
@@ -92,21 +93,21 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
               <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Message Sent!</h3>
+              <h3 className="text-xl font-semibold text-foreground">{t.contactSentTitle}</h3>
               <p className="text-sm text-muted-foreground max-w-xs">
-                Your default mail app has opened with your message pre-filled. We'll get back to you shortly.
+                {t.contactSentDesc}
               </p>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {/* Name */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.contactNameLabel}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your full name"
+                  placeholder={t.contactNamePlaceholder}
                   required
                   className="w-full px-4 py-3 rounded-xl bg-background/60 border border-card-border/80 text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition-all"
                 />
@@ -114,7 +115,7 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
 
               {/* Email */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Your Email</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.contactEmailLabel}</label>
                 <input
                   type="email"
                   value={email}
@@ -127,7 +128,7 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
 
               {/* Purpose dropdown */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Purpose of Message</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.contactPurposeLabel}</label>
                 <div className="relative">
                   <button
                     type="button"
@@ -136,7 +137,7 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
                     style={{ color: purpose ? 'var(--foreground)' : 'rgba(var(--muted-foreground-rgb, 148 163 184) / 0.5)' }}
                   >
                     <span className={purpose ? 'text-foreground' : 'text-muted-foreground/50'}>
-                      {purpose || 'Select the purpose of your message'}
+                      {purpose || t.contactPurposePlaceholder}
                     </span>
                     <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${selectOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -167,11 +168,11 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
 
               {/* Message */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Message</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.contactMsgLabel}</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Write your message here…"
+                  placeholder={t.contactMsgPlaceholder}
                   required
                   rows={5}
                   className="w-full px-4 py-3 rounded-xl bg-background/60 border border-card-border/80 text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition-all resize-none leading-relaxed"
@@ -186,7 +187,7 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
               >
                 <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-xl" />
                 <Send className="relative w-4 h-4" />
-                <span className="relative">Send Message</span>
+                <span className="relative">{t.contactSendBtn}</span>
               </button>
             </form>
           )}
@@ -205,7 +206,7 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-2">Email Us</p>
+              <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-2">{t.contactEmailCardLabel}</p>
               <p className="text-sm font-semibold text-foreground">Ts. Soo Chern Tien</p>
               <p className="text-xs text-muted-foreground mt-0.5">IT Service Strategy &amp; Orchestration</p>
               <p className="text-xs text-muted-foreground">IT as a Service (ITaaS)</p>
@@ -220,22 +221,15 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
 
           {/* Info card */}
           <div className="p-5 rounded-2xl border border-card-border/60 bg-card/40 backdrop-blur-sm">
-            <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-3">Purpose Guide</p>
+            <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase mb-3">{t.contactPurposeGuide}</p>
             <ul className="flex flex-col gap-2.5">
-              {[
-                { label: 'Suggestion', desc: 'Ideas to improve AiNspire' },
-                { label: 'Complaint', desc: 'Report a concern or issue' },
-                { label: 'Technical Issue', desc: 'App bugs or errors' },
-                { label: 'General Inquiry', desc: 'Questions about the platform' },
-                { label: 'Collaboration', desc: 'Partner with our team' },
-                { label: 'Others', desc: 'Anything else on your mind' },
-              ].map((item) => (
-                <li key={item.label} className="flex items-start gap-2">
+              {(t.contactPurposeOptions as readonly string[]).map((label, idx) => (
+                <li key={label} className="flex items-start gap-2">
                   <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
                   <span className="text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground/80">{item.label}</span>
+                    <span className="font-semibold text-foreground/80">{label}</span>
                     {' — '}
-                    {item.desc}
+                    {(t.contactPurposeDescs as readonly string[])[idx]}
                   </span>
                 </li>
               ))}
@@ -246,17 +240,24 @@ export default function ContactScreen({ onBack }: { onBack: () => void }) {
 
       </div>
 
-      {/* ── Bottom-left back button ── */}
-      <motion.button
-        onClick={onBack}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="self-start mt-10 flex items-center gap-2 px-5 py-2.5 rounded-full border border-card-border/60 bg-card/30 hover:border-primary/30 hover:bg-card/50 transition-all text-sm text-muted-foreground hover:text-foreground group"
+      {/* Bottom back button */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-10"
       >
-        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-        Back to Main Page
-      </motion.button>
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-sm text-muted-foreground hover:text-white transition-all"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          {t.backToMain}
+        </button>
+      </motion.div>
+
     </div>
   );
 }

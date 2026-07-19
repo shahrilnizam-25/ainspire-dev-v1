@@ -1,45 +1,51 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Question, Option } from '../data/questions';
+import type { TranslatedQuestion, TranslatedOption, Lang } from '../i18n';
+import { translations } from '../i18n';
 
-export default function QuestionScreen({ 
-  question, 
-  currentIndex, 
-  totalQuestions, 
-  onAnswer 
-}: { 
-  question: Question, 
-  currentIndex: number, 
-  totalQuestions: number,
-  onAnswer: (option: Option) => void 
+export default function QuestionScreen({
+  lang,
+  question,
+  currentIndex,
+  totalQuestions,
+  onAnswer,
+}: {
+  lang: Lang;
+  question: TranslatedQuestion;
+  currentIndex: number;
+  totalQuestions: number;
+  onAnswer: (option: TranslatedOption) => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const t = translations[lang];
 
   // Reset selection when question changes
   useEffect(() => {
     setSelectedId(null);
   }, [question.id]);
 
-  const handleSelect = (option: Option) => {
-    if (selectedId) return; // Prevent multiple clicks
+  const handleSelect = (option: TranslatedOption) => {
+    if (selectedId) return;
     setSelectedId(option.id);
     onAnswer(option);
   };
+
+  const numStr = (n: number) => String(n).padStart(2, '0');
 
   return (
     <div className="w-full max-w-3xl px-6 py-8 flex flex-col items-center">
       {/* Progress */}
       <div className="w-full mb-12 space-y-4">
         <div className="flex justify-between text-sm font-medium text-muted-foreground font-mono">
-          <span>0{currentIndex + 1}</span>
-          <span>0{totalQuestions}</span>
+          <span>{numStr(currentIndex + 1)}</span>
+          <span>{numStr(totalQuestions)}</span>
         </div>
         <div className="h-1 bg-muted rounded-full overflow-hidden">
-          <motion.div 
+          <motion.div
             className="h-full bg-primary glow-cyan"
             initial={{ width: `${(currentIndex / totalQuestions) * 100}%` }}
             animate={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
           />
         </div>
       </div>
@@ -52,7 +58,7 @@ export default function QuestionScreen({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="w-full"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-10 leading-tight">

@@ -1,7 +1,192 @@
 export type Lang = 'EN' | 'BM' | 'CN';
 
+// ── Question data types ──────────────────────────────────────────────
+export type TranslatedOption = { id: string; text: string; personaId: string };
+export type TranslatedQuestion = { id: number; text: string; options: TranslatedOption[] };
+export type TranslatedOpenQuestion = { id: number; text: string; placeholder: string };
+
+// ── Translated question sets ─────────────────────────────────────────
+export const questionsByLang: Record<Lang, TranslatedQuestion[]> = {
+  EN: [
+    {
+      id: 1,
+      text: 'How do you currently engage with AI tools in your daily work?',
+      options: [
+        { id: 'A', text: 'I occasionally try out AI tools when I hear about them', personaId: 'explorer' },
+        { id: 'B', text: 'I actively build or integrate AI into systems and workflows', personaId: 'builder' },
+        { id: 'C', text: 'I lead or plan AI-related projects and initiatives', personaId: 'strategist' },
+        { id: 'D', text: 'I shape the long-term AI direction for my organization', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 2,
+      text: 'What best describes your AI knowledge level?',
+      options: [
+        { id: 'A', text: 'I understand AI concepts at a general level', personaId: 'explorer' },
+        { id: 'B', text: 'I can technically implement or configure AI models and systems', personaId: 'builder' },
+        { id: 'C', text: 'I understand how AI creates business value and drives strategy', personaId: 'strategist' },
+        { id: 'D', text: 'I influence AI policy, thought leadership, and industry direction', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 3,
+      text: 'When your team faces a challenge, what is your natural role with AI?',
+      options: [
+        { id: 'A', text: 'I explore and experiment — finding AI tools that might help', personaId: 'explorer' },
+        { id: 'B', text: 'I develop the technical solution using AI', personaId: 'builder' },
+        { id: 'C', text: 'I define the strategy and ensure alignment with business goals', personaId: 'strategist' },
+        { id: 'D', text: 'I inspire others with a transformative vision of what AI can achieve', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 4,
+      text: 'What motivates you most about AI at Telekom Malaysia?',
+      options: [
+        { id: 'A', text: 'Discovering new possibilities and staying curious about AI', personaId: 'explorer' },
+        { id: 'B', text: 'Building impactful AI-powered products and services', personaId: 'builder' },
+        { id: 'C', text: 'Driving measurable business outcomes through AI initiatives', personaId: 'strategist' },
+        { id: 'D', text: "Leading TM's transformation into an AI-first organization", personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 5,
+      text: 'How do you typically learn about AI?',
+      options: [
+        { id: 'A', text: 'I explore tutorials, demos, and articles at my own pace', personaId: 'explorer' },
+        { id: 'B', text: 'I dive into technical courses, frameworks, and hands-on projects', personaId: 'builder' },
+        { id: 'C', text: "I study AI's strategic and business impact through case studies", personaId: 'strategist' },
+        { id: 'D', text: 'I engage with industry leaders and shape future AI narratives', personaId: 'visionary' },
+      ],
+    },
+  ],
+  BM: [
+    {
+      id: 1,
+      text: 'Bagaimana anda menggunakan alat AI dalam kerja harian anda?',
+      options: [
+        { id: 'A', text: 'Saya sesekali mencuba alat AI apabila mendengar tentangnya', personaId: 'explorer' },
+        { id: 'B', text: 'Saya aktif membina atau mengintegrasikan AI ke dalam sistem dan aliran kerja', personaId: 'builder' },
+        { id: 'C', text: 'Saya mengetuai atau merancang projek dan inisiatif berkaitan AI', personaId: 'strategist' },
+        { id: 'D', text: 'Saya membentuk hala tuju AI jangka panjang untuk organisasi saya', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 2,
+      text: 'Apakah yang paling menggambarkan tahap pengetahuan AI anda?',
+      options: [
+        { id: 'A', text: 'Saya memahami konsep AI pada tahap umum', personaId: 'explorer' },
+        { id: 'B', text: 'Saya boleh melaksanakan atau mengkonfigurasi model dan sistem AI secara teknikal', personaId: 'builder' },
+        { id: 'C', text: 'Saya memahami bagaimana AI mencipta nilai perniagaan dan memacu strategi', personaId: 'strategist' },
+        { id: 'D', text: 'Saya mempengaruhi dasar AI, kepimpinan pemikiran, dan hala tuju industri', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 3,
+      text: 'Apabila pasukan anda menghadapi cabaran, apakah peranan semula jadi anda dengan AI?',
+      options: [
+        { id: 'A', text: 'Saya meneroka dan bereksperimen — mencari alat AI yang mungkin membantu', personaId: 'explorer' },
+        { id: 'B', text: 'Saya membangunkan penyelesaian teknikal menggunakan AI', personaId: 'builder' },
+        { id: 'C', text: 'Saya menentukan strategi dan memastikan keselarasan dengan matlamat perniagaan', personaId: 'strategist' },
+        { id: 'D', text: 'Saya menginspirasi orang lain dengan visi transformatif tentang apa yang boleh dicapai AI', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 4,
+      text: 'Apa yang paling memotivasikan anda tentang AI di Telekom Malaysia?',
+      options: [
+        { id: 'A', text: 'Menemui kemungkinan baharu dan kekal ingin tahu tentang AI', personaId: 'explorer' },
+        { id: 'B', text: 'Membina produk dan perkhidmatan berteraskan AI yang berdampak', personaId: 'builder' },
+        { id: 'C', text: 'Mendorong hasil perniagaan yang boleh diukur melalui inisiatif AI', personaId: 'strategist' },
+        { id: 'D', text: 'Memimpin transformasi TM menjadi organisasi yang mengutamakan AI', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 5,
+      text: 'Bagaimana anda biasanya belajar tentang AI?',
+      options: [
+        { id: 'A', text: 'Saya meneroka tutorial, demo, dan artikel mengikut kadar saya sendiri', personaId: 'explorer' },
+        { id: 'B', text: 'Saya mendalami kursus teknikal, rangka kerja, dan projek praktikal', personaId: 'builder' },
+        { id: 'C', text: 'Saya mengkaji kesan strategik dan perniagaan AI melalui kajian kes', personaId: 'strategist' },
+        { id: 'D', text: 'Saya berinteraksi dengan pemimpin industri dan membentuk naratif AI masa depan', personaId: 'visionary' },
+      ],
+    },
+  ],
+  CN: [
+    {
+      id: 1,
+      text: '您目前如何在日常工作中使用AI工具？',
+      options: [
+        { id: 'A', text: '我偶尔会在听说后尝试AI工具', personaId: 'explorer' },
+        { id: 'B', text: '我积极地将AI构建或整合到系统和工作流程中', personaId: 'builder' },
+        { id: 'C', text: '我主导或规划与AI相关的项目和举措', personaId: 'strategist' },
+        { id: 'D', text: '我为组织制定长期AI发展方向', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 2,
+      text: '以下哪项最能描述您的AI知识水平？',
+      options: [
+        { id: 'A', text: '我在一般层面上了解AI概念', personaId: 'explorer' },
+        { id: 'B', text: '我能够在技术上实施或配置AI模型和系统', personaId: 'builder' },
+        { id: 'C', text: '我了解AI如何创造商业价值并推动战略', personaId: 'strategist' },
+        { id: 'D', text: '我影响AI政策、思想领导力和行业方向', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 3,
+      text: '当团队面临挑战时，您在AI方面的自然角色是什么？',
+      options: [
+        { id: 'A', text: '我探索和实验——寻找可能有帮助的AI工具', personaId: 'explorer' },
+        { id: 'B', text: '我使用AI开发技术解决方案', personaId: 'builder' },
+        { id: 'C', text: '我制定战略并确保与业务目标保持一致', personaId: 'strategist' },
+        { id: 'D', text: '我用AI能实现的变革性愿景激励他人', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 4,
+      text: '在马来西亚电信，什么最能激励您对AI的热情？',
+      options: [
+        { id: 'A', text: '发现新的可能性并对AI保持好奇', personaId: 'explorer' },
+        { id: 'B', text: '构建有影响力的AI驱动产品和服务', personaId: 'builder' },
+        { id: 'C', text: '通过AI举措推动可衡量的业务成果', personaId: 'strategist' },
+        { id: 'D', text: '引领TM转型为AI优先的组织', personaId: 'visionary' },
+      ],
+    },
+    {
+      id: 5,
+      text: '您通常如何学习AI？',
+      options: [
+        { id: 'A', text: '我按自己的节奏探索教程、演示和文章', personaId: 'explorer' },
+        { id: 'B', text: '我深入研究技术课程、框架和实践项目', personaId: 'builder' },
+        { id: 'C', text: '我通过案例研究了解AI的战略和商业影响', personaId: 'strategist' },
+        { id: 'D', text: '我与行业领袖互动并塑造未来AI叙事', personaId: 'visionary' },
+      ],
+    },
+  ],
+};
+
+export const openQuestionByLang: Record<Lang, TranslatedOpenQuestion> = {
+  EN: {
+    id: 6,
+    text: 'In your own words, what does AI mean for your role at Telekom Malaysia, and where do you want to take your AI journey?',
+    placeholder: 'Share your thoughts openly — this is the most important part of the assessment…',
+  },
+  BM: {
+    id: 6,
+    text: 'Dengan kata-kata anda sendiri, apakah maksud AI untuk peranan anda di Telekom Malaysia, dan ke mana anda ingin membawa perjalanan AI anda?',
+    placeholder: 'Kongsi pemikiran anda secara terbuka — ini adalah bahagian paling penting dalam penilaian…',
+  },
+  CN: {
+    id: 6,
+    text: '用您自己的话，AI对您在马来西亚电信的角色意味着什么，您希望将AI之旅带向何方？',
+    placeholder: '请坦诚分享您的想法——这是评估中最重要的部分……',
+  },
+};
+
+// ── UI string translations ────────────────────────────────────────────
 export const translations = {
   EN: {
+    // ── Landing ──
     platformLabel:   'TM AI Workforce Intelligent Platform',
     headline1:       'Discover Your',
     headlineAccent:  'AI Persona',
@@ -19,8 +204,122 @@ export const translations = {
     beginSub:        '5 questions + 1 open response · Takes ~3 minutes',
     statsBtn:        'View Workforce Statistics',
     contactBtn:      'Contact Us',
+
+    // ── Shared ──
+    backToMain:      'Back to Main Page',
+
+    // ── Assessment / Question screen ──
+    questionLabel:   'Question',
+
+    // ── Open Question screen ──
+    openAiBadge:     '✦ AI-Analysed Open Response',
+    openTitle:       'Question 6',
+    openSubtitle:    'Your answers here carry real weight — the AI agent reads them holistically alongside your multiple-choice responses before classifying your persona.',
+    openPartA:       'Part A',
+    openPartB:       'Part B',
+    openRequired:    'Required',
+    openCharMin:     'characters minimum',
+    openPartAQuestion: 'What is your current role in Telekom Malaysia?',
+    openPartAPlaceholder: 'e.g. Senior Network Engineer, Product Manager, Data Analyst…',
+    openPartAHint:   'Please enter your current role to continue.',
+    openSubmitBtn:   'Analyse with AI',
+
+    // ── AI Thinking screen ──
+    thinkingBadge:   '✦ Claude Sonnet · Agentic Reasoning',
+    thinkingTitle:   'Analysing Your Responses',
+    thinkingSubtitle: 'Our AI agent is reasoning through your complete assessment to discover your unique AI persona.',
+    thinkStep1Label: 'OBSERVE',
+    thinkStep1Detail: 'Reading all 6 responses including your open-ended answer…',
+    thinkStep2Label: 'REASON',
+    thinkStep2Detail: 'Detecting patterns, resolving mixed signals, weighing free-text…',
+    thinkStep3Label: 'DECIDE',
+    thinkStep3Detail: 'Classifying your AI persona and scoring confidence…',
+    thinkStep4Label: 'PRODUCE',
+    thinkStep4Detail: 'Crafting your personalised narrative and learning path…',
+
+    // ── Results screen ──
+    resultsAiClassified: 'AI-Classified',
+    resultsConfidence:   'Confidence',
+    resultsRuleBased:    'Rule-Based Result',
+    resultsAiUnavail:    '(AI unavailable)',
+    resultsYourPersona:  'Your AI Persona',
+    resultsAiReasoning:  'AI Reasoning',
+    resultsLearningPath: 'Your AI Learning Path',
+    resultsYouBadge:     'You',
+    resultsAiContentNote: '* AI-generated content is in English',
+    resultsRetake:       'Retake Assessment',
+    resultsDownloadReport: 'Download My Report',
+    resultsHRView:       'HR Manager View',
+
+    // ── Report screen ──
+    reportBackToResults: 'Back to Results',
+    reportDownload:      'Download / Print PDF',
+    reportSaveBtn:       'Save as PDF — Print Report',
+    reportBrandSub:      'Personalised AI Readiness Report',
+    reportTitle:         'Your AI Readiness Report',
+    reportAiPersona:     'AI Persona',
+    reportConfidence:    'Confidence',
+    reportDimensions:    'Readiness Dimensions',
+    reportNarrativeLabel: 'AI Assessment Narrative',
+    reportReasoningLabel: 'AI Reasoning',
+    reportStrengths:     'Key Strengths',
+    reportGrowthAreas:   'Growth Areas',
+    reportLearningPath:  'Recommended Learning Pathway',
+    reportTailoredFor:   '— tailored for',
+    reportFooter:        'Generated by AiNspire · Powered by Claude AI · Confidential — For personal development use only',
+
+    // ── Statistics screen ──
+    statsLiveBadge:      '✦ Live Workforce Intelligence · AiNspire',
+    statsSection1Badge:  'Section 1',
+    statsSection1Title:  'Workforce Analytics Statistics',
+    statsSection1Desc:   'Assessment completion rates, persona distribution, and AI readiness benchmarks across all TM divisions.',
+    statsSection2Badge:  'Section 2',
+    statsSection2Title:  'Learning Pathway Statistics',
+    statsSection2Desc:   'Course enrolment, completion trends, skill coverage, and persona-aligned learning performance.',
+
+    // ── Contact screen ──
+    contactTitle1:       'Contact',
+    contactTitle2:       'Us',
+    contactSubtitle:     'Whether you wish to share a suggestion, raise a concern, or explore collaboration opportunities, we would love to hear from you.',
+    contactFormLabel:    '// AINSPIRE',
+    contactFormTitle:    'Talk to us',
+    contactNameLabel:    'Name',
+    contactNamePlaceholder: 'Your full name',
+    contactEmailLabel:   'Your Email',
+    contactPurposeLabel: 'Purpose of Message',
+    contactPurposePlaceholder: 'Select the purpose of your message',
+    contactMsgLabel:     'Message',
+    contactMsgPlaceholder: 'Write your message here…',
+    contactSendBtn:      'Send Message',
+    contactSentTitle:    'Message Sent!',
+    contactSentDesc:     "Your default mail app has opened with your message pre-filled. We'll get back to you shortly.",
+    contactEmailCardLabel: 'Email Us',
+    contactPurposeGuide: 'Purpose Guide',
+    contactPurposeOptions: ['Suggestion', 'Complaint', 'Technical Issue', 'General Inquiry', 'Collaboration', 'Others'],
+    contactPurposeDescs: ['Ideas to improve AiNspire', 'Report a concern or issue', 'App bugs or errors', 'Questions about the platform', 'Partner with our team', 'Anything else on your mind'],
+
+    // ── HR Dashboard ──
+    hrBackToResults:     'Back to Results',
+    hrTitle:             'HR Manager Dashboard',
+    hrSubtitle:          'AI Workforce Intelligence',
+    hrTab1:              'Team Overview',
+    hrTab2:              'Skills Gap Analysis',
+    hrTab3:              'Succession Planning',
+    hrTab4:              'Action Plan',
+    hrExportCSV:         'Export CSV',
+    hrSendReminder:      'Send Reminder',
+    hrReminderSent:      'Reminder Sent',
+    hrApprove:           'Approve & Publish Results',
+    hrApproved:          '✓ Results Published',
+    hrGovernance:        'Human-in-the-Loop Governance',
+    hrGovernanceDesc:    'AI classifications require HR Manager review before being recorded in official systems. Publishing activates learning pathway assignments.',
+    hrGeneratePlan:      'Generate 90-Day Action Plan',
+    hrGenerating:        'Generating Plan…',
+    hrPrintPlan:         'Print / Export Plan',
   },
+
   BM: {
+    // ── Landing ──
     platformLabel:   'Platform Perisikan Tenaga Kerja AI TM',
     headline1:       'Temui',
     headlineAccent:  'Persona AI',
@@ -38,8 +337,122 @@ export const translations = {
     beginSub:        '5 soalan + 1 respons terbuka · Mengambil ~3 minit',
     statsBtn:        'Lihat Statistik Tenaga Kerja',
     contactBtn:      'Hubungi Kami',
+
+    // ── Shared ──
+    backToMain:      'Kembali ke Halaman Utama',
+
+    // ── Assessment / Question screen ──
+    questionLabel:   'Soalan',
+
+    // ── Open Question screen ──
+    openAiBadge:     '✦ Respons Terbuka Dianalisis AI',
+    openTitle:       'Soalan 6',
+    openSubtitle:    'Jawapan anda di sini membawa berat yang nyata — ejen AI membacanya secara holistik bersama respons pilihan berbilang anda sebelum mengklasifikasikan persona anda.',
+    openPartA:       'Bahagian A',
+    openPartB:       'Bahagian B',
+    openRequired:    'Wajib',
+    openCharMin:     'aksara minimum',
+    openPartAQuestion: 'Apakah peranan semasa anda di Telekom Malaysia?',
+    openPartAPlaceholder: 'cth. Jurutera Rangkaian Kanan, Pengurus Produk, Penganalisis Data…',
+    openPartAHint:   'Sila masukkan peranan semasa anda untuk meneruskan.',
+    openSubmitBtn:   'Analisis dengan AI',
+
+    // ── AI Thinking screen ──
+    thinkingBadge:   '✦ Claude Sonnet · Penaakulan Agentik',
+    thinkingTitle:   'Menganalisis Respons Anda',
+    thinkingSubtitle: 'Ejen AI kami menaakulkan penilaian lengkap anda untuk menemui persona AI unik anda.',
+    thinkStep1Label: 'PERHATIKAN',
+    thinkStep1Detail: 'Membaca semua 6 respons termasuk jawapan terbuka anda…',
+    thinkStep2Label: 'TAAKULKAN',
+    thinkStep2Detail: 'Mengesan corak, menyelesaikan isyarat bercampur, menimbang teks bebas…',
+    thinkStep3Label: 'PUTUSKAN',
+    thinkStep3Detail: 'Mengklasifikasikan persona AI anda dan menilai keyakinan…',
+    thinkStep4Label: 'HASILKAN',
+    thinkStep4Detail: 'Mencipta naratif peribadi dan laluan pembelajaran anda…',
+
+    // ── Results screen ──
+    resultsAiClassified: 'Dikelaskan AI',
+    resultsConfidence:   'Keyakinan',
+    resultsRuleBased:    'Keputusan Berasaskan Peraturan',
+    resultsAiUnavail:    '(AI tidak tersedia)',
+    resultsYourPersona:  'Persona AI Anda',
+    resultsAiReasoning:  'Penaakulan AI',
+    resultsLearningPath: 'Laluan Pembelajaran AI Anda',
+    resultsYouBadge:     'Anda',
+    resultsAiContentNote: '* Kandungan yang dijana AI adalah dalam Bahasa Inggeris',
+    resultsRetake:       'Ambil Semula Penilaian',
+    resultsDownloadReport: 'Muat Turun Laporan Saya',
+    resultsHRView:       'Paparan Pengurus HR',
+
+    // ── Report screen ──
+    reportBackToResults: 'Kembali ke Keputusan',
+    reportDownload:      'Muat Turun / Cetak PDF',
+    reportSaveBtn:       'Simpan sebagai PDF — Cetak Laporan',
+    reportBrandSub:      'Laporan Kesediaan AI Peribadi',
+    reportTitle:         'Laporan Kesediaan AI Anda',
+    reportAiPersona:     'Persona AI',
+    reportConfidence:    'Keyakinan',
+    reportDimensions:    'Dimensi Kesediaan',
+    reportNarrativeLabel: 'Naratif Penilaian AI',
+    reportReasoningLabel: 'Penaakulan AI',
+    reportStrengths:     'Kekuatan Utama',
+    reportGrowthAreas:   'Kawasan Pertumbuhan',
+    reportLearningPath:  'Laluan Pembelajaran yang Disyorkan',
+    reportTailoredFor:   '— disesuaikan untuk',
+    reportFooter:        'Dijana oleh AiNspire · Dikuasakan oleh Claude AI · Sulit — Untuk kegunaan pembangunan peribadi sahaja',
+
+    // ── Statistics screen ──
+    statsLiveBadge:      '✦ Perisikan Tenaga Kerja Langsung · AiNspire',
+    statsSection1Badge:  'Bahagian 1',
+    statsSection1Title:  'Statistik Analitik Tenaga Kerja',
+    statsSection1Desc:   'Kadar penyelesaian penilaian, taburan persona, dan penanda aras kesediaan AI merentas semua bahagian TM.',
+    statsSection2Badge:  'Bahagian 2',
+    statsSection2Title:  'Statistik Laluan Pembelajaran',
+    statsSection2Desc:   'Pendaftaran kursus, trend penyelesaian, liputan kemahiran, dan prestasi pembelajaran selaras persona.',
+
+    // ── Contact screen ──
+    contactTitle1:       'Hubungi',
+    contactTitle2:       'Kami',
+    contactSubtitle:     'Sama ada anda ingin berkongsi cadangan, membangkitkan kebimbangan, atau meneroka peluang kerjasama, kami ingin mendengar daripada anda.',
+    contactFormLabel:    '// AINSPIRE',
+    contactFormTitle:    'Bercakap dengan kami',
+    contactNameLabel:    'Nama',
+    contactNamePlaceholder: 'Nama penuh anda',
+    contactEmailLabel:   'E-mel Anda',
+    contactPurposeLabel: 'Tujuan Mesej',
+    contactPurposePlaceholder: 'Pilih tujuan mesej anda',
+    contactMsgLabel:     'Mesej',
+    contactMsgPlaceholder: 'Tulis mesej anda di sini…',
+    contactSendBtn:      'Hantar Mesej',
+    contactSentTitle:    'Mesej Dihantar!',
+    contactSentDesc:     'Aplikasi mel lalai anda telah dibuka dengan mesej anda pra-diisi. Kami akan menghubungi anda tidak lama lagi.',
+    contactEmailCardLabel: 'E-mel Kami',
+    contactPurposeGuide: 'Panduan Tujuan',
+    contactPurposeOptions: ['Cadangan', 'Aduan', 'Isu Teknikal', 'Pertanyaan Umum', 'Kerjasama', 'Lain-lain'],
+    contactPurposeDescs: ['Idea untuk menambah baik AiNspire', 'Laporkan kebimbangan atau isu', 'Pepijat atau ralat aplikasi', 'Soalan tentang platform', 'Bekerjasama dengan pasukan kami', 'Apa-apa lagi dalam fikiran anda'],
+
+    // ── HR Dashboard ──
+    hrBackToResults:     'Kembali ke Keputusan',
+    hrTitle:             'Papan Pemuka Pengurus HR',
+    hrSubtitle:          'Perisikan Tenaga Kerja AI',
+    hrTab1:              'Gambaran Pasukan',
+    hrTab2:              'Analisis Jurang Kemahiran',
+    hrTab3:              'Perancangan Penggantian',
+    hrTab4:              'Pelan Tindakan',
+    hrExportCSV:         'Eksport CSV',
+    hrSendReminder:      'Hantar Peringatan',
+    hrReminderSent:      'Peringatan Dihantar',
+    hrApprove:           'Lulus & Terbit Keputusan',
+    hrApproved:          '✓ Keputusan Diterbitkan',
+    hrGovernance:        'Tadbir Urus Manusia-dalam-Gelung',
+    hrGovernanceDesc:    'Klasifikasi AI memerlukan semakan Pengurus HR sebelum direkodkan dalam sistem rasmi. Penerbitan mengaktifkan tugasan laluan pembelajaran.',
+    hrGeneratePlan:      'Jana Pelan Tindakan 90 Hari',
+    hrGenerating:        'Menjana Pelan…',
+    hrPrintPlan:         'Cetak / Eksport Pelan',
   },
+
   CN: {
+    // ── Landing ──
     platformLabel:   'TM AI 劳动力智能平台',
     headline1:       '发现您的',
     headlineAccent:  'AI 人设',
@@ -57,5 +470,119 @@ export const translations = {
     beginSub:        '5 道题 + 1 道开放题 · 约需 3 分钟',
     statsBtn:        '查看劳动力统计',
     contactBtn:      '联系我们',
+
+    // ── Shared ──
+    backToMain:      '返回主页',
+
+    // ── Assessment / Question screen ──
+    questionLabel:   '题目',
+
+    // ── Open Question screen ──
+    openAiBadge:     '✦ AI 分析开放式回答',
+    openTitle:       '第 6 题',
+    openSubtitle:    '您在此处的回答至关重要——AI代理将在分类您的人设之前，结合您的多选题回答整体阅读这些内容。',
+    openPartA:       '第 A 部分',
+    openPartB:       '第 B 部分',
+    openRequired:    '必填',
+    openCharMin:     '个字符最低要求',
+    openPartAQuestion: '您目前在马来西亚电信担任什么职位？',
+    openPartAPlaceholder: '例如：高级网络工程师、产品经理、数据分析师……',
+    openPartAHint:   '请输入您当前的职位以继续。',
+    openSubmitBtn:   '用 AI 分析',
+
+    // ── AI Thinking screen ──
+    thinkingBadge:   '✦ Claude Sonnet · 智能推理',
+    thinkingTitle:   '正在分析您的回答',
+    thinkingSubtitle: '我们的AI代理正在推理您的完整评估，以发现您独特的AI人设。',
+    thinkStep1Label: '观察',
+    thinkStep1Detail: '正在读取包括您开放式答案在内的全部6项回答…',
+    thinkStep2Label: '推理',
+    thinkStep2Detail: '正在检测规律，解析混合信号，权衡自由文本…',
+    thinkStep3Label: '决策',
+    thinkStep3Detail: '正在分类您的AI人设并评分置信度…',
+    thinkStep4Label: '生成',
+    thinkStep4Detail: '正在撰写您的个性化叙述和学习路径…',
+
+    // ── Results screen ──
+    resultsAiClassified: 'AI 分类',
+    resultsConfidence:   '置信度',
+    resultsRuleBased:    '基于规则的结果',
+    resultsAiUnavail:    '（AI 不可用）',
+    resultsYourPersona:  '您的 AI 人设',
+    resultsAiReasoning:  'AI 推理',
+    resultsLearningPath: '您的 AI 学习路径',
+    resultsYouBadge:     '您',
+    resultsAiContentNote: '* AI生成内容为英文',
+    resultsRetake:       '重新评估',
+    resultsDownloadReport: '下载我的报告',
+    resultsHRView:       'HR 经理视图',
+
+    // ── Report screen ──
+    reportBackToResults: '返回结果',
+    reportDownload:      '下载 / 打印 PDF',
+    reportSaveBtn:       '另存为 PDF — 打印报告',
+    reportBrandSub:      '个性化 AI 准备度报告',
+    reportTitle:         '您的 AI 准备度报告',
+    reportAiPersona:     'AI 人设',
+    reportConfidence:    '置信度',
+    reportDimensions:    '准备度维度',
+    reportNarrativeLabel: 'AI 评估叙述',
+    reportReasoningLabel: 'AI 推理',
+    reportStrengths:     '主要优势',
+    reportGrowthAreas:   '成长领域',
+    reportLearningPath:  '推荐学习路径',
+    reportTailoredFor:   '——专为',
+    reportFooter:        '由 AiNspire 生成 · 由 Claude AI 驱动 · 机密——仅供个人发展使用',
+
+    // ── Statistics screen ──
+    statsLiveBadge:      '✦ 实时劳动力智能 · AiNspire',
+    statsSection1Badge:  '第 1 节',
+    statsSection1Title:  '劳动力分析统计',
+    statsSection1Desc:   '所有TM部门的评估完成率、人设分布及AI准备度基准。',
+    statsSection2Badge:  '第 2 节',
+    statsSection2Title:  '学习路径统计',
+    statsSection2Desc:   '课程注册、完成趋势、技能覆盖率及人设对齐的学习表现。',
+
+    // ── Contact screen ──
+    contactTitle1:       '联系',
+    contactTitle2:       '我们',
+    contactSubtitle:     '无论您希望分享建议、提出关切，还是探索合作机会，我们都很乐意听取您的意见。',
+    contactFormLabel:    '// AINSPIRE',
+    contactFormTitle:    '与我们交流',
+    contactNameLabel:    '姓名',
+    contactNamePlaceholder: '您的全名',
+    contactEmailLabel:   '您的电子邮件',
+    contactPurposeLabel: '消息目的',
+    contactPurposePlaceholder: '请选择您的消息目的',
+    contactMsgLabel:     '消息',
+    contactMsgPlaceholder: '在此处写下您的消息…',
+    contactSendBtn:      '发送消息',
+    contactSentTitle:    '消息已发送！',
+    contactSentDesc:     '您的默认邮件应用已打开，消息已预填。我们将尽快与您联系。',
+    contactEmailCardLabel: '发送电子邮件',
+    contactPurposeGuide: '目的指南',
+    contactPurposeOptions: ['建议', '投诉', '技术问题', '一般咨询', '合作', '其他'],
+    contactPurposeDescs: ['改进 AiNspire 的想法', '报告关切或问题', '应用程序错误', '关于平台的问题', '与我们的团队合作', '其他任何想法'],
+
+    // ── HR Dashboard ──
+    hrBackToResults:     '返回结果',
+    hrTitle:             'HR 经理仪表板',
+    hrSubtitle:          'AI 劳动力智能',
+    hrTab1:              '团队概览',
+    hrTab2:              '技能差距分析',
+    hrTab3:              '继任规划',
+    hrTab4:              '行动计划',
+    hrExportCSV:         '导出 CSV',
+    hrSendReminder:      '发送提醒',
+    hrReminderSent:      '提醒已发送',
+    hrApprove:           '批准并发布结果',
+    hrApproved:          '✓ 结果已发布',
+    hrGovernance:        '人在回路治理',
+    hrGovernanceDesc:    'AI分类需要HR经理审核后才能记录在官方系统中。发布后将激活学习路径分配。',
+    hrGeneratePlan:      '生成 90 天行动计划',
+    hrGenerating:        '正在生成计划…',
+    hrPrintPlan:         '打印 / 导出计划',
   },
-} satisfies Record<Lang, Record<string, string>>;
+} as const;
+
+export type T = typeof translations.EN;
