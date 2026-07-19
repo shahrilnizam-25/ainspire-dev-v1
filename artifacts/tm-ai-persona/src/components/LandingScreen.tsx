@@ -31,21 +31,18 @@ export default function LandingScreen({
   ];
 
   return (
-    /* Page wrapper — same base colour the hero fades into, zero seam */
+    /* Page wrapper — identical base colour to hero fade-to, zero seam */
     <div
       className="w-full max-w-5xl flex flex-col items-center text-center relative"
       style={{ background: '#030712' }}
     >
 
       {/* ══════════════════════════════════════════════════════════════════
-          HERO SECTION
-          Hero image fills the entire block as a background.
-          Gradient overlay:
-            • top-to-~35%  : dark → semi-dark  (keeps text legible)
-            • ~35%–65%     : transparent        (illustration breathes)
-            • ~65%–100%    : transparent → #030712  (fades into page)
-          Side fades are very subtle — just enough to soften edges.
-          NO floating badges — minimalist, clean.
+          HERO SECTION — full-width seamless background
+          • Hero image fills the entire block edge-to-edge
+          • Strong side fades blend image edges into #030712
+          • Top gradient keeps text legible; bottom fades into page
+          • No floating badges — clean minimalist hero
       ══════════════════════════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -56,39 +53,43 @@ export default function LandingScreen({
       >
         {/* Hero image */}
         <img
-          src="/hero-v4.jpg"
+          src="/hero-v5.jpg"
           alt="AI future portal — KL skyline"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: 'center center' }}
         />
 
-        {/* Primary overlay — top dark, mid clear, bottom fades to page colour */}
+        {/* Primary overlay — top dark, mid clear, bottom fades to #030712 */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
               'linear-gradient(to bottom,' +
-              '  rgba(3,7,18,0.92)  0%,' +
-              '  rgba(3,7,18,0.75) 16%,' +
-              '  rgba(3,7,18,0.35) 32%,' +
-              '  rgba(3,7,18,0.06) 48%,' +
-              '  transparent        58%,' +
-              '  transparent        68%,' +
-              '  rgba(3,7,18,0.72) 82%,' +
-              '  rgba(3,7,18,1)   100%)',
+              ' rgba(3,7,18,0.90)  0%,' +
+              ' rgba(3,7,18,0.72) 14%,' +
+              ' rgba(3,7,18,0.30) 30%,' +
+              ' rgba(3,7,18,0.04) 46%,' +
+              ' transparent        56%,' +
+              ' transparent        66%,' +
+              ' rgba(3,7,18,0.68) 80%,' +
+              ' rgba(3,7,18,1)   100%)',
           }}
         />
 
-        {/* Side fades — very light, only to soften hard crop edges */}
+        {/* Side fades — strong, cover any narrow-image edge artefacts fully */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
               'linear-gradient(to right,' +
-              '  rgba(3,7,18,0.40) 0%,' +
-              '  transparent 14%,' +
-              '  transparent 86%,' +
-              '  rgba(3,7,18,0.40) 100%)',
+              ' rgba(3,7,18,1)    0%,' +
+              ' rgba(3,7,18,0.80) 4%,' +
+              ' rgba(3,7,18,0.30) 10%,' +
+              ' transparent       20%,' +
+              ' transparent       80%,' +
+              ' rgba(3,7,18,0.30) 90%,' +
+              ' rgba(3,7,18,0.80) 96%,' +
+              ' rgba(3,7,18,1)   100%)',
           }}
         />
 
@@ -168,107 +169,159 @@ export default function LandingScreen({
             </div>
           </motion.div>
 
-          {/* ── Tagline — sits between the logo pill and the headline ──
-               Small, soft, spaced — gives context before the bold headline lands */}
+          {/* ── Tagline — below logo pill, above headline ── */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.14 }}
-            className="text-xs uppercase tracking-[0.18em] font-semibold mb-4"
-            style={{ color: 'rgba(0,212,255,0.70)' }}
+            className="text-xs uppercase tracking-[0.18em] font-semibold mb-5"
+            style={{
+              color: 'rgba(0,212,255,0.72)',
+              textShadow: '1px 2px 6px rgba(0,0,0,0.70)',
+            }}
           >
             {t.description}{' '}
-            <span style={{ color: 'rgba(0,212,255,0.90)', fontWeight: 700 }}>{t.descriptionBold}</span>
+            <span style={{ color: 'rgba(0,212,255,0.95)', fontWeight: 700 }}>{t.descriptionBold}</span>
           </motion.p>
 
-          {/* Headline */}
+          {/* ── Headline — with bottom-right text shadow ── */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.22 }}
             className="text-5xl md:text-7xl font-black tracking-tight mb-2 leading-[1.05]"
+            style={{
+              textShadow: '2px 3px 12px rgba(0,0,0,0.85), 4px 6px 24px rgba(0,0,0,0.55)',
+            }}
           >
             <span className="text-white">{t.headline1} </span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.5)]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary"
+              style={{
+                /* text-shadow doesn't apply to gradient clip text; use filter instead */
+                filter: 'drop-shadow(2px 3px 10px rgba(0,0,0,0.80))',
+              }}
+            >
               {t.headlineAccent}
             </span>
             <br />
-            <span className="text-white/80 text-4xl md:text-5xl font-bold">{t.headline2}</span>
+            {/* ── Subheadline — with bottom-right text shadow ── */}
+            <span
+              className="text-white/80 text-4xl md:text-5xl font-bold"
+              style={{
+                textShadow: '2px 3px 10px rgba(0,0,0,0.85), 4px 5px 20px rgba(0,0,0,0.55)',
+              }}
+            >
+              {t.headline2}
+            </span>
           </motion.h1>
 
         </div>
-        {/* (no floating badges — clean minimalist hero) */}
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════════
           FEATURE COLUMNS
-          Float on top of the hero's bottom fade with:
-            • negative margin-top  → slight upward overlap
-            • no top border        → no visible seam
-            • upward box-shadow    → soft glow depth
-            • background matches the hero's fade-to colour exactly
+          • Negative margin — overlaps the hero bottom fade
+          • Semi-transparent glassy background blends into #030712
+          • NO hard top border — replaced by subtle gradient highlight
+          • Bottom edges fade naturally into the page background
+          • Upward glow shadow for floating depth
       ══════════════════════════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.50 }}
+        transition={{ duration: 0.6, delay: 0.48 }}
         className="w-full overflow-hidden relative z-10"
         style={{
-          marginTop: '-52px',
-          background: 'rgba(3,7,18,0.82)',
+          marginTop: '-56px',
+          /* Semi-transparent so the hero glow bleeds through the top */
+          background:
+            'linear-gradient(to bottom,' +
+            ' rgba(3,7,18,0.55)  0%,' +
+            ' rgba(3,7,18,0.82) 35%,' +
+            ' rgba(3,7,18,0.92) 100%)',
           border: 'none',
-          backdropFilter: 'blur(18px)',
-          /* upward glow instead of a hard border-top */
+          backdropFilter: 'blur(20px)',
+          /* Upward cyan+purple glow instead of a hard border */
           boxShadow:
-            '0 -12px 40px rgba(0,212,255,0.10),' +
-            '0  -4px 16px rgba(139,92,246,0.08),' +
-            '0   8px 40px rgba(0,0,0,0.55)',
-          borderRadius: '2px',
+            '0 -16px 48px rgba(0,212,255,0.12),' +
+            '0  -6px 20px rgba(139,92,246,0.09),' +
+            '0   8px 40px rgba(0,0,0,0.60)',
         }}
       >
-        {/* Subtle cyan top-edge highlight — replaces the hard border */}
+        {/* Gradient top-edge highlight — replaces hard border */}
         <div
-          className="w-full"
           style={{
             height: '1px',
             background:
               'linear-gradient(to right,' +
-              '  transparent 0%,' +
-              '  rgba(0,212,255,0.35) 30%,' +
-              '  rgba(139,92,246,0.35) 70%,' +
-              '  transparent 100%)',
+              ' transparent 0%,' +
+              ' rgba(0,212,255,0.45) 25%,' +
+              ' rgba(167,139,250,0.45) 75%,' +
+              ' transparent 100%)',
           }}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/[0.06]">
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
+            /* Alternate icon accent colours for differentiation */
+            const iconColors = ['text-cyan-400', 'text-violet-400', 'text-sky-400'];
+            const iconBg = [
+              'rgba(0,212,255,0.10)',
+              'rgba(139,92,246,0.12)',
+              'rgba(56,189,248,0.10)',
+            ];
+            const iconBorder = [
+              'rgba(0,212,255,0.22)',
+              'rgba(167,139,250,0.22)',
+              'rgba(56,189,248,0.22)',
+            ];
+            const headingColors = ['#22d3ee', '#a78bfa', '#38bdf8'];
             return (
               <motion.div
                 key={f.label}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55 + i * 0.08 }}
+                transition={{ delay: 0.54 + i * 0.08 }}
                 className="flex items-start gap-4 p-5 text-left"
+                style={{
+                  /* Column bottom also fades gently */
+                  background:
+                    'linear-gradient(to bottom, transparent 0%, rgba(3,7,18,0.18) 100%)',
+                }}
               >
                 <div
                   className="flex-shrink-0 p-2.5 rounded-xl mt-0.5"
                   style={{
-                    background: 'rgba(0,212,255,0.09)',
-                    border: '1px solid rgba(0,212,255,0.20)',
-                    boxShadow: '0 0 12px rgba(0,212,255,0.08)',
+                    background: iconBg[i],
+                    border: `1px solid ${iconBorder[i]}`,
+                    boxShadow: `0 0 14px ${iconBg[i]}`,
                   }}
                 >
-                  <Icon className="w-5 h-5 text-cyan-400" />
+                  <Icon className={`w-5 h-5 ${iconColors[i]}`} />
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-white mb-1">{f.label}</div>
+                  <div
+                    className="font-bold text-sm mb-1"
+                    style={{ color: headingColors[i] }}
+                  >
+                    {f.label}
+                  </div>
                   <div className="text-xs text-white/45 leading-relaxed">{f.desc}</div>
                 </div>
               </motion.div>
             );
           })}
         </div>
+
+        {/* Bottom edge — fades into page background */}
+        <div
+          style={{
+            height: '32px',
+            background:
+              'linear-gradient(to bottom, transparent, rgba(3,7,18,1))',
+          }}
+        />
       </motion.div>
 
       {/* ══════════════════════════════════════════════
@@ -277,8 +330,8 @@ export default function LandingScreen({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.72 }}
-        className="flex flex-col items-center gap-4 w-full mb-10 mt-8 px-6"
+        transition={{ duration: 0.5, delay: 0.70 }}
+        className="flex flex-col items-center gap-4 w-full mb-10 mt-4 px-6"
       >
         <motion.button
           onClick={onStart}
@@ -327,7 +380,7 @@ export default function LandingScreen({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.88 }}
+        transition={{ duration: 0.6, delay: 0.86 }}
         className="w-full flex flex-wrap justify-center gap-8 pt-6 pb-10 border-t border-white/8 px-6"
       >
         {TRUST_BADGES.map((b, i) => {
@@ -337,7 +390,7 @@ export default function LandingScreen({
               key={b.label}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.92 + i * 0.07 }}
+              transition={{ delay: 0.90 + i * 0.07 }}
               className="flex items-center gap-2 text-white/50 text-xs font-semibold"
             >
               <Icon className="w-4 h-4 text-primary/60" />
@@ -351,7 +404,7 @@ export default function LandingScreen({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.1 }}
+        transition={{ delay: 1.08 }}
         className="mb-8 text-xs text-muted-foreground/50 font-mono"
       >
         {t.poweredBy}
