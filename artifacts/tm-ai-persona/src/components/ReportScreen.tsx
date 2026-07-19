@@ -108,31 +108,22 @@ export default function ReportScreen({
     setIsDownloading(true);
 
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import('html2canvas'),
+      const [{ toCanvas }, { default: jsPDF }] = await Promise.all([
+        import('html-to-image'),
         import('jspdf'),
       ]);
 
       const node = reportRef.current;
 
-      // foreignObjectRendering delegates all CSS painting to the browser, so
-      // Chrome's oklab() / oklch() colors are handled natively and never hit
-      // html2canvas's own colour parser (which doesn't support them).
-      const canvas = await html2canvas(node, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        foreignObjectRendering: true,
+      // html-to-image uses the browser's native SVG renderer — no custom CSS
+      // parser — so oklch/oklab colours, CSS variables, and gradients all work.
+      const canvas = await toCanvas(node, {
+        pixelRatio: 2,
         backgroundColor: '#0d1117',
-        logging: false,
-        width:        node.scrollWidth,
-        height:       node.scrollHeight,
-        windowWidth:  node.scrollWidth,
-        windowHeight: node.scrollHeight,
-        // Skip any element with backdrop-filter (the re-classifying overlay)
-        ignoreElements: (el) =>
-          !!(el as HTMLElement).style?.backdropFilter ||
-          el.classList.contains('backdrop-blur-\\[2px\\]'),
+        // Skip the backdrop-blur re-classifying overlay (unsupported in SVG)
+        filter: (el) =>
+          !(el as HTMLElement).style?.backdropFilter &&
+          !el.classList.contains('backdrop-blur-[2px]'),
       });
 
       const imgW  = 210; // A4 width mm
