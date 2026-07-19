@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingScreen from './components/LandingScreen';
 import QuestionScreen from './components/QuestionScreen';
@@ -30,6 +30,11 @@ export type AIResult = {
   recommendations: Array<{ title: string; description: string }>;
 };
 
+// Payload shape sent to /api/classify
+type StoredAnswer =
+  | MCQAnswer
+  | { questionId: number; questionText: string; freeText: string };
+
 const LANGS: Lang[] = ['EN', 'BM', 'CN'];
 
 export default function App() {
@@ -37,20 +42,77 @@ export default function App() {
   const [lang, setLang] = useState<Lang>('EN');
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [mcqAnswers, setMcqAnswers] = useState<MCQAnswer[]>([]);
-  const [aiResult, setAiResult] = useState<AIResult | null>(null);
+
+  // Per-language result cache: once fetched for a language it never re-fetches
+  const [aiResultCache, setAiResultCache] = useState<Partial<Record<Lang, AIResult>>>({});
+  // The canonical persona ID (set once from first successful result, unchanged by lang switch)
+  const [classifiedPersonaId, setClassifiedPersonaId] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [isReClassifying, setIsReClassifying] = useState(false);
+  // Stored answers so we can re-call the API when language changes
+  const [lastAnswers, setLastAnswers] = useState<StoredAnswer[] | null>(null);
   const [userRole, setUserRole] = useState<string>('');
+
+  // Track which lang is currently in-flight to avoid duplicate requests
+  const fetchingForLang = useRef<Lang | null>(null);
+
+  // Derived: result for the currently selected language
+  const aiResult = aiResultCache[lang] ?? null;
 
   // Active language-specific data
   const questions = questionsByLang[lang];
   const openQuestion = openQuestionByLang[lang];
 
+  // Shared classify helper
+  const runClassify = useCallback(async (answers: StoredAnswer[], targetLang: Lang): Promise<AIResult> => {
+    const res = await fetch('/api/classify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers, lang: targetLang }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json() as Promise<AIResult>;
+  }, []);
+
+  // Re-classify in the background whenever language changes on results/report screens
+  useEffect(() => {
+    if (screen !== 'results' && screen !== 'report') return;
+    if (!lastAnswers) return;
+    if (aiResultCache[lang]) return;              // already cached for this lang
+    if (fetchingForLang.current === lang) return; // request already in-flight
+
+    let cancelled = false;
+    fetchingForLang.current = lang;
+    setIsReClassifying(true);
+
+    runClassify(lastAnswers, lang)
+      .then((data) => {
+        if (!cancelled) {
+          setAiResultCache((prev) => ({ ...prev, [lang]: data }));
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) console.error('Re-classification error:', err);
+      })
+      .finally(() => {
+        fetchingForLang.current = null;
+        if (!cancelled) setIsReClassifying(false);
+      });
+
+    return () => { cancelled = true; };
+  // aiResultCache intentionally omitted — we check it at call time, not as a dep
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang, screen, lastAnswers, runClassify]);
+
   const handleStart = () => {
     setScreen('assessment');
     setCurrentQuestionIdx(0);
     setMcqAnswers([]);
-    setAiResult(null);
+    setAiResultCache({});
+    setClassifiedPersonaId(null);
+    setLastAnswers(null);
     setAiError(null);
+    setIsReClassifying(false);
   };
 
   const handleAnswer = (option: Option) => {
@@ -75,7 +137,7 @@ export default function App() {
     setUserRole(role);
     setScreen('ai-loading');
 
-    const answers = [
+    const answers: StoredAnswer[] = [
       ...mcqAnswers,
       {
         questionId: 6,
@@ -89,21 +151,17 @@ export default function App() {
       },
     ];
 
-    try {
-      const res = await fetch('/api/classify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers, lang }),
-      });
+    // Persist answers so language switches can re-use them
+    setLastAnswers(answers);
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: AIResult = await res.json();
-      setAiResult(data);
+    try {
+      const data = await runClassify(answers, lang);
+      setAiResultCache({ [lang]: data });
+      setClassifiedPersonaId(data.persona);
       setScreen('results');
     } catch (err) {
       console.error('Classification error:', err);
       setAiError(String(err));
-      setAiResult(null);
       setScreen('results');
     }
   };
@@ -124,7 +182,8 @@ export default function App() {
     );
   };
 
-  const resultPersonaId = aiResult?.persona ?? getFallbackPersona();
+  // Persona ID is fixed from the first successful classification; never changes on lang switch
+  const resultPersonaId = classifiedPersonaId ?? getFallbackPersona();
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary-foreground relative flex flex-col font-sans overflow-x-hidden">
@@ -242,6 +301,7 @@ export default function App() {
                 resultPersonaId={resultPersonaId}
                 aiResult={aiResult}
                 aiError={aiError}
+                isReClassifying={isReClassifying}
                 onRetake={handleStart}
                 onHRView={() => setScreen('hr-view')}
                 onReport={() => setScreen('report')}
@@ -307,6 +367,7 @@ export default function App() {
                 resultPersonaId={resultPersonaId}
                 aiResult={aiResult}
                 userRole={userRole}
+                isReClassifying={isReClassifying}
                 onBack={() => setScreen('results')}
               />
             </motion.div>

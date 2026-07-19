@@ -1,19 +1,62 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Download, Bot, TrendingUp, CheckCircle, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, Download, Bot, TrendingUp, CheckCircle, ArrowUpRight, Loader2 } from 'lucide-react';
 import { personas } from '../data/personas';
 import type { AIResult } from '../App';
 import type { Lang } from '../i18n';
 import { translations } from '../i18n';
 
-const DIMENSION_LABELS = [
-  'AI Awareness',
-  'Practical Application',
-  'Strategic Thinking',
-  'Collaboration & Ethics',
-];
+// ── Localised static content ────────────────────────────────────────────────
+
+const DIMENSION_LABELS_I18N: Record<Lang, string[]> = {
+  EN: ['AI Awareness', 'Practical Application', 'Strategic Thinking', 'Collaboration & Ethics'],
+  BM: ['Kesedaran AI', 'Aplikasi Praktikal', 'Pemikiran Strategik', 'Kerjasama & Etika'],
+  CN: ['AI 认知', '实践应用', '战略思维', '协作与伦理'],
+};
+
+const STRENGTHS_I18N: Record<Lang, Record<string, string[]>> = {
+  EN: {
+    explorer:   ['Curiosity-driven experimentation', 'Fast AI tool adoption', 'Cross-domain learning agility', 'Open to iterative feedback'],
+    builder:    ['Hands-on AI implementation', 'Technical prototyping', 'Prompt engineering fluency', 'Systematic problem solving'],
+    strategist: ['AI vision & alignment', 'Stakeholder communication', 'ROI-focused AI planning', 'Ethical AI governance'],
+    visionary:  ['Enterprise AI transformation', 'Executive championing', 'Cross-functional orchestration', 'Long-horizon AI roadmapping'],
+  },
+  BM: {
+    explorer:   ['Eksperimentasi didorong keingintahuan', 'Penggunaan alat AI dengan pantas', 'Ketangkasan pembelajaran merentas domain', 'Terbuka kepada maklum balas berulang'],
+    builder:    ['Pelaksanaan AI secara langsung', 'Prototaip teknikal', 'Kemahiran kejuruteraan prompt', 'Penyelesaian masalah secara sistematik'],
+    strategist: ['Visi & penjajaran AI', 'Komunikasi pemegang kepentingan', 'Perancangan AI berasaskan ROI', 'Tadbir urus AI beretika'],
+    visionary:  ['Transformasi AI perusahaan', 'Penjuaian eksekutif', 'Pengorkestraan merentas fungsi', 'Peta jalan AI jangka panjang'],
+  },
+  CN: {
+    explorer:   ['好奇心驱动的实验精神', '快速采用 AI 工具', '跨领域学习敏捷性', '开放接受迭代反馈'],
+    builder:    ['AI 动手实施', '技术原型开发', '提示工程能力', '系统化解决问题'],
+    strategist: ['AI 愿景与对齐', '利益相关者沟通', '以 ROI 为导向的 AI 规划', '道德 AI 治理'],
+    visionary:  ['企业 AI 转型', '高管倡导', '跨职能协调', '长期 AI 路线图规划'],
+  },
+};
+
+const GROWTH_I18N: Record<Lang, Record<string, string[]>> = {
+  EN: {
+    explorer:   ['Structured implementation skills', 'AI project scoping & delivery'],
+    builder:    ['Strategic alignment with business goals', 'AI ethics & governance frameworks'],
+    strategist: ['Hands-on prompt engineering', 'AI model evaluation techniques'],
+    visionary:  ['Deep technical AI literacy', 'Rapid hands-on prototyping'],
+  },
+  BM: {
+    explorer:   ['Kemahiran pelaksanaan berstruktur', 'Skop & penyampaian projek AI'],
+    builder:    ['Penjajaran strategik dengan matlamat perniagaan', 'Rangka kerja etika & tadbir urus AI'],
+    strategist: ['Kejuruteraan prompt secara langsung', 'Teknik penilaian model AI'],
+    visionary:  ['Literasi AI teknikal yang mendalam', 'Prototaip langsung yang pantas'],
+  },
+  CN: {
+    explorer:   ['结构化实施技能', 'AI 项目范围界定与交付'],
+    builder:    ['与业务目标的战略对齐', 'AI 伦理与治理框架'],
+    strategist: ['动手提示工程', 'AI 模型评估技术'],
+    visionary:  ['深度技术 AI 素养', '快速动手原型开发'],
+  },
+};
 
 // Derive 4 dimension scores from confidence + persona for visual richness
-function getDimensions(confidence: number, personaId: string) {
+function getDimensions(confidence: number, personaId: string, lang: Lang) {
   const base = Math.round(confidence * 100);
   const offsets: Record<string, number[]> = {
     explorer:   [+8, +4, -6, +2],
@@ -22,37 +65,28 @@ function getDimensions(confidence: number, personaId: string) {
     visionary:  [+4, -4, +8, +6],
   };
   const o = offsets[personaId] ?? [0, 0, 0, 0];
-  return DIMENSION_LABELS.map((label, i) => ({
+  const labels = DIMENSION_LABELS_I18N[lang];
+  return labels.map((label, i) => ({
     label,
     score: Math.min(99, Math.max(52, base + o[i])),
   }));
 }
 
-const STRENGTHS: Record<string, string[]> = {
-  explorer:   ['Curiosity-driven experimentation', 'Fast AI tool adoption', 'Cross-domain learning agility', 'Open to iterative feedback'],
-  builder:    ['Hands-on AI implementation', 'Technical prototyping', 'Prompt engineering fluency', 'Systematic problem solving'],
-  strategist: ['AI vision & alignment', 'Stakeholder communication', 'ROI-focused AI planning', 'Ethical AI governance'],
-  visionary:  ['Enterprise AI transformation', 'Executive championing', 'Cross-functional orchestration', 'Long-horizon AI roadmapping'],
-};
-
-const GROWTH: Record<string, string[]> = {
-  explorer:   ['Structured implementation skills', 'AI project scoping & delivery'],
-  builder:    ['Strategic alignment with business goals', 'AI ethics & governance frameworks'],
-  strategist: ['Hands-on prompt engineering', 'AI model evaluation techniques'],
-  visionary:  ['Deep technical AI literacy', 'Rapid hands-on prototyping'],
-};
+// ── Component ────────────────────────────────────────────────────────────────
 
 export default function ReportScreen({
   lang,
   resultPersonaId,
   aiResult,
   userRole,
+  isReClassifying,
   onBack,
 }: {
   lang: Lang;
   resultPersonaId: string;
   aiResult: AIResult | null;
   userRole: string;
+  isReClassifying: boolean;
   onBack: () => void;
 }) {
   const persona = personas[resultPersonaId];
@@ -60,12 +94,25 @@ export default function ReportScreen({
 
   const t = translations[lang];
   const confidence = aiResult ? Math.round(aiResult.confidence * 100) : 75;
-  const dimensions = getDimensions(aiResult?.confidence ?? 0.75, resultPersonaId);
+  const dimensions = getDimensions(aiResult?.confidence ?? 0.75, resultPersonaId, lang);
   const Icon = persona.icon;
-  const strengths = STRENGTHS[resultPersonaId] ?? STRENGTHS.explorer;
-  const growth = GROWTH[resultPersonaId] ?? GROWTH.explorer;
+  const strengths = STRENGTHS_I18N[lang]?.[resultPersonaId] ?? STRENGTHS_I18N.EN.explorer;
+  const growth    = GROWTH_I18N[lang]?.[resultPersonaId]    ?? GROWTH_I18N.EN.explorer;
 
   const handlePrint = () => window.print();
+
+  // ── Updating overlay (shown while re-classifying) ──
+  const UpdatingBadge = () => (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold mb-6 self-center"
+    >
+      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+      {t.reClassifyingLabel ?? 'Updating content…'}
+    </motion.div>
+  );
 
   return (
     <>
@@ -107,14 +154,24 @@ export default function ReportScreen({
           </button>
         </motion.div>
 
+        {/* Updating badge */}
+        {isReClassifying && <UpdatingBadge />}
+
         {/* Report card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="print-page rounded-3xl overflow-hidden border border-card-border"
+          className="print-page rounded-3xl overflow-hidden border border-card-border relative"
           style={{ background: 'var(--card)', boxShadow: '0 32px 80px rgba(0,0,0,0.4)' }}
         >
+          {/* Dimming overlay while re-classifying */}
+          {isReClassifying && (
+            <div className="absolute inset-0 z-10 bg-background/40 backdrop-blur-[2px] flex items-center justify-center rounded-3xl pointer-events-none">
+              <Loader2 className="w-8 h-8 animate-spin text-primary opacity-60" />
+            </div>
+          )}
+
           {/* Header band */}
           <div
             className="px-10 py-8 flex items-start justify-between"
@@ -268,9 +325,6 @@ export default function ReportScreen({
                     </div>
                   ))}
                 </div>
-                {lang !== 'EN' && (
-                  <p className="mt-2 text-xs text-muted-foreground/40 italic">{t.resultsAiContentNote}</p>
-                )}
               </div>
             )}
 
@@ -286,7 +340,7 @@ export default function ReportScreen({
           </div>
         </motion.div>
 
-        {/* Print button — bottom, hidden on print */}
+        {/* Download button — bottom, hidden on print */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

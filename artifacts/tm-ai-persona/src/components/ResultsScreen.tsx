@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { RefreshCw, ChevronRight, Bot, BarChart2, AlertCircle, FileText } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { RefreshCw, ChevronRight, Bot, BarChart2, AlertCircle, FileText, Loader2 } from 'lucide-react';
 import { personas } from '../data/personas';
 import type { AIResult } from '../App';
 import type { Lang } from '../i18n';
@@ -10,6 +10,7 @@ export default function ResultsScreen({
   resultPersonaId,
   aiResult,
   aiError,
+  isReClassifying,
   onRetake,
   onHRView,
   onReport,
@@ -18,6 +19,7 @@ export default function ResultsScreen({
   resultPersonaId: string;
   aiResult: AIResult | null;
   aiError: string | null;
+  isReClassifying: boolean;
   onRetake: () => void;
   onHRView: () => void;
   onReport: () => void;
@@ -31,6 +33,22 @@ export default function ResultsScreen({
 
   return (
     <div className="w-full max-w-5xl px-6 py-12 flex flex-col items-center">
+
+      {/* Re-classifying indicator */}
+      <AnimatePresence>
+        {isReClassifying && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold mb-4"
+          >
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            {t.reClassifyingLabel ?? 'Updating content…'}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Classification badge */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -165,10 +183,6 @@ export default function ResultsScreen({
               </motion.div>
             ))}
           </div>
-          {/* AI content language note */}
-          {lang !== 'EN' && (
-            <p className="mt-3 text-xs text-muted-foreground/50 italic">{t.resultsAiContentNote}</p>
-          )}
         </motion.div>
       )}
 
