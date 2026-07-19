@@ -106,29 +106,65 @@ export default function ReportScreen({
   const handleDownloadPDF = async () => {
     if (!reportRef.current || isDownloading) return;
     setIsDownloading(true);
+
+    // Inline all CSS-variable-based colours so html2canvas can read them
+    const resolveVars = (el: HTMLElement) => {
+      const cs = window.getComputedStyle(el);
+      const bg = cs.backgroundColor;
+      const col = cs.color;
+      if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') el.style.backgroundColor = bg;
+      if (col) el.style.color = col;
+      for (const child of Array.from(el.children)) resolveVars(child as HTMLElement);
+    };
+
     try {
       const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
         import('html2canvas'),
         import('jspdf'),
       ]);
 
-      const canvas = await html2canvas(reportRef.current, {
+      const node = reportRef.current;
+
+      // Temporarily resolve CSS variables into computed values
+      const savedStyles: { el: HTMLElement; bg: string; color: string }[] = [];
+      const snapshot = (el: HTMLElement) => {
+        savedStyles.push({ el, bg: el.style.backgroundColor, color: el.style.color });
+        resolveVars(el);
+      };
+      snapshot(node);
+
+      const canvas = await html2canvas(node, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#0a0f1e',
+        allowTaint: true,
+        backgroundColor: '#0d1117',
         logging: false,
+        // Capture the full scrollable height even if part is off-screen
+        width: node.scrollWidth,
+        height: node.scrollHeight,
+        windowWidth: node.scrollWidth,
+        windowHeight: node.scrollHeight,
+        // Skip the re-classifying dimming overlay — it has backdrop-filter which html2canvas can't render
+        ignoreElements: (el) => el.classList.contains('backdrop-blur-\\[2px\\]') || (el as HTMLElement).style.backdropFilter !== '',
       });
+
+      // Restore original inline styles
+      for (const { el, bg, color } of savedStyles) {
+        el.style.backgroundColor = bg;
+        el.style.color = color;
+      }
 
       const imgW = 210; // A4 width mm
       const imgH = (canvas.height * imgW) / canvas.width;
-      const pdf = new jsPDF({ orientation: imgH > imgW ? 'portrait' : 'landscape', unit: 'mm', format: 'a4' });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pageH = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL('image/jpeg', 0.93);
 
-      // Slice canvas across multiple pages if the report is taller than one A4
+      // Slice canvas across pages
       let yOffset = 0;
       while (yOffset < imgH) {
         if (yOffset > 0) pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, -yOffset, imgW, imgH);
+        pdf.addImage(imgData, 'JPEG', 0, -yOffset, imgW, imgH);
         yOffset += pageH;
       }
 
@@ -136,6 +172,8 @@ export default function ReportScreen({
       pdf.save(`AiNspire_Report_${safeName}.pdf`);
     } catch (err) {
       console.error('PDF generation failed:', err);
+      // Surface error so the user knows something went wrong
+      alert(`PDF download failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setIsDownloading(false);
     }
