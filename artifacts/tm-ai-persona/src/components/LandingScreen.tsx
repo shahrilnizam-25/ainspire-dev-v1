@@ -195,10 +195,13 @@ export default function LandingScreen({
             }}
           >
             <span className="text-white">{t.headline1} </span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary"
-              style={{
-                /* text-shadow doesn't apply to gradient clip text; use filter instead */
-                filter: 'drop-shadow(2px 3px 10px rgba(0,0,0,0.80))',
+            <span style={{
+                color: '#FFFFFF',
+                /* Layered glow: tight bright cyan core → wide soft halo → hard dark base */
+                filter:
+                  'drop-shadow(0 0 8px rgba(0,230,255,1)) ' +
+                  'drop-shadow(0 0 24px rgba(0,210,255,0.75)) ' +
+                  'drop-shadow(2px 4px 10px rgba(0,0,0,1))',
               }}
             >
               {t.headlineAccent}
