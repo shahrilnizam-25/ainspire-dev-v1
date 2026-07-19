@@ -5,14 +5,14 @@ import { translations, type Lang } from '../i18n';
 
 /* ─── Floating badge definitions ─────────────────────────────────────────── */
 const LEFT_BADGES = [
-  { icon: Brain,      label: 'AI Insights',        top: '22%', delay: 0.6 },
-  { icon: UserCircle, label: 'Employee Profile',    top: '50%', delay: 0.75 },
-  { icon: BarChart3,  label: 'Workforce Analytics', top: '74%', delay: 0.9 },
+  { icon: Brain,      label: 'AI Insights',        top: '52%', delay: 0.6 },
+  { icon: UserCircle, label: 'Employee Profile',    top: '68%', delay: 0.75 },
+  { icon: BarChart3,  label: 'Workforce Analytics', top: '84%', delay: 0.9 },
 ];
 const RIGHT_BADGES = [
-  { icon: GraduationCap, label: 'Learning Paths', top: '22%', delay: 0.65 },
-  { icon: Target,        label: 'AI Goals',       top: '50%', delay: 0.80 },
-  { icon: LineChart,     label: 'Career Growth',  top: '74%', delay: 0.95 },
+  { icon: GraduationCap, label: 'Learning Paths', top: '52%', delay: 0.65 },
+  { icon: Target,        label: 'AI Goals',       top: '68%', delay: 0.80 },
+  { icon: LineChart,     label: 'Career Growth',  top: '84%', delay: 0.95 },
 ];
 
 /* ─── Trust badge definitions ─────────────────────────────────────────────── */
@@ -43,154 +43,147 @@ export default function LandingScreen({
   ];
 
   return (
-    <div className="w-full max-w-5xl px-6 py-8 flex flex-col items-center text-center relative">
+    <div className="w-full max-w-5xl flex flex-col items-center text-center relative">
 
-      {/* ══════════════════════════════════════════════
-          PLATFORM PILL — top centre
-      ══════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════
+          UNIFIED HERO SECTION — text + illustration as one seamless block.
+          The hero image is the BACKGROUND; text floats on the upper half.
+      ══════════════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.0 }}
-        className="mb-5"
-      >
-        <div
-          className="inline-flex items-center px-5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest"
-          style={{
-            background: 'rgba(8,16,40,0.80)',
-            border: '1px solid rgba(0,212,255,0.25)',
-            color: 'rgba(255,255,255,0.55)',
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 0 16px rgba(0,212,255,0.08)',
-          }}
-        >
-          {t.platformLabel}
-        </div>
-      </motion.div>
-
-      {/* ══════════════════════════════════════════════
-          HEADER — TM logo + AiNspire pill
-      ══════════════════════════════════════════════ */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.08 }}
-        className="mb-4 flex items-center gap-3"
-      >
-        {/* TM logo — original brand colours */}
-        <img
-          src="/tm-logo-official.png"
-          alt="Telekom Malaysia"
-          className="w-auto object-contain"
-          style={{ height: 'clamp(2.4rem, 4.5vw, 3.2rem)' }}
-        />
-
-        {/* AiNspire glassy pill */}
-        <div className="relative">
-          <div
-            className="absolute inset-0 rounded-full blur-xl"
-            style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,255,0.18) 0%, rgba(139,92,246,0.12) 60%, transparent 100%)' }}
-          />
-          <div
-            className="relative flex items-center select-none px-5 py-2 rounded-full"
-            style={{
-              background: 'linear-gradient(135deg, rgba(0,20,40,0.75) 0%, rgba(10,5,30,0.82) 100%)',
-              border: '1.5px solid rgba(0,212,255,0.38)',
-              boxShadow: '0 0 24px rgba(0,212,255,0.14), 0 0 40px rgba(139,92,246,0.10), inset 0 1px 0 rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            <span
-              className="font-black tracking-tight leading-none"
-              style={{
-                fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
-                background: 'linear-gradient(135deg, #a5f3fc 0%, #22d3ee 40%, #00b4d8 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Ai
-            </span>
-            <span
-              className="font-black tracking-tight leading-none"
-              style={{
-                fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
-                background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 40%, #8b5cf6 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 10px rgba(167,139,250,0.60))',
-              }}
-            >
-              Nspire
-            </span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ══════════════════════════════════════════════
-          HEADLINE
-      ══════════════════════════════════════════════ */}
-      <motion.h1
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.16 }}
-        className="text-5xl md:text-7xl font-black tracking-tight mb-3 leading-[1.05]"
-      >
-        <span className="text-white">{t.headline1} </span>
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.5)]">
-          {t.headlineAccent}
-        </span>
-        <br />
-        <span className="text-white/80 text-4xl md:text-5xl font-bold">{t.headline2}</span>
-      </motion.h1>
-
-      {/* Description */}
-      <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.26 }}
-        className="text-base md:text-lg text-muted-foreground mb-6 whitespace-nowrap"
+        transition={{ duration: 0.8 }}
+        className="relative w-full overflow-hidden"
+        style={{ minHeight: '620px' }}
       >
-        {t.description}{' '}
-        <span className="text-foreground font-semibold">{t.descriptionBold}</span>
-      </motion.p>
-
-      {/* ══════════════════════════════════════════════
-          CINEMATIC HERO — seamless bleed, no frame
-      ══════════════════════════════════════════════ */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.0, delay: 0.32 }}
-        className="relative w-full mb-0"
-        style={{ aspectRatio: '16/7' }}
-      >
-        {/* Hero image */}
+        {/* ── Hero image as background ── */}
         <img
           src="/hero-v2.jpg"
           alt="AI future portal"
-          className="w-full h-full object-cover"
-          style={{ objectPosition: 'center center' }}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: 'center bottom' }}
         />
 
-        {/* Top fade — blends into page background */}
+        {/* ── Top gradient: fully opaque at top → transparent at middle
+               This seamlessly hides the dark sky and lets the illustration bloom ── */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to bottom, rgba(3,7,18,0.60) 0%, transparent 22%, transparent 68%, rgba(3,7,18,0.72) 100%)',
+              'linear-gradient(to bottom, rgba(3,7,18,1) 0%, rgba(3,7,18,0.96) 20%, rgba(3,7,18,0.55) 38%, rgba(3,7,18,0.10) 52%, transparent 62%, transparent 74%, rgba(3,7,18,0.85) 100%)',
           }}
         />
-        {/* Side fades */}
+        {/* ── Side fades ── */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, rgba(3,7,18,0.60) 0%, transparent 16%, transparent 84%, rgba(3,7,18,0.60) 100%)',
+              'linear-gradient(to right, rgba(3,7,18,0.65) 0%, transparent 18%, transparent 82%, rgba(3,7,18,0.65) 100%)',
           }}
         />
+
+        {/* ── Text content — floats over the image ── */}
+        <div className="relative z-10 w-full flex flex-col items-center text-center px-6 pt-8">
+
+          {/* Platform pill */}
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.0 }}
+            className="mb-5"
+          >
+            <div
+              className="inline-flex items-center px-5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest"
+              style={{
+                background: 'rgba(8,16,40,0.80)',
+                border: '1px solid rgba(0,212,255,0.25)',
+                color: 'rgba(255,255,255,0.55)',
+                backdropFilter: 'blur(8px)',
+                boxShadow: '0 0 16px rgba(0,212,255,0.08)',
+              }}
+            >
+              {t.platformLabel}
+            </div>
+          </motion.div>
+
+          {/* TM logo + AiNspire pill */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.08 }}
+            className="mb-4 flex items-center gap-3"
+          >
+            <img
+              src="/tm-logo-official.png"
+              alt="Telekom Malaysia"
+              className="w-auto object-contain"
+              style={{ height: 'clamp(2.4rem, 4.5vw, 3.2rem)' }}
+            />
+            <div className="relative">
+              <div
+                className="absolute inset-0 rounded-full blur-xl"
+                style={{ background: 'radial-gradient(ellipse at center, rgba(0,180,255,0.18) 0%, rgba(139,92,246,0.12) 60%, transparent 100%)' }}
+              />
+              <div
+                className="relative flex items-center select-none px-5 py-2 rounded-full"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(0,20,40,0.75) 0%, rgba(10,5,30,0.82) 100%)',
+                  border: '1.5px solid rgba(0,212,255,0.38)',
+                  boxShadow: '0 0 24px rgba(0,212,255,0.14), 0 0 40px rgba(139,92,246,0.10), inset 0 1px 0 rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(10px)',
+                }}
+              >
+                <span
+                  className="font-black tracking-tight leading-none"
+                  style={{
+                    fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                    background: 'linear-gradient(135deg, #a5f3fc 0%, #22d3ee 40%, #00b4d8 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >Ai</span>
+                <span
+                  className="font-black tracking-tight leading-none"
+                  style={{
+                    fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                    background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 40%, #8b5cf6 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    filter: 'drop-shadow(0 0 10px rgba(167,139,250,0.60))',
+                  }}
+                >Nspire</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.16 }}
+            className="text-5xl md:text-7xl font-black tracking-tight mb-3 leading-[1.05]"
+          >
+            <span className="text-white">{t.headline1} </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.5)]">
+              {t.headlineAccent}
+            </span>
+            <br />
+            <span className="text-white/80 text-4xl md:text-5xl font-bold">{t.headline2}</span>
+          </motion.h1>
+
+          {/* Description */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.26 }}
+            className="text-base md:text-lg text-muted-foreground whitespace-nowrap"
+          >
+            {t.description}{' '}
+            <span className="text-foreground font-semibold">{t.descriptionBold}</span>
+          </motion.p>
+        </div>
 
         {/* ── LEFT floating badges — cyan/blue ── */}
         {LEFT_BADGES.map((b) => {
@@ -201,7 +194,7 @@ export default function LandingScreen({
               initial={{ opacity: 0, x: -24 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: b.delay }}
-              className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none"
+              className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none z-10"
               style={{
                 top: b.top,
                 left: '2%',
@@ -231,7 +224,7 @@ export default function LandingScreen({
               initial={{ opacity: 0, x: 24 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: b.delay }}
-              className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none"
+              className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none z-10"
               style={{
                 top: b.top,
                 right: '2%',
@@ -255,18 +248,16 @@ export default function LandingScreen({
 
       {/* ══════════════════════════════════════════════
           FEATURE CARDS — unified glassmorphism panel
-          with vertical dividers (matches snapshot)
       ══════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.55 }}
-        className="w-full mb-8 overflow-hidden"
+        className="w-full overflow-hidden"
         style={{
           background: 'rgba(6,12,30,0.82)',
           border: '1px solid rgba(0,212,255,0.14)',
           borderTop: 'none',
-          borderRadius: '0 0 1.25rem 1.25rem',
           backdropFilter: 'blur(14px)',
           boxShadow: '0 8px 40px rgba(0,0,0,0.45)',
         }}
@@ -282,7 +273,6 @@ export default function LandingScreen({
                 transition={{ delay: 0.60 + i * 0.08 }}
                 className="flex items-start gap-4 p-5 text-left"
               >
-                {/* Icon box */}
                 <div
                   className="flex-shrink-0 p-2.5 rounded-xl mt-0.5"
                   style={{
@@ -293,8 +283,6 @@ export default function LandingScreen({
                 >
                   <Icon className="w-5 h-5 text-cyan-400" />
                 </div>
-
-                {/* Text */}
                 <div>
                   <div className="font-bold text-sm text-white mb-1">{f.label}</div>
                   <div className="text-xs text-white/45 leading-relaxed">{f.desc}</div>
@@ -312,7 +300,7 @@ export default function LandingScreen({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.72 }}
-        className="flex flex-col items-center gap-4 w-full mb-10"
+        className="flex flex-col items-center gap-4 w-full mb-10 mt-8 px-6"
       >
         <motion.button
           onClick={onStart}
@@ -362,7 +350,7 @@ export default function LandingScreen({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.88 }}
-        className="w-full flex flex-wrap justify-center gap-8 pt-6 border-t border-white/8"
+        className="w-full flex flex-wrap justify-center gap-8 pt-6 pb-10 border-t border-white/8 px-6"
       >
         {TRUST_BADGES.map((b, i) => {
           const Icon = b.icon;
@@ -386,7 +374,7 @@ export default function LandingScreen({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.1 }}
-        className="mt-8 text-xs text-muted-foreground/50 font-mono"
+        className="mb-8 text-xs text-muted-foreground/50 font-mono"
       >
         {t.poweredBy}
       </motion.div>
