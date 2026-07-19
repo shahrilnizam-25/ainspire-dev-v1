@@ -115,42 +115,25 @@ export default function ReportScreen({
 
       const node = reportRef.current;
 
-      // Temporarily force explicit hex backgrounds on elements that use CSS variables,
-      // because getComputedStyle returns oklab() in Chrome 111+ which html2canvas can't parse.
-      // We write hex directly so we bypass the colour-parsing pipeline entirely.
-      const overrides: { el: HTMLElement; prev: string }[] = [];
-      const forceHex = (el: HTMLElement) => {
-        const s = el.style;
-        // Only override if the inline style references a CSS variable
-        if (s.background.includes('var(') || s.backgroundColor.includes('var(')) {
-          overrides.push({ el, prev: s.background });
-          s.background = '#0d1117';
-        }
-        if (s.borderColor.includes('var(')) {
-          s.borderColor = 'rgba(255,255,255,0.08)';
-        }
-        for (const child of Array.from(el.children)) forceHex(child as HTMLElement);
-      };
-      forceHex(node);
-
+      // foreignObjectRendering delegates all CSS painting to the browser, so
+      // Chrome's oklab() / oklch() colors are handled natively and never hit
+      // html2canvas's own colour parser (which doesn't support them).
       const canvas = await html2canvas(node, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
+        foreignObjectRendering: true,
         backgroundColor: '#0d1117',
         logging: false,
         width:        node.scrollWidth,
         height:       node.scrollHeight,
         windowWidth:  node.scrollWidth,
         windowHeight: node.scrollHeight,
-        // Skip any element using backdrop-filter (the re-classifying overlay)
+        // Skip any element with backdrop-filter (the re-classifying overlay)
         ignoreElements: (el) =>
           !!(el as HTMLElement).style?.backdropFilter ||
           el.classList.contains('backdrop-blur-\\[2px\\]'),
       });
-
-      // Restore overridden inline styles
-      for (const { el, prev } of overrides) el.style.background = prev;
 
       const imgW  = 210; // A4 width mm
       const imgH  = (canvas.height * imgW) / canvas.width;
