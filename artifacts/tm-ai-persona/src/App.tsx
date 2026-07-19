@@ -74,14 +74,25 @@ export default function App() {
     return res.json() as Promise<AIResult>;
   }, []);
 
-  // Re-classify in the background whenever language changes on results/report screens
+  // Re-classify whenever language changes on results/report screens
   useEffect(() => {
     if (screen !== 'results' && screen !== 'report') return;
     if (!lastAnswers) return;
-    if (aiResultCache[lang]) return;              // already cached for this lang
-    if (fetchingForLang.current === lang) return; // request already in-flight
+
+    // Cache hit — stop any pending spinner immediately and do nothing else
+    if (aiResultCache[lang]) {
+      setIsReClassifying(false);
+      return;
+    }
+
+    // Another effect cycle is already fetching this language — wait for it
+    if (fetchingForLang.current === lang) return;
 
     let cancelled = false;
+    const controller = new AbortController();
+    // 45-second hard timeout so the spinner never hangs indefinitely
+    const timeoutId = setTimeout(() => controller.abort(), 45_000);
+
     fetchingForLang.current = lang;
     setIsReClassifying(true);
 
@@ -95,11 +106,19 @@ export default function App() {
         if (!cancelled) console.error('Re-classification error:', err);
       })
       .finally(() => {
+        clearTimeout(timeoutId);
         fetchingForLang.current = null;
         if (!cancelled) setIsReClassifying(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+      controller.abort();
+      // If we cancel mid-flight (e.g. user switches lang again), clear the spinner
+      // so the next effect run can reset it cleanly via the cache-hit branch above.
+      setIsReClassifying(false);
+    };
   // aiResultCache intentionally omitted — we check it at call time, not as a dep
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, screen, lastAnswers, runClassify]);
@@ -159,16 +178,6 @@ export default function App() {
       setAiResultCache({ [lang]: data });
       setClassifiedPersonaId(data.persona);
       setScreen('results');
-
-      // Pre-fetch the other two languages in the background so switching is instant
-      const otherLangs = LANGS.filter(l => l !== lang);
-      otherLangs.forEach(targetLang => {
-        runClassify(answers, targetLang)
-          .then(result => {
-            setAiResultCache(prev => ({ ...prev, [targetLang]: result }));
-          })
-          .catch(err => console.warn(`Pre-fetch ${targetLang} failed:`, err));
-      });
     } catch (err) {
       console.error('Classification error:', err);
       setAiError(String(err));
