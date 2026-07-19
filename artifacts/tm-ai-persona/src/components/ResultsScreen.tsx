@@ -31,6 +31,29 @@ export default function ResultsScreen({
   const Icon = result.icon;
   const confidence = aiResult ? Math.round(aiResult.confidence * 100) : null;
 
+  // Localised persona text (falls back to English from personas.ts if key missing)
+  const personaNameMap: Record<string, string> = {
+    explorer:   t.personaExplorer,
+    builder:    t.personaBuilder,
+    strategist: t.personaStrategist,
+    visionary:  t.personaVisionary,
+  };
+  const personaTaglineMap: Record<string, string> = {
+    explorer:   t.personaTaglineExplorer,
+    builder:    t.personaTaglineBuilder,
+    strategist: t.personaTaglineStrategist,
+    visionary:  t.personaTaglineVisionary,
+  };
+  const personaDescMap: Record<string, string> = {
+    explorer:   t.personaDescExplorer,
+    builder:    t.personaDescBuilder,
+    strategist: t.personaDescStrategist,
+    visionary:  t.personaDescVisionary,
+  };
+  const localName    = personaNameMap[resultPersonaId]    ?? result.name;
+  const localTagline = personaTaglineMap[resultPersonaId] ?? result.tagline;
+  const localDesc    = personaDescMap[resultPersonaId]    ?? result.description;
+
   return (
     <div className="w-full max-w-5xl px-6 py-12 flex flex-col items-center">
 
@@ -113,7 +136,7 @@ export default function ResultsScreen({
           className="text-6xl md:text-8xl font-black mb-6 drop-shadow-2xl"
           style={{ color: result.color, textShadow: `0 0 30px ${result.color}50` }}
         >
-          {result.name}
+          {localName}
         </motion.h1>
 
         <motion.p
@@ -122,7 +145,7 @@ export default function ResultsScreen({
           transition={{ delay: 0.5 }}
           className="text-2xl md:text-3xl font-medium italic text-white/90 mb-8"
         >
-          "{result.tagline}"
+          "{localTagline}"
         </motion.p>
 
         {/* AI narrative or static description */}
@@ -132,7 +155,7 @@ export default function ResultsScreen({
           transition={{ delay: 0.6 }}
           className="text-lg md:text-xl text-muted-foreground leading-relaxed"
         >
-          {aiResult?.narrative ?? result.description}
+          {aiResult?.narrative ?? localDesc}
         </motion.p>
       </motion.div>
 
@@ -213,7 +236,7 @@ export default function ResultsScreen({
                 />
               )}
               <PIcon className="w-10 h-10 mb-4" style={{ color: p.color }} />
-              <div className="font-bold text-base mb-1 text-foreground">{p.name}</div>
+              <div className="font-bold text-base mb-1 text-foreground">{personaNameMap[p.id] ?? p.name}</div>
               {isResult && (
                 <div
                   className="mt-3 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-background border"

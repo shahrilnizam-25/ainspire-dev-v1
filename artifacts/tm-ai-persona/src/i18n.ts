@@ -247,7 +247,7 @@ export const translations = {
     resultsLearningPath: 'Your AI Learning Path',
     resultsYouBadge:     'You',
     resultsAiContentNote: '* AI-generated content is in English',
-    reClassifyingLabel:  'Updating content in English…',
+    reClassifyingLabel:  'Updating content…',
     resultsRetake:       'Retake Assessment',
     resultsDownloadReport: 'Download My Report',
     resultsHRView:       'HR Manager View',
@@ -323,6 +323,34 @@ export const translations = {
     personaBuilder:   'The AI Builder',
     personaStrategist:'The AI Strategist',
     personaVisionary: 'The AI Visionary',
+
+    // Persona taglines
+    personaTaglineExplorer:  'Curious. Adventurous. Always discovering.',
+    personaTaglineBuilder:   'Technical. Hands-on. Building tomorrow.',
+    personaTaglineStrategist:'Analytical. Decisive. Driving outcomes.',
+    personaTaglineVisionary: 'Bold. Transformative. Shaping the future.',
+
+    // Persona descriptions
+    personaDescExplorer:  "You approach AI with an open mind and a sense of wonder. You're the first to try new tools and share discoveries with your team. Your curiosity drives innovation — keep exploring, the next breakthrough might be yours.",
+    personaDescBuilder:   "You don't just use AI — you create with it. Whether writing code, designing models, or integrating AI into systems, you turn ideas into reality. TM's AI future runs on builders like you.",
+    personaDescStrategist:"You see AI as a powerful lever for business transformation. You connect technology to strategy, align teams, and ensure AI investments deliver real results. You're the bridge between vision and execution.",
+    personaDescVisionary: "You see what others don't yet see. You champion AI not just as a tool but as a force that will redefine Telekom Malaysia's role in the digital economy. Leaders like you make transformation possible.",
+
+    // HR AI Insights (per dominant persona)
+    hrInsightExplorer:   'Explorer-dominant teams are curiosity-driven and ready to experiment. The highest-leverage next action is a structured AI Sandbox Programme where employees safely trial tools with curated challenges — typically accelerating progression to Builder/Strategist roles within 6–9 months.',
+    hrInsightBuilder:    'Builder-heavy teams are ready to develop internal AI solutions. Invest in an AI Engineering Guild paired with internal LLM bootcamps. Establish inner-source AI modules that Builders can share across business units.',
+    hrInsightStrategist: 'Strong strategic AI thinking is present. Focus on AI ROI Frameworks, governance training, and cross-functional steering committees. Strategists are your best accelerators for executive buy-in.',
+    hrInsightVisionary:  'Exceptional high-potential AI champions are present. Channel them into a TM AI Council to drive top-down transformation. Visionaries paired with Builders create the most impactful AI initiatives.',
+
+    // Report localised strings
+    reportAssessmentDate: 'Assessment Date',
+    reportTMEmployee:     'Telekom Malaysia Employee',
+    reportPoweredByLabel: 'Powered by Claude AI',
+    reportFallbackNarrative: 'You demonstrate strong characteristics in your approach to AI adoption and strategy at Telekom Malaysia.',
+    reportFallbackReasoning: 'Your responses reflect a consistent pattern aligned with this persona profile across all assessment dimensions.',
+
+    // HR "you" label
+    hrYouLabel: '(you)',
 
     // Overview tab
     hrKpi1Label:      'Completion Rate',
@@ -536,6 +564,34 @@ export const translations = {
     personaStrategist:'Ahli Strategi AI',
     personaVisionary: 'Visioner AI',
 
+    // Persona taglines
+    personaTaglineExplorer:  'Ingin tahu. Berani. Sentiasa menemui.',
+    personaTaglineBuilder:   'Teknikal. Praktikal. Membina masa depan.',
+    personaTaglineStrategist:'Analitikal. Tegas. Mendorong keputusan.',
+    personaTaglineVisionary: 'Berani. Transformatif. Membentuk masa hadapan.',
+
+    // Persona descriptions
+    personaDescExplorer:  'Anda mendekati AI dengan minda terbuka dan rasa kagum. Anda adalah yang pertama mencuba alat baharu dan berkongsi penemuan dengan pasukan anda. Keingintahuan anda mendorong inovasi — terus meneroka, terobosan seterusnya mungkin milik anda.',
+    personaDescBuilder:   'Anda bukan sekadar menggunakan AI — anda mencipta dengannya. Sama ada menulis kod, mereka bentuk model, atau mengintegrasikan AI ke dalam sistem, anda mengubah idea menjadi realiti. Masa depan AI TM bergantung kepada pembina seperti anda.',
+    personaDescStrategist:'Anda melihat AI sebagai tuas yang berkuasa untuk transformasi perniagaan. Anda menghubungkan teknologi dengan strategi, menyelaraskan pasukan, dan memastikan pelaburan AI memberikan hasil nyata. Anda adalah jambatan antara visi dan pelaksanaan.',
+    personaDescVisionary: 'Anda melihat apa yang orang lain belum nampak. Anda memperjuangkan AI bukan sekadar sebagai alat tetapi sebagai kuasa yang akan mentakrifkan semula peranan Telekom Malaysia dalam ekonomi digital. Pemimpin seperti anda menjadikan transformasi mungkin.',
+
+    // HR AI Insights
+    hrInsightExplorer:   'Pasukan dominan-Penjelajah didorong oleh rasa ingin tahu dan bersedia bereksperimen. Tindakan leverage tertinggi adalah Program Kotak Pasir AI berstruktur di mana pekerja mencuba alat secara selamat dengan cabaran terpandu — biasanya mempercepatkan perkembangan ke peranan Pembina/Ahli Strategi dalam masa 6–9 bulan.',
+    hrInsightBuilder:    'Pasukan dominan-Pembina bersedia membangunkan penyelesaian AI dalaman. Laburkan dalam Persatuan Kejuruteraan AI bersama bootcamp LLM dalaman. Wujudkan modul AI sumber dalaman yang boleh dikongsi merentas unit perniagaan.',
+    hrInsightStrategist: 'Pemikiran AI strategik yang kukuh wujud. Fokus pada Rangka Kerja ROI AI, latihan tadbir urus, dan jawatankuasa pemandu merentas fungsi. Ahli Strategi adalah pemangkin terbaik untuk mendapat sokongan eksekutif.',
+    hrInsightVisionary:  'Pejuang AI berpotensi tinggi yang luar biasa ada. Salurkan mereka ke dalam Majlis AI TM untuk memacu transformasi dari atas ke bawah. Visioner yang dipasangkan dengan Pembina mencipta inisiatif AI yang paling berkesan.',
+
+    // Report localised strings
+    reportAssessmentDate: 'Tarikh Penilaian',
+    reportTMEmployee:     'Pekerja Telekom Malaysia',
+    reportPoweredByLabel: 'Dikuasakan oleh Claude AI',
+    reportFallbackNarrative: 'Anda menunjukkan ciri-ciri yang kukuh dalam pendekatan anda terhadap penggunaan dan strategi AI di Telekom Malaysia.',
+    reportFallbackReasoning: 'Respons anda mencerminkan corak yang konsisten selaras dengan profil persona ini merentas semua dimensi penilaian.',
+
+    // HR "you" label
+    hrYouLabel: '(anda)',
+
     // Overview tab
     hrKpi1Label:      'Kadar Penyiapan',
     hrKpi2Label:      'Skor Kesediaan Purata',
@@ -747,6 +803,34 @@ export const translations = {
     personaBuilder:   'AI 构建者',
     personaStrategist:'AI 策略家',
     personaVisionary: 'AI 远见者',
+
+    // Persona taglines
+    personaTaglineExplorer:  '好奇。冒险。永远在探索。',
+    personaTaglineBuilder:   '技术精湛。实践为先。构建明天。',
+    personaTaglineStrategist:'分析深刻。果断决策。驱动成果。',
+    personaTaglineVisionary: '大胆。变革。塑造未来。',
+
+    // Persona descriptions
+    personaDescExplorer:  '您以开放的心态和探索的精神对待AI。您是第一个尝试新工具并与团队分享发现的人。您的好奇心推动创新——继续探索，下一个突破可能属于您。',
+    personaDescBuilder:   '您不只是使用AI——您用它来创造。无论是编写代码、设计模型还是将AI集成到系统中，您将想法变为现实。TM的AI未来有赖于像您这样的构建者。',
+    personaDescStrategist:'您将AI视为业务转型的强大杠杆。您将技术与战略相连接，协调团队，确保AI投资产生真实成果。您是愿景与执行之间的桥梁。',
+    personaDescVisionary: '您看到别人尚未看到的东西。您倡导AI不仅仅是一个工具，而是将重新定义马来西亚电信在数字经济中角色的力量。像您这样的领导者使转型成为可能。',
+
+    // HR AI Insights
+    hrInsightExplorer:   '以探索者为主的团队由好奇心驱动，随时准备实验。最高效的下一步是结构化的AI沙盒计划，员工在精心设计的挑战中安全地试用工具——通常在6-9个月内加速晋升为构建者/策略家角色。',
+    hrInsightBuilder:    '以构建者为主的团队已准备好开发内部AI解决方案。投资于AI工程公会和内部LLM训练营。建立可在业务部门间共享的内部AI模块。',
+    hrInsightStrategist: '具备强大的战略AI思维。专注于AI ROI框架、治理培训和跨职能指导委员会。策略家是推动高管认同的最佳加速器。',
+    hrInsightVisionary:  '具备卓越的高潜力AI倡导者。将他们引入TM AI委员会，推动自上而下的转型。远见者与构建者搭档，创造最有影响力的AI举措。',
+
+    // Report localised strings
+    reportAssessmentDate: '评估日期',
+    reportTMEmployee:     '马来西亚电信员工',
+    reportPoweredByLabel: '由 Claude AI 驱动',
+    reportFallbackNarrative: '您在马来西亚电信的AI采用与战略方面展现出强大的特质。',
+    reportFallbackReasoning: '您的回答在所有评估维度中均呈现出与此人设档案一致的规律。',
+
+    // HR "you" label
+    hrYouLabel: '（您）',
 
     // Overview tab
     hrKpi1Label:      '完成率',

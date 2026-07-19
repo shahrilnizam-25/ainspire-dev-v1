@@ -31,12 +31,7 @@ type Member = {
   score: number | null; trend: string | null; status: 'complete' | 'pending';
 };
 
-const AI_INSIGHTS: Record<string, string> = {
-  explorer:   'Explorer-dominant teams are curiosity-driven and ready to experiment. The highest-leverage next action is a structured AI Sandbox Programme where employees safely trial tools with curated challenges — typically accelerating progression to Builder/Strategist roles within 6–9 months.',
-  builder:    'Builder-heavy teams are ready to develop internal AI solutions. Invest in an AI Engineering Guild paired with internal LLM bootcamps. Establish inner-source AI modules that Builders can share across business units.',
-  strategist: 'Strong strategic AI thinking is present. Focus on AI ROI Frameworks, governance training, and cross-functional steering committees. Strategists are your best accelerators for executive buy-in.',
-  visionary:  'Exceptional high-potential AI champions are present. Channel them into a TM AI Council to drive top-down transformation. Visionaries paired with Builders create the most impactful AI initiatives.',
-};
+// AI_INSIGHTS are now sourced from i18n via t.hrInsight* keys — see OverviewTab
 
 // ── Helpers ──────────────────────────────────────────────────────────
 type FilterPersona = 'all' | 'explorer' | 'builder' | 'strategist' | 'visionary';
@@ -188,7 +183,7 @@ function OverviewTab({ t, allMembers, completed, pending, avgScore, dominant, do
                             style={{ background: m.status === 'complete' ? `${pColor}18` : 'rgba(255,255,255,0.06)', color: m.status === 'complete' ? pColor : 'rgba(255,255,255,0.3)' }}>
                             {m.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
-                          <span className="font-semibold text-foreground">{m.name}{isYou && <span className="ml-1.5 text-xs font-bold text-primary/80">(you)</span>}</span>
+                          <span className="font-semibold text-foreground">{m.name}{isYou && <span className="ml-1.5 text-xs font-bold text-primary/80">{t.hrYouLabel}</span>}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{m.role}</td>
@@ -224,7 +219,8 @@ function OverviewTab({ t, allMembers, completed, pending, avgScore, dominant, do
         </div>
         <p className="text-foreground leading-relaxed mb-4">
           <strong style={{ color: dominantP?.color }}>{pName(dominant, t)}s ({counts[dominant] ?? 0}/{completed.length} · {Math.round(((counts[dominant] ?? 0) / completed.length) * 100)}%)</strong>{' '}
-          {t.hrDominantSuffix} {AI_INSIGHTS[dominant]}
+          {t.hrDominantSuffix}{' '}
+          {({ explorer: t.hrInsightExplorer, builder: t.hrInsightBuilder, strategist: t.hrInsightStrategist, visionary: t.hrInsightVisionary } as Record<string,string>)[dominant] ?? ''}
         </p>
         {aiResult?.recommendations && aiResult.recommendations.length > 0 && (
           <div className="border-t border-primary/10 pt-4">

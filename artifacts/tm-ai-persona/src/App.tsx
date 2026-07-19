@@ -159,6 +159,16 @@ export default function App() {
       setAiResultCache({ [lang]: data });
       setClassifiedPersonaId(data.persona);
       setScreen('results');
+
+      // Pre-fetch the other two languages in the background so switching is instant
+      const otherLangs = LANGS.filter(l => l !== lang);
+      otherLangs.forEach(targetLang => {
+        runClassify(answers, targetLang)
+          .then(result => {
+            setAiResultCache(prev => ({ ...prev, [targetLang]: result }));
+          })
+          .catch(err => console.warn(`Pre-fetch ${targetLang} failed:`, err));
+      });
     } catch (err) {
       console.error('Classification error:', err);
       setAiError(String(err));

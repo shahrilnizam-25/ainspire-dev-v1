@@ -191,11 +191,11 @@ export default function ReportScreen({
               </div>
               <div className="text-2xl font-black text-white mb-1">{t.reportTitle}</div>
               <div className="text-sm font-medium mb-1" style={{ color: `${persona.color}cc` }}>
-                {userRole || 'Telekom Malaysia Employee'}
+                {userRole || t.reportTMEmployee}
               </div>
               <div className="text-xs text-white/40">
-                Assessment Date: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-                {' · '}Powered by Claude AI
+                {t.reportAssessmentDate}: {new Date().toLocaleDateString(lang === 'CN' ? 'zh-CN' : lang === 'BM' ? 'ms-MY' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                {' · '}{t.reportPoweredByLabel}
               </div>
             </div>
 
@@ -253,7 +253,7 @@ export default function ReportScreen({
                   <span className="text-xs font-bold uppercase tracking-widest" style={{ color: persona.color }}>{t.reportNarrativeLabel}</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {aiResult?.narrative ?? `You demonstrate strong ${persona.name.toLowerCase()} characteristics in your approach to AI adoption and strategy.`}
+                  {aiResult?.narrative ?? t.reportFallbackNarrative}
                 </p>
               </div>
 
@@ -263,7 +263,7 @@ export default function ReportScreen({
                   <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.reportReasoningLabel}</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {aiResult?.reasoning ?? `Your responses reflect a consistent pattern aligned with the ${persona.name} profile across all assessment dimensions.`}
+                  {aiResult?.reasoning ?? t.reportFallbackReasoning}
                 </p>
               </div>
             </div>
