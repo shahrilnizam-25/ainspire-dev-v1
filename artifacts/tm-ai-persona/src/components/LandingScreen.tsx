@@ -1,21 +1,9 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Brain, BarChart3, Route, TrendingUp, Mail,
-         GraduationCap, Target, Shield, Users, Lock, LineChart, UserCircle } from 'lucide-react';
+         Shield, Users, Lock, LineChart } from 'lucide-react';
 import { translations, type Lang } from '../i18n';
 
-/* ─── Floating badge definitions ─────────────────────────────────────────── */
-const LEFT_BADGES = [
-  { icon: Brain,      label: 'AI Insights',        top: '54%', delay: 0.60 },
-  { icon: UserCircle, label: 'Employee Profile',    top: '69%', delay: 0.75 },
-  { icon: BarChart3,  label: 'Workforce Analytics', top: '84%', delay: 0.90 },
-];
-const RIGHT_BADGES = [
-  { icon: GraduationCap, label: 'Learning Paths', top: '54%', delay: 0.65 },
-  { icon: Target,        label: 'AI Goals',       top: '69%', delay: 0.80 },
-  { icon: LineChart,     label: 'Career Growth',  top: '84%', delay: 0.95 },
-];
-
-/* ─── Trust badge definitions ─────────────────────────────────────────────── */
+/* ─── Trust badges ─────────────────────────────────────────────────────────── */
 const TRUST_BADGES = [
   { icon: Shield,    label: 'AI-Driven' },
   { icon: Users,     label: 'Employee-Centric' },
@@ -43,48 +31,68 @@ export default function LandingScreen({
   ];
 
   return (
-    <div className="w-full max-w-5xl flex flex-col items-center text-center relative">
+    /* Page wrapper — same base colour the hero fades into, zero seam */
+    <div
+      className="w-full max-w-5xl flex flex-col items-center text-center relative"
+      style={{ background: '#030712' }}
+    >
 
       {/* ══════════════════════════════════════════════════════════════════
-          UNIFIED HERO SECTION — hero image is the background fill.
-          Text and badges float over it naturally.
+          HERO SECTION
+          Hero image fills the entire block as a background.
+          Gradient overlay:
+            • top-to-~35%  : dark → semi-dark  (keeps text legible)
+            • ~35%–65%     : transparent        (illustration breathes)
+            • ~65%–100%    : transparent → #030712  (fades into page)
+          Side fades are very subtle — just enough to soften edges.
+          NO floating badges — minimalist, clean.
       ══════════════════════════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.9 }}
         className="relative w-full overflow-hidden"
-        style={{ minHeight: '640px' }}
+        style={{ minHeight: '660px', background: '#030712' }}
       >
-        {/* ── Hero image as full background ── */}
+        {/* Hero image */}
         <img
-          src="/hero-v3.jpg"
-          alt="AI future portal"
+          src="/hero-v4.jpg"
+          alt="AI future portal — KL skyline"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: 'center center' }}
         />
 
-        {/* ── Top gradient: dark at top → transparent mid → dark at bottom
-               Upper portion keeps text legible; lower lets illustration shine.
-               Bottom fade blends into the feature strip below. ── */}
+        {/* Primary overlay — top dark, mid clear, bottom fades to page colour */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to bottom, rgba(3,7,18,0.88) 0%, rgba(3,7,18,0.72) 18%, rgba(3,7,18,0.32) 36%, rgba(3,7,18,0.08) 50%, transparent 62%, transparent 72%, rgba(3,7,18,0.80) 88%, rgba(6,12,30,1) 100%)',
+              'linear-gradient(to bottom,' +
+              '  rgba(3,7,18,0.92)  0%,' +
+              '  rgba(3,7,18,0.75) 16%,' +
+              '  rgba(3,7,18,0.35) 32%,' +
+              '  rgba(3,7,18,0.06) 48%,' +
+              '  transparent        58%,' +
+              '  transparent        68%,' +
+              '  rgba(3,7,18,0.72) 82%,' +
+              '  rgba(3,7,18,1)   100%)',
           }}
         />
 
-        {/* ── Side fades — soften hard edges ── */}
+        {/* Side fades — very light, only to soften hard crop edges */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, rgba(3,7,18,0.55) 0%, transparent 16%, transparent 84%, rgba(3,7,18,0.55) 100%)',
+              'linear-gradient(to right,' +
+              '  rgba(3,7,18,0.40) 0%,' +
+              '  transparent 14%,' +
+              '  transparent 86%,' +
+              '  rgba(3,7,18,0.40) 100%)',
           }}
         />
 
-        {/* ── Text content — floats over the image ── */}
+        {/* ── Text block ── */}
         <div className="relative z-10 w-full flex flex-col items-center text-center px-6 pt-8">
 
           {/* Platform pill */}
@@ -92,7 +100,7 @@ export default function LandingScreen({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.0 }}
-            className="mb-5"
+            className="mb-4"
           >
             <div
               className="inline-flex items-center px-5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest"
@@ -113,7 +121,7 @@ export default function LandingScreen({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.08 }}
-            className="mb-4 flex items-center gap-3"
+            className="mb-3 flex items-center gap-3"
           >
             <img
               src="/tm-logo-official.png"
@@ -160,12 +168,25 @@ export default function LandingScreen({
             </div>
           </motion.div>
 
+          {/* ── Tagline — sits between the logo pill and the headline ──
+               Small, soft, spaced — gives context before the bold headline lands */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.14 }}
+            className="text-xs uppercase tracking-[0.18em] font-semibold mb-4"
+            style={{ color: 'rgba(0,212,255,0.70)' }}
+          >
+            {t.description}{' '}
+            <span style={{ color: 'rgba(0,212,255,0.90)', fontWeight: 700 }}>{t.descriptionBold}</span>
+          </motion.p>
+
           {/* Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.16 }}
-            className="text-5xl md:text-7xl font-black tracking-tight mb-3 leading-[1.05]"
+            transition={{ duration: 0.7, delay: 0.22 }}
+            className="text-5xl md:text-7xl font-black tracking-tight mb-2 leading-[1.05]"
           >
             <span className="text-white">{t.headline1} </span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary drop-shadow-[0_0_30px_rgba(0,212,255,0.5)]">
@@ -175,106 +196,59 @@ export default function LandingScreen({
             <span className="text-white/80 text-4xl md:text-5xl font-bold">{t.headline2}</span>
           </motion.h1>
 
-          {/* Description */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.26 }}
-            className="text-base md:text-lg text-muted-foreground whitespace-nowrap"
-          >
-            {t.description}{' '}
-            <span className="text-foreground font-semibold">{t.descriptionBold}</span>
-          </motion.p>
         </div>
-
-        {/* ── LEFT floating badges — cyan/blue ── */}
-        {LEFT_BADGES.map((b) => {
-          const Icon = b.icon;
-          return (
-            <motion.div
-              key={b.label}
-              initial={{ opacity: 0, x: -24 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: b.delay }}
-              className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none z-10"
-              style={{
-                top: b.top,
-                left: '3%',
-                background: 'rgba(0,12,30,0.68)',
-                border: '1px solid rgba(0,212,255,0.32)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.40), 0 0 14px rgba(0,212,255,0.12)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <div
-                className="p-1.5 rounded-lg"
-                style={{ background: 'rgba(0,212,255,0.14)', border: '1px solid rgba(0,212,255,0.28)' }}
-              >
-                <Icon className="w-3.5 h-3.5 text-cyan-400" />
-              </div>
-              <span className="text-xs font-semibold text-white/85 whitespace-nowrap">{b.label}</span>
-            </motion.div>
-          );
-        })}
-
-        {/* ── RIGHT floating badges — purple/magenta ── */}
-        {RIGHT_BADGES.map((b) => {
-          const Icon = b.icon;
-          return (
-            <motion.div
-              key={b.label}
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: b.delay }}
-              className="absolute flex items-center gap-2 px-3 py-2 rounded-xl select-none z-10"
-              style={{
-                top: b.top,
-                right: '3%',
-                background: 'rgba(15,5,35,0.68)',
-                border: '1px solid rgba(167,139,250,0.32)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.40), 0 0 14px rgba(139,92,246,0.14)',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <div
-                className="p-1.5 rounded-lg"
-                style={{ background: 'rgba(139,92,246,0.16)', border: '1px solid rgba(167,139,250,0.28)' }}
-              >
-                <Icon className="w-3.5 h-3.5 text-violet-400" />
-              </div>
-              <span className="text-xs font-semibold text-white/85 whitespace-nowrap">{b.label}</span>
-            </motion.div>
-          );
-        })}
+        {/* (no floating badges — clean minimalist hero) */}
       </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════════
-          FEATURE COLUMNS — pulled up with negative margin to slightly
-          overlap the hero's bottom glow, creating a seamless transition.
+          FEATURE COLUMNS
+          Float on top of the hero's bottom fade with:
+            • negative margin-top  → slight upward overlap
+            • no top border        → no visible seam
+            • upward box-shadow    → soft glow depth
+            • background matches the hero's fade-to colour exactly
       ══════════════════════════════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.55 }}
+        transition={{ duration: 0.6, delay: 0.50 }}
         className="w-full overflow-hidden relative z-10"
         style={{
-          marginTop: '-32px',
-          background: 'rgba(6,12,30,0.88)',
-          border: '1px solid rgba(0,212,255,0.16)',
-          borderTop: '1px solid rgba(0,212,255,0.24)',
-          backdropFilter: 'blur(16px)',
-          boxShadow: '0 -8px 32px rgba(0,212,255,0.06), 0 8px 40px rgba(0,0,0,0.45)',
+          marginTop: '-52px',
+          background: 'rgba(3,7,18,0.82)',
+          border: 'none',
+          backdropFilter: 'blur(18px)',
+          /* upward glow instead of a hard border-top */
+          boxShadow:
+            '0 -12px 40px rgba(0,212,255,0.10),' +
+            '0  -4px 16px rgba(139,92,246,0.08),' +
+            '0   8px 40px rgba(0,0,0,0.55)',
+          borderRadius: '2px',
         }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/8">
+        {/* Subtle cyan top-edge highlight — replaces the hard border */}
+        <div
+          className="w-full"
+          style={{
+            height: '1px',
+            background:
+              'linear-gradient(to right,' +
+              '  transparent 0%,' +
+              '  rgba(0,212,255,0.35) 30%,' +
+              '  rgba(139,92,246,0.35) 70%,' +
+              '  transparent 100%)',
+          }}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/[0.06]">
           {FEATURES.map((f, i) => {
             const Icon = f.icon;
             return (
               <motion.div
                 key={f.label}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.60 + i * 0.08 }}
+                transition={{ delay: 0.55 + i * 0.08 }}
                 className="flex items-start gap-4 p-5 text-left"
               >
                 <div
