@@ -262,10 +262,10 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
     return (
       <div className="bg-card border border-card-border rounded-xl p-3 text-xs shadow-xl">
         <p className="font-bold text-foreground mb-1">{div?.full ?? label}</p>
-        <p className="text-primary">{payload[0].value} assessments completed</p>
-        <p className="text-muted-foreground">{div?.employees.toLocaleString()} total employees</p>
-        <p className="text-muted-foreground">{div ? Math.round((div.completed / div.employees) * 100) : 0}% participation</p>
-        <p className="text-primary/60 mt-1 font-medium">Click to filter all charts ↓</p>
+        <p className="text-primary">{payload[0].value} {t.statBarAssessments}</p>
+        <p className="text-muted-foreground">{div?.employees.toLocaleString()} {t.statBarEmployees}</p>
+        <p className="text-muted-foreground">{div ? Math.round((div.completed / div.employees) * 100) : 0}% {t.statBarParticipation}</p>
+        <p className="text-primary/60 mt-1 font-medium">{t.statBarClickFilter}</p>
       </div>
     );
   };
@@ -282,6 +282,8 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
     );
   };
 
+  const t = translations[lang];
+
   // Skill heatmap colour
   const skillColor = (score: number) => {
     if (score === 0) return 'rgba(255,255,255,0.04)';
@@ -289,7 +291,8 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
     if (score === 2) return 'rgba(0,212,255,0.45)';
     return 'rgba(0,212,255,0.85)';
   };
-  const skillLabel = (score: number) => ['—', 'Started', 'Developing', 'Proficient'][score];
+  const skillLabel = (score: number) => [t.statSkillNone, t.statSkillStarted, t.statSkillDeveloping, t.statSkillProficient][score];
+  const localSkills = t.statSkills as readonly string[];
 
   return (
     <div className="w-full min-h-screen px-4 md:px-8 py-8 max-w-7xl mx-auto">
@@ -316,30 +319,32 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
 
         <div className="w-full max-w-lg mb-10 px-8 py-6 rounded-3xl bg-card/60 border border-primary/20 backdrop-blur-md shadow-[0_0_60px_rgba(0,212,255,0.08)]">
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
-            {activeDivision ? `${activeDivision.full} · Assessments Completed` : 'Total Assessments Completed · Live Count'}
+            {activeDivision ? `${activeDivision.full} · ${t.statHeroCountLabelDiv}` : t.statHeroCountLabelAll}
           </p>
           <p className="text-7xl font-black text-primary mb-2" style={{ filter: 'drop-shadow(0 0 20px rgba(0,212,255,0.5))' }}>
             {counterCompleted.toLocaleString()}
           </p>
           <p className="text-sm text-muted-foreground mb-4">
-            {activeDivision ? `of ${activeDivision.employees.toLocaleString()} employees in this division` : `of ${TARGET.toLocaleString()} workforce target`}
+            {activeDivision
+              ? t.statHeroCountSubDiv.replace('{n}', activeDivision.employees.toLocaleString())
+              : t.statHeroCountSubAll.replace('{n}', TARGET.toLocaleString())}
           </p>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-3">
             <motion.div className="h-full bg-gradient-to-r from-primary to-secondary rounded-full" initial={{ width: 0 }} animate={{ width: `${Math.min(progress, 100)}%` }} transition={{ duration: 1.2, ease: 'easeOut' }} />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span className="text-primary font-semibold">{Math.round((activeCompleted / activeEmployees) * 100)}% participation</span>
-            <span>+{Math.round(958 * ratio)} this month</span>
-            <span>Target: Dec 2025</span>
+            <span className="text-primary font-semibold">{Math.round((activeCompleted / activeEmployees) * 100)}% {t.statHeroParticipation}</span>
+            <span>+{Math.round(958 * ratio)} {t.statHeroThisMonth}</span>
+            <span>{t.statHeroTarget}</span>
           </div>
         </div>
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
-          The official TM{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary">AI readiness</span>{' '}signal.
+          {t.statHeroTitle}{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#00B4D8] to-secondary">{t.statHeroTitleAccent}</span>{' '}{t.statHeroTitleSuffix}
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl">
-          Real-time organisational dashboard tracking Telekom Malaysia's progress toward a fully AI-ready workforce — across all divisions, personas, and learning pathways.
+          {t.statHeroDesc}
         </p>
       </motion.div>
 
@@ -350,11 +355,11 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
             className="mb-6 flex items-center justify-between px-5 py-3 rounded-xl border border-primary/40 bg-primary/8 backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-semibold text-primary">Filtering by: {activeDivision?.full ?? selectedDivision}</span>
-              <span className="text-xs text-muted-foreground">· All charts updated below</span>
+              <span className="text-sm font-semibold text-primary">{t.statFilteringBy} {activeDivision?.full ?? selectedDivision}</span>
+              <span className="text-xs text-muted-foreground">{t.statFilterNote}</span>
             </div>
             <button onClick={() => setSelectedDivision(null)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1 rounded-full hover:bg-card/60">
-              <X className="w-3.5 h-3.5" /> Clear filter
+              <X className="w-3.5 h-3.5" /> {t.statClearFilter}
             </button>
           </motion.div>
         )}
@@ -375,16 +380,16 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
 
       {/* ── KPI Cards ── */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <KpiCard icon={Users}     label="Total Assessments"    value={activeCompleted.toLocaleString()} sub={`of ${activeEmployees.toLocaleString()} ${activeDivision ? 'division' : 'TM'} employees`} color="#00d4ff" tooltip="The number of TM employees who have completed the full AiNspire AI persona assessment." />
-        <KpiCard icon={Brain}     label="AI-Ready Employees"   value={activeAiReady.toLocaleString()}   sub="Builder + Strategist + Visionary personas"  color="#a855f7" tooltip="Employees classified as Builder, Strategist, or Visionary — the three personas associated with active, applied AI capability." />
-        <KpiCard icon={Award}     label="Avg Confidence Score" value={`${activeConfidence}%`}           sub="Across all completed assessments"             color="#10b981" tooltip="Claude's average confidence in its persona classification across all completed assessments (0–100%). Higher scores indicate stronger, more consistent signal." />
-        <KpiCard icon={BarChart3} label="Divisions Active"     value={activeDivisionsLabel}             sub="TM divisions on the platform"                 color="#f59e0b" tooltip="Number of TM business divisions where at least one employee has completed an assessment on the AiNspire platform." />
+        <KpiCard icon={Users}     label={t.statKpi1Label} value={activeCompleted.toLocaleString()} sub={`of ${activeEmployees.toLocaleString()} ${t.statKpi1Sub}`} color="#00d4ff" tooltip={t.statKpi1Tooltip} />
+        <KpiCard icon={Brain}     label={t.statKpi2Label} value={activeAiReady.toLocaleString()}   sub={t.statKpi2Sub}  color="#a855f7" tooltip={t.statKpi2Tooltip} />
+        <KpiCard icon={Award}     label={t.statKpi3Label} value={`${activeConfidence}%`}           sub={t.statKpi3Sub}  color="#10b981" tooltip={t.statKpi3Tooltip} />
+        <KpiCard icon={BarChart3} label={t.statKpi4Label} value={activeDivisionsLabel}             sub={t.statKpi4Sub}  color="#f59e0b" tooltip={t.statKpi4Tooltip} />
       </motion.div>
 
       {/* ── Monthly Assessment Trend (moved above division bar) ── */}
-      <Panel icon={TrendingUp} iconColor="#00d4ff" title="Monthly Assessment Trend" delay={0.25}
-        tooltip="Month-by-month count of new assessments completed (dashed purple line) and the cumulative running total (solid cyan area). Tracks the pace and acceleration of workforce participation."
-        subtitle={activeDivision ? `${activeDivision.name} — estimated monthly cadence` : 'Cumulative growth across TM workforce — 2025'}>
+      <Panel icon={TrendingUp} iconColor="#00d4ff" title={t.statTrendTitle} delay={0.25}
+        tooltip={t.statTrendTooltip}
+        subtitle={activeDivision ? `${activeDivision.name} — ${t.statTrendSubDiv}` : t.statTrendSubAll}>
         <ResponsiveContainer width="100%" height={230}>
           <AreaChart data={activeTrend} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
             <defs>
@@ -402,19 +407,19 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
           </AreaChart>
         </ResponsiveContainer>
         <div className="flex gap-5 text-xs text-muted-foreground mt-2">
-          <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-primary inline-block" />Cumulative total</span>
-          <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 border-t-2 border-dashed border-[#a855f7] inline-block" />Monthly new</span>
+          <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-primary inline-block" />{t.statTrendLegendCum}</span>
+          <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 border-t-2 border-dashed border-[#a855f7] inline-block" />{t.statTrendLegendNew}</span>
         </div>
       </Panel>
 
       {/* ── Participation by Division ── */}
-      <Panel icon={BarChart3} iconColor="#00d4ff" title="Participation by Division" delay={0.3}
-        tooltip="Number of employees who have completed the AiNspire assessment in each division. Click any bar to filter all downstream charts to that division. Bar height reflects raw assessment count, not participation rate."
-        subtitle="Click a bar to filter all charts by that division" className="mt-6">
+      <Panel icon={BarChart3} iconColor="#00d4ff" title={t.statPartTitle} delay={0.3}
+        tooltip={t.statPartTooltip}
+        subtitle={t.statPartSub} className="mt-6">
         <div className="mb-6">
           {selectedDivision && (
             <button onClick={() => setSelectedDivision(null)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
-              <X className="w-3 h-3" /> Reset
+              <X className="w-3 h-3" /> {t.statPartReset}
             </button>
           )}
         </div>
@@ -445,9 +450,9 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
 
       {/* ── Persona Distribution + AI Readiness Index ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <Panel icon={Brain} iconColor="#a855f7" title="AI Persona Distribution" delay={0.35}
-          tooltip="Breakdown of all assessed employees into the four AI personas. Explorer: curiosity-driven; Builder: hands-on creator; Strategist: governance and ROI-focused; Visionary: transformation leader."
-          subtitle={activeDivision ? `${activeDivision.name} — classified employees` : 'All classified TM employees'}>
+        <Panel icon={Brain} iconColor="#a855f7" title={t.statDistTitle} delay={0.35}
+          tooltip={t.statDistTooltip}
+          subtitle={activeDivision ? `${activeDivision.name} — ${t.statDistSubDiv}` : t.statDistSubAll}>
           <div className="flex flex-col md:flex-row items-center gap-6">
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -473,14 +478,14 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
                   </div>
                 );
               })}
-              <p className="text-xs text-muted-foreground pt-1">{activeCompleted.toLocaleString()} total classified</p>
+              <p className="text-xs text-muted-foreground pt-1">{activeCompleted.toLocaleString()} {t.statDistTotalLabel}</p>
             </div>
           </div>
         </Panel>
 
-        <Panel icon={Target} iconColor="#10b981" title="AI Readiness Index" delay={0.4}
-          tooltip="Composite score per division (0–100) combining participation rate, average confidence score, and the proportion of AI-ready personas (Builder + Strategist + Visionary). Higher is more AI-ready."
-          subtitle="Composite score per division (0–100)">
+        <Panel icon={Target} iconColor="#10b981" title={t.statIndexTitle} delay={0.4}
+          tooltip={t.statIndexTooltip}
+          subtitle={t.statIndexSub}>
           <div className="space-y-3">
             {[...DIVISIONS].sort((a, b) => b.index - a.index).map((d, i) => {
               const color = d.index >= 70 ? '#10b981' : d.index >= 60 ? '#00d4ff' : '#f59e0b';
@@ -501,17 +506,17 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
             })}
           </div>
           <div className="flex items-center gap-4 mt-4 pt-3 border-t border-card-border/40 text-xs">
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#10b981]" />≥70 High</span>
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#00d4ff]" />60–69 Mid</span>
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#f59e0b]" />&lt;60 Developing</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#10b981]" />{t.statIndexHigh}</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#00d4ff]" />{t.statIndexMid}</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#f59e0b]" />{t.statIndexDev}</span>
           </div>
         </Panel>
       </div>
 
       {/* ── Persona Mix by Division ── */}
-      <Panel icon={Zap} iconColor="#f59e0b" title="Persona Mix by Division" delay={0.45}
-        tooltip="Stacked percentage breakdown of the four AI persona types within each division. Reveals each division's AI culture — a Builder-heavy division is suited to build internal tools; Explorer-heavy divisions need structured activation programmes."
-        subtitle={activeDivision ? `${activeDivision.name} — persona breakdown` : 'Stacked percentage per division'} className="mt-6">
+      <Panel icon={Zap} iconColor="#f59e0b" title={t.statMixTitle} delay={0.45}
+        tooltip={t.statMixTooltip}
+        subtitle={activeDivision ? `${activeDivision.name} — ${t.statMixSubDiv}` : t.statMixSubAll} className="mt-6">
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={activeDivision ? [activeDivision] : DIVISIONS} margin={{ top: 4, right: 16, left: 0, bottom: 4 }} barCategoryGap={activeDivision ? '65%' : '30%'}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -528,13 +533,13 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
       </Panel>
 
       {/* ── Cohort Benchmarking ── */}
-      <Panel icon={Target} iconColor="#ec4899" title="Cohort Benchmarking" delay={0.5}
-        tooltip="Each division's AI Readiness Index (0–100) compared against two reference lines: the TM organisation-wide average (amber, 67) and the wider Telco industry benchmark (pink, 71). Gaps shown in green (above) or red (below)."
-        subtitle="Division AI Readiness vs TM Average (67) vs Telco Industry Benchmark (71)" className="mt-6 mb-10">
+      <Panel icon={Target} iconColor="#ec4899" title={t.statBenchTitle} delay={0.5}
+        tooltip={t.statBenchTooltip}
+        subtitle={t.statBenchSub} className="mt-6 mb-10">
         <div className="flex items-center gap-6 mb-6 text-xs">
-          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#00d4ff]" />Division Score</span>
-          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#f59e0b]" />TM Org Average (67)</span>
-          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#ec4899]" />Telco Industry Benchmark (71)</span>
+          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#00d4ff]" />{t.statBenchDivScore}</span>
+          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#f59e0b]" />{t.statBenchTMAvg}</span>
+          <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#ec4899]" />{t.statBenchIndustry}</span>
         </div>
         <div className="space-y-4">
           {[...DIVISIONS].sort((a, b) => b.index - a.index).map(d => {
@@ -548,8 +553,8 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
                     <span className="text-xs text-muted-foreground/60 hidden md:block">{d.full}</span>
                   </div>
                   <div className="flex items-center gap-3 text-xs font-semibold">
-                    <span style={{ color: vsAvg >= 0 ? '#22c55e' : '#ef4444' }}>{vsAvg >= 0 ? '+' : ''}{vsAvg} vs TM avg</span>
-                    <span style={{ color: vsInd >= 0 ? '#22c55e' : '#ef4444' }}>{vsInd >= 0 ? '+' : ''}{vsInd} vs industry</span>
+                    <span style={{ color: vsAvg >= 0 ? '#22c55e' : '#ef4444' }}>{vsAvg >= 0 ? '+' : ''}{vsAvg} {t.statBenchVsAvg}</span>
+                    <span style={{ color: vsInd >= 0 ? '#22c55e' : '#ef4444' }}>{vsInd >= 0 ? '+' : ''}{vsInd} {t.statBenchVsInd}</span>
                     <span className="font-black text-foreground w-6 text-right">{d.index}</span>
                   </div>
                 </div>
@@ -568,9 +573,9 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
         </div>
         <div className="grid grid-cols-3 gap-4 mt-6 pt-5 border-t border-card-border/40">
           {[
-            { label: 'Above Industry Benchmark', value: DIVISIONS.filter(d => d.index >= 71).length, color: '#22c55e', sub: 'divisions above Telco industry average' },
-            { label: 'At TM Average',             value: DIVISIONS.filter(d => d.index >= 65 && d.index < 71).length, color: '#f59e0b', sub: 'divisions within ±2 pts of TM average' },
-            { label: 'Below Average',             value: DIVISIONS.filter(d => d.index < 65).length, color: '#ef4444', sub: 'divisions requiring targeted intervention' },
+            { label: t.statBenchAbove, value: DIVISIONS.filter(d => d.index >= 71).length, color: '#22c55e', sub: t.statBenchAboveSub },
+            { label: t.statBenchAt,    value: DIVISIONS.filter(d => d.index >= 65 && d.index < 71).length, color: '#f59e0b', sub: t.statBenchAtSub },
+            { label: t.statBenchBelow, value: DIVISIONS.filter(d => d.index < 65).length, color: '#ef4444', sub: t.statBenchBelowSub },
           ].map(c => (
             <div key={c.label} className="p-4 rounded-xl border border-card-border/60 bg-card/30 text-center">
               <div className="text-3xl font-black mb-1" style={{ color: c.color }}>{c.value}</div>
@@ -602,9 +607,9 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
       {/* ── Org level: Learning Hours + Certifications ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
-        <Panel icon={Clock} iconColor="#6366f1" title="Learning Hours Logged" delay={0.6}
-          tooltip="Total AI learning hours recorded per division and average hours per assessed employee. The amber target line represents 80% of division headcount completing at least 5 learning hours."
-          subtitle="Total hours by division · avg per employee shown on bar">
+        <Panel icon={Clock} iconColor="#6366f1" title={t.statHoursTitle} delay={0.6}
+          tooltip={t.statHoursTooltip}
+          subtitle={t.statHoursSub}>
           <div className="space-y-3">
             {[...LEARNING_HOURS_BY_DIVISION].sort((a, b) => b.hours - a.hours).map((d, i) => {
               const maxHours = Math.max(...LEARNING_HOURS_BY_DIVISION.map(x => x.hours));
@@ -620,20 +625,20 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
                       <span className="text-[10px] font-black text-white">{d.hours.toLocaleString()}</span>
                     </motion.div>
                   </div>
-                  <span className="text-xs text-muted-foreground w-12 text-right flex-shrink-0">{d.avg}h avg</span>
+                  <span className="text-xs text-muted-foreground w-12 text-right flex-shrink-0">{d.avg}{t.statHoursAvgSuffix}</span>
                 </div>
               );
             })}
           </div>
           <div className="flex gap-5 text-xs text-muted-foreground mt-4 pt-3 border-t border-card-border/40">
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#6366f1]" />On / above target</span>
-            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#f59e0b]" />Below target</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#6366f1]" />{t.statHoursOnTarget}</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#f59e0b]" />{t.statHoursBelowTarget}</span>
           </div>
         </Panel>
 
-        <Panel icon={GraduationCap} iconColor="#10b981" title="Certifications & Badges Earned" delay={0.62}
-          tooltip="Count of employees per division who have earned an AI certification or digital badge on the AiNspire platform. Target bar shows 40% of assessed employees earning at least one certification."
-          subtitle="Employees who earned at least one AI badge · target = 40% of assessed">
+        <Panel icon={GraduationCap} iconColor="#10b981" title={t.statCertTitle} delay={0.62}
+          tooltip={t.statCertTooltip}
+          subtitle={t.statCertSub}>
           <div className="space-y-4">
             {[...CERTIFICATIONS_BY_DIVISION].sort((a, b) => b.earned - a.earned).map((d, i) => {
               const earnedPct  = Math.round((d.earned / d.target) * 100);
@@ -642,14 +647,14 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
                 <div key={d.name} style={{ opacity: selectedDivision && selectedDivision !== d.name ? 0.3 : 1, transition: 'opacity 0.25s' }}>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="font-bold text-muted-foreground">{d.name}</span>
-                    <span style={{ color: onTrack ? '#10b981' : '#f59e0b' }}>{d.earned} / {d.target} target</span>
+                    <span style={{ color: onTrack ? '#10b981' : '#f59e0b' }}>{d.earned} / {d.target} {t.statCertTarget}</span>
                   </div>
                   <div className="relative h-3 bg-muted rounded-full overflow-hidden">
                     <motion.div className="absolute inset-y-0 left-0 rounded-full"
                       style={{ background: onTrack ? '#10b981' : '#f59e0b' }}
                       initial={{ width: 0 }} animate={{ width: `${Math.min(earnedPct, 100)}%` }} transition={{ duration: 0.8, delay: 0.5 + i * 0.04 }} />
                   </div>
-                  <div className="text-right text-[10px] text-muted-foreground mt-0.5">{earnedPct}% of target</div>
+                  <div className="text-right text-[10px] text-muted-foreground mt-0.5">{earnedPct}{t.statCertOfTarget}</div>
                 </div>
               );
             })}
@@ -658,9 +663,9 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
       </div>
 
       {/* ── Monthly Completion Rate Trend ── */}
-      <Panel icon={TrendingUp} iconColor="#f43f5e" title="Monthly Completion Rate Trend" delay={0.64}
-        tooltip="Percentage of enrolled employees who completed at least one AI course during each month. The dashed amber line is the monthly completion rate target. Upward trend indicates improving learner engagement."
-        subtitle="% of enrolled employees completing a course each month · target shown in amber" className="mb-6">
+      <Panel icon={TrendingUp} iconColor="#f43f5e" title={t.statCompTitle} delay={0.64}
+        tooltip={t.statCompTooltip}
+        subtitle={t.statCompSub} className="mb-6">
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={COMPLETION_TREND} margin={{ top: 4, right: 24, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -672,26 +677,26 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
           </LineChart>
         </ResponsiveContainer>
         <div className="flex gap-5 text-xs text-muted-foreground mt-2">
-          <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-[#f43f5e] inline-block" />Actual completion rate</span>
-          <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 border-t-2 border-dashed border-[#f59e0b] inline-block" />Monthly target</span>
+          <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 bg-[#f43f5e] inline-block" />{t.statCompActual}</span>
+          <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 border-t-2 border-dashed border-[#f59e0b] inline-block" />{t.statCompMonthly}</span>
         </div>
       </Panel>
 
       {/* ── Course Performance (existing + drop-off + avg days, combined) ── */}
-      <Panel icon={BookOpen} iconColor="#00d4ff" title="Course Performance" delay={0.66}
-        tooltip="Combined view of all AI learning courses: enrolment count, completion count, completion rate, drop-off rate (enrolled but did not finish), and average days from enrolment to completion. Sorted by enrolment size."
-        subtitle="Enrolment, completion rate, drop-off, and time-to-complete per course — all combined" className="mb-6">
+      <Panel icon={BookOpen} iconColor="#00d4ff" title={t.statCourseTitle} delay={0.66}
+        tooltip={t.statCourseTooltip}
+        subtitle={t.statCourseSub} className="mb-6">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-card-border">
                 {[
-                  { label: 'Course',              tip: 'AI learning course recommended on the AiNspire platform.' },
-                  { label: 'Enrolled',            tip: 'Number of TM employees who started this course.' },
-                  { label: 'Completed',           tip: 'Number of employees who finished the course and received a completion badge.' },
-                  { label: 'Completion Rate',     tip: 'Percentage of enrolled employees who successfully completed the course (Completed ÷ Enrolled).' },
-                  { label: 'Drop-off Rate',       tip: 'Percentage of enrolled employees who started but did not finish the course. High drop-off may indicate content difficulty or relevance issues.' },
-                  { label: 'Avg Days to Finish',  tip: 'Average number of calendar days between an employee enrolling and completing the course. Shorter is generally better for engagement.' },
+                  { label: t.statColCourse,    tip: t.statColCourseTip },
+                  { label: t.statColEnrolled,  tip: t.statColEnrolledTip },
+                  { label: t.statColCompleted, tip: t.statColCompletedTip },
+                  { label: t.statColCompRate,  tip: t.statColCompRateTip },
+                  { label: t.statColDropoff,   tip: t.statColDropoffTip },
+                  { label: t.statColAvgDays,   tip: t.statColAvgDaysTip },
                 ].map(h => (
                   <th key={h.label} className="pb-3 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/60 pr-4 last:pr-0">
                     <div className="flex items-center gap-1.5">{h.label}<InfoTooltip text={h.tip} /></div>
@@ -728,7 +733,7 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
                     <td className="py-3">
                       <div className="flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span className="text-sm font-semibold text-foreground">{c.avgDays}d</span>
+                        <span className="text-sm font-semibold text-foreground">{c.avgDays}{t.statDaySuffix}</span>
                       </div>
                     </td>
                   </tr>
@@ -738,22 +743,22 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
           </table>
         </div>
         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground mt-4 pt-3 border-t border-card-border/40">
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />Drop-off &lt;15% — healthy engagement</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" />15–25% — review content pacing</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500" />&gt;25% — intervention recommended</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />{t.statDropLow}</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" />{t.statDropMid}</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500" />{t.statDropHigh}</span>
         </div>
       </Panel>
 
       {/* ── Skill Coverage Heatmap ── */}
-      <Panel icon={Layers} iconColor="#6366f1" title="Skill Coverage Heatmap" delay={0.68}
-        tooltip="Matrix showing how well each AI skill area is covered per division, derived from course completion data. Coverage levels: — none, Started, Developing, Proficient. Darker cells indicate stronger skill coverage."
-        subtitle="AI skill areas vs divisions · derived from course completion · hover a cell for detail" className="mb-6">
+      <Panel icon={Layers} iconColor="#6366f1" title={t.statHeatTitle} delay={0.68}
+        tooltip={t.statHeatTooltip}
+        subtitle={t.statHeatSub} className="mb-6">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr>
-                <th className="pb-3 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/50 pr-4 w-20">Division</th>
-                {SKILLS.map(s => (
+                <th className="pb-3 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/50 pr-4 w-20">{t.statHeatDivision}</th>
+                {localSkills.map(s => (
                   <th key={s} className="pb-3 text-center font-bold text-muted-foreground/70 px-1">
                     <div className="flex flex-col items-center gap-1">
                       <span className="text-[10px] uppercase tracking-wider leading-snug" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: 72 }}>{s}</span>
@@ -772,7 +777,7 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
                         style={{ background: skillColor(score), border: `1px solid ${score > 0 ? 'rgba(0,212,255,0.25)' : 'rgba(255,255,255,0.04)'}` }}>
                         <span className="text-[10px] font-black text-white/80">{score > 0 ? score : ''}</span>
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-28 p-2 rounded-lg bg-[#0d1b2a] border border-card-border text-center z-50 pointer-events-none">
-                          <div className="font-bold text-foreground text-[10px]">{row.division} · {SKILLS[j]}</div>
+                          <div className="font-bold text-foreground text-[10px]">{row.division} · {localSkills[j]}</div>
                           <div className="text-[10px]" style={{ color: score === 3 ? '#22c55e' : score === 2 ? '#00d4ff' : score === 1 ? '#f59e0b' : '#94a3b8' }}>{skillLabel(score)}</div>
                         </div>
                       </div>
@@ -793,9 +798,9 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
       </Panel>
 
       {/* ── Persona-to-Course Alignment (persona level — last) ── */}
-      <Panel icon={Brain} iconColor="#a855f7" title="Persona-to-Course Alignment" delay={0.7}
-        tooltip="Shows whether employees in each persona group are following their persona's recommended learning path. High alignment means employees are studying the courses most relevant to their AI working style. Off-track employees may benefit from guided re-enrolment."
-        subtitle="Are employees following their persona's recommended learning path? · percentage on-track" className="mb-10">
+      <Panel icon={Brain} iconColor="#a855f7" title={t.statAlignTitle} delay={0.7}
+        tooltip={t.statAlignTooltip}
+        subtitle={t.statAlignSub} className="mb-10">
         <div className="space-y-6">
           {PERSONA_ALIGNMENT_DATA.map(p => {
             const offTrack = 100 - p.onTrack;
@@ -809,11 +814,11 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
                       <span className="text-sm font-bold" style={{ color: p.color }}>{p.name}</span>
                       <span className="text-xs text-muted-foreground">· {p.total.toLocaleString()} employees</span>
                     </div>
-                    <div className="text-xs text-muted-foreground">Recommended: <span className="text-foreground font-medium">{p.recommended.join(' · ')}</span></div>
+                    <div className="text-xs text-muted-foreground">{t.statAlignRecommended} <span className="text-foreground font-medium">{p.recommended.join(' · ')}</span></div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-4">
                     <div className="text-2xl font-black" style={{ color: p.onTrack >= 75 ? '#22c55e' : p.onTrack >= 60 ? p.color : '#f59e0b' }}>{p.onTrack}%</div>
-                    <div className="text-xs text-muted-foreground">on-track</div>
+                    <div className="text-xs text-muted-foreground">{t.statAlignOnTrack}</div>
                   </div>
                 </div>
                 <div className="relative h-4 bg-muted rounded-full overflow-hidden">
@@ -821,23 +826,23 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
                   <motion.div className="absolute inset-y-0 rounded-full bg-amber-500/50" initial={{ width: 0, left: `${p.onTrack}%` }} animate={{ width: `${offTrack}%`, left: `${p.onTrack}%` }} transition={{ duration: 0.9, ease: 'easeOut' }} />
                 </div>
                 <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5">
-                  <span style={{ color: p.color }}>{onCount.toLocaleString()} on recommended path</span>
-                  <span className="text-amber-400">{offCount.toLocaleString()} off-track — may need guidance</span>
+                  <span style={{ color: p.color }}>{onCount.toLocaleString()} {t.statAlignOnPath}</span>
+                  <span className="text-amber-400">{offCount.toLocaleString()} {t.statAlignOffTrack}</span>
                 </div>
               </div>
             );
           })}
         </div>
         <div className="flex gap-5 text-xs text-muted-foreground mt-5 pt-4 border-t border-card-border/40">
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />≥75% aligned — excellent</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400" />60–74% — some re-enrolment needed</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-400" />&lt;60% — guided intervention required</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" />{t.statAlignGoodLabel}</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400" />{t.statAlignMidLabel}</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-400" />{t.statAlignLowLabel}</span>
         </div>
       </Panel>
 
       {/* ── Footer ── */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center text-xs text-muted-foreground/50 pb-6">
-        Data is simulated for demonstration purposes · AiNspire Workforce Intelligence Platform · Telekom Malaysia Berhad
+        {t.statFooter}
       </motion.div>
 
       <motion.button onClick={onBack} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }}
