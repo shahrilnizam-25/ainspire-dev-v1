@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Download, Bot, TrendingUp, CheckCircle, ArrowUpRight, Loader2 } from 'lucide-react';
 import { personas } from '../data/personas';
@@ -99,7 +100,46 @@ export default function ReportScreen({
   const strengths = STRENGTHS_I18N[lang]?.[resultPersonaId] ?? STRENGTHS_I18N.EN.explorer;
   const growth    = GROWTH_I18N[lang]?.[resultPersonaId]    ?? GROWTH_I18N.EN.explorer;
 
-  const handlePrint = () => window.print();
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    if (!reportRef.current || isDownloading) return;
+    setIsDownloading(true);
+    try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
+
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#0a0f1e',
+        logging: false,
+      });
+
+      const imgW = 210; // A4 width mm
+      const imgH = (canvas.height * imgW) / canvas.width;
+      const pdf = new jsPDF({ orientation: imgH > imgW ? 'portrait' : 'landscape', unit: 'mm', format: 'a4' });
+      const pageH = pdf.internal.pageSize.getHeight();
+
+      // Slice canvas across multiple pages if the report is taller than one A4
+      let yOffset = 0;
+      while (yOffset < imgH) {
+        if (yOffset > 0) pdf.addPage();
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, -yOffset, imgW, imgH);
+        yOffset += pageH;
+      }
+
+      const safeName = (userRole || 'AI-Persona').replace(/[^a-zA-Z0-9]/g, '_');
+      pdf.save(`AiNspire_Report_${safeName}.pdf`);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   // ── Updating overlay (shown while re-classifying) ──
   const UpdatingBadge = () => (
@@ -115,23 +155,13 @@ export default function ReportScreen({
   );
 
   return (
-    <>
-      {/* Print-only global styles */}
-      <style>{`
-        @media print {
-          body { background: #fff !important; }
-          .no-print { display: none !important; }
-          .print-page { box-shadow: none !important; }
-        }
-      `}</style>
+    <div className="w-full max-w-4xl px-6 py-10 flex flex-col">
 
-      <div className="w-full max-w-4xl px-6 py-10 flex flex-col">
-
-        {/* Top nav — hidden on print */}
+        {/* Top nav */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8 no-print"
+          className="flex items-center justify-between mb-8"
         >
           <button
             onClick={onBack}
@@ -141,16 +171,17 @@ export default function ReportScreen({
             {t.reportBackToResults}
           </button>
           <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition-all"
+            onClick={handleDownloadPDF}
+            disabled={isDownloading || isReClassifying}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition-all disabled:opacity-50"
             style={{
               background: `${persona.color}18`,
               border: `1px solid ${persona.color}50`,
               color: persona.color,
             }}
           >
-            <Download className="w-4 h-4" />
-            {t.reportDownload}
+            {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {isDownloading ? (t.reportGenerating ?? 'Generating…') : t.reportDownload}
           </button>
         </motion.div>
 
@@ -159,10 +190,11 @@ export default function ReportScreen({
 
         {/* Report card */}
         <motion.div
+          ref={reportRef}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="print-page rounded-3xl overflow-hidden border border-card-border relative"
+          className="rounded-3xl overflow-hidden border border-card-border relative"
           style={{ background: 'var(--card)', boxShadow: '0 32px 80px rgba(0,0,0,0.4)' }}
         >
           {/* Dimming overlay while re-classifying */}
@@ -340,16 +372,17 @@ export default function ReportScreen({
           </div>
         </motion.div>
 
-        {/* Download button — bottom, hidden on print */}
+        {/* Download button — bottom */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="flex justify-center mt-8 no-print"
+          className="flex justify-center mt-8"
         >
           <button
-            onClick={handlePrint}
-            className="flex items-center gap-3 px-8 py-4 rounded-full font-bold text-base transition-all"
+            onClick={handleDownloadPDF}
+            disabled={isDownloading || isReClassifying}
+            className="flex items-center gap-3 px-8 py-4 rounded-full font-bold text-base transition-all disabled:opacity-50"
             style={{
               background: `linear-gradient(135deg, ${persona.color}22, ${persona.color}12)`,
               border: `2px solid ${persona.color}50`,
@@ -357,11 +390,10 @@ export default function ReportScreen({
               boxShadow: `0 0 30px ${persona.color}20`,
             }}
           >
-            <Download className="w-5 h-5" />
-            {t.reportSaveBtn}
+            {isDownloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+            {isDownloading ? (t.reportGenerating ?? 'Generating…') : t.reportSaveBtn}
           </button>
         </motion.div>
-      </div>
-    </>
+    </div>
   );
 }
