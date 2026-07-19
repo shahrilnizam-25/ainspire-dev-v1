@@ -129,18 +129,34 @@ export default function ReportScreen({
         },
       });
 
-      const imgW  = 210; // A4 width mm
-      const imgH  = (canvas.height * imgW) / canvas.width;
       const pdf   = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pageH = pdf.internal.pageSize.getHeight();
+      const pageW = pdf.internal.pageSize.getWidth();  // 210 mm
+      const pageH = pdf.internal.pageSize.getHeight(); // 297 mm
       const imgData = canvas.toDataURL('image/jpeg', 0.93);
 
-      // Use a 1 mm tolerance so floating-point overshoot doesn't add a blank last page
-      let yOffset = 0;
-      while (yOffset < imgH - 1) {
-        if (yOffset > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, -yOffset, imgW, imgH);
-        yOffset += pageH;
+      // Natural image size at A4 width
+      const naturalImgH = (canvas.height * pageW) / canvas.width;
+
+      // If the image overflows by less than 15 mm it's a near-miss (sub-pixel
+      // rendering artefacts / padding). Scale it to fit one page exactly so we
+      // never produce a near-blank second page.
+      const fitsOnOnePage = naturalImgH <= pageH + 15;
+      const imgW = fitsOnOnePage
+        ? pageW * (pageH / Math.max(naturalImgH, pageH)) // scale down to page height
+        : pageW;
+      const imgH = fitsOnOnePage ? pageH : naturalImgH;
+      const xOff = (pageW - imgW) / 2; // centre horizontally if scaled
+
+      if (fitsOnOnePage) {
+        pdf.addImage(imgData, 'JPEG', xOff, 0, imgW, imgH);
+      } else {
+        // Genuine multi-page: slice the image across pages
+        let yOffset = 0;
+        while (yOffset < imgH - 1) {
+          if (yOffset > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, -yOffset, imgW, imgH);
+          yOffset += pageH;
+        }
       }
 
       const safeName = (userRole || 'AI-Persona').replace(/[^a-zA-Z0-9]/g, '_');
