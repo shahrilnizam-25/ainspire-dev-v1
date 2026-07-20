@@ -35,6 +35,9 @@ const DIVISIONS = [
 
 const TOTAL_EMPLOYEES = DIVISIONS.reduce((s, d) => s + d.employees, 0);
 const TOTAL_COMPLETED = DIVISIONS.reduce((s, d) => s + d.completed, 0);
+// AI-Ready = completed employees whose persona is Builder, Strategist, or Visionary
+const TOTAL_AI_READY  = DIVISIONS.reduce((s, d) =>
+  s + Math.round(d.completed * (d.builder + d.strategist + d.visionary) / 100), 0);
 const TARGET = 8480;
 const AVG_CONFIDENCE = 74;
 
@@ -240,7 +243,7 @@ export default function StatisticsScreen({ lang = 'EN', onBack }: { lang?: Lang;
   const activeConfidence   = activeDivision ? activeDivision.confidence : AVG_CONFIDENCE;
   const activeAiReady      = activeDivision
     ? Math.round(activeDivision.completed * (activeDivision.builder + activeDivision.strategist + activeDivision.visionary) / 100)
-    : 2891;
+    : TOTAL_AI_READY;
   const activeDivisionsLabel = activeDivision ? '1 / 10' : '10 / 10';
   const activePersonaTotals  = activeDivision ? computePersonaTotals([activeDivision]) : ALL_PERSONA_TOTALS;
 
