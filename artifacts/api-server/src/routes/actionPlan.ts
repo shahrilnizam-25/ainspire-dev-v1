@@ -1,8 +1,7 @@
 import { Router } from "express";
-import Anthropic from "@anthropic-ai/sdk";
+import { chatComplete } from "../lib/llm.js";
 
 const router = Router();
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 router.post("/action-plan", async (req, res) => {
   const { distribution, teamSize, divisionName, skillsGap, dominantPersona } = req.body as {
@@ -66,13 +65,7 @@ Respond ONLY with valid JSON, no markdown:
 }`;
 
   try {
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 2048,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const raw = message.content[0].type === "text" ? message.content[0].text : "{}";
+    const raw = await chatComplete(prompt, 2048);
     const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     const result = JSON.parse(cleaned);
     return res.json(result);

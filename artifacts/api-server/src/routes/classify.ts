@@ -1,8 +1,7 @@
 import { Router } from "express";
-import Anthropic from "@anthropic-ai/sdk";
+import { chatComplete } from "../lib/llm.js";
 
 const router = Router();
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 type AnswerItem = {
   questionId: number;
@@ -100,14 +99,7 @@ Respond ONLY with a valid JSON object. No markdown, no text outside the JSON bra
 }`;
 
   try {
-    const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const raw =
-      message.content[0].type === "text" ? message.content[0].text : "{}";
+    const raw = await chatComplete(prompt, 1024);
 
     // Strip any accidental markdown code fences
     const cleaned = raw
