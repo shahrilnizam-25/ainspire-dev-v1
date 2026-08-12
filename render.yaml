@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ainspire-api
+    runtime: node
+    rootDir: artifacts/api-server
+    buildCommand: node build.mjs
+    startCommand: node --enable-source-maps ./dist/index.mjs
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: TM_LLM_API_KEY
+        sync: false
