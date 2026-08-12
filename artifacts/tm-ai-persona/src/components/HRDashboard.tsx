@@ -600,7 +600,7 @@ function ActionPlanTab({ t, counts, completed, dominant }: { t: T; counts: Recor
   const generatePlan = async () => {
     setLoading(true); setError(null); setPlan(null);
     try {
-      const res = await fetch('/api/action-plan', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/action-plan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ distribution, teamSize: total, divisionName: 'IT Strategy & Orchestration', skillsGap, dominantPersona: dominant }),

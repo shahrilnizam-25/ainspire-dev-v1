@@ -65,7 +65,7 @@ export default function App() {
 
   // Shared classify helper
   const runClassify = useCallback(async (answers: StoredAnswer[], targetLang: Lang): Promise<AIResult> => {
-    const res = await fetch('/api/classify', {
+    const res = await fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/classify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answers, lang: targetLang }),
