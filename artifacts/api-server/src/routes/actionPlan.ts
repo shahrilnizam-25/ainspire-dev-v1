@@ -12,6 +12,17 @@ router.post("/action-plan", async (req, res) => {
     skillsGap: Array<{ persona: string; current: number; target: number; gap: number }>;
   };
 
+  req.log.info(
+    {
+      event: "action_plan_started",
+      teamSize,
+      divisionName: divisionName || "IT Strategy & Orchestration",
+      dominantPersona,
+      skillsGapCount: Array.isArray(skillsGap) ? skillsGap.length : 0,
+    },
+    "Starting action plan generation",
+  );
+
   const gapSummary = skillsGap
     .map(g => `  - ${g.persona}: currently ${g.current}% → target ${g.target}% (gap: ${g.gap > 0 ? `+${g.gap}` : g.gap}%)`)
     .join("\n");
@@ -68,9 +79,12 @@ Respond ONLY with valid JSON, no markdown:
     const raw = await chatComplete(prompt, 2048);
     const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     const result = JSON.parse(cleaned);
+
+    req.log.info({ event: "action_plan_success" }, "Action plan generation completed");
+
     return res.json(result);
   } catch (err) {
-    console.error("Action plan error:", err);
+    req.log.error({ event: "action_plan_failed", err }, "Action plan generation failed");
     return res.status(500).json({ error: "Action plan generation failed", details: String(err) });
   }
 });

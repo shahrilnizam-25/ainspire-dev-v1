@@ -32,6 +32,15 @@ const LANG_LABELS: Record<string, string> = {
 router.post("/classify", async (req, res) => {
   const { answers, lang } = req.body as { answers: AnswerItem[]; lang?: string };
 
+  req.log.info(
+    {
+      event: "classify_started",
+      answersCount: Array.isArray(answers) ? answers.length : 0,
+      lang: lang ?? "EN",
+    },
+    "Starting persona classification",
+  );
+
   if (!answers || !Array.isArray(answers) || answers.length === 0) {
     return res.status(400).json({ error: "answers array is required" });
   }
@@ -115,9 +124,18 @@ Respond ONLY with a valid JSON object. No markdown, no text outside the JSON bra
     if (typeof result.confidence !== "number") result.confidence = 0.7;
     if (!Array.isArray(result.recommendations)) result.recommendations = [];
 
+    req.log.info(
+      {
+        event: "classify_success",
+        persona: result.persona,
+        confidence: result.confidence,
+      },
+      "Persona classification completed",
+    );
+
     return res.json(result);
   } catch (err) {
-    console.error("Classify error:", err);
+    req.log.error({ event: "classify_failed", err }, "Persona classification failed");
     return res
       .status(500)
       .json({ error: "AI classification failed", details: String(err) });
