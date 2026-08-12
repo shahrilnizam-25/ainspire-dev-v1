@@ -23,6 +23,7 @@ export default function LandingScreen({
   onContact: () => void;
 }) {
   const t = translations[lang];
+  const assetBase = import.meta.env.BASE_URL;
 
   const FEATURES = [
     { icon: Brain,     label: t.feature1Label, desc: t.feature1Desc },
@@ -53,7 +54,7 @@ export default function LandingScreen({
       >
         {/* Hero image */}
         <img
-          src="/hero-v5.jpg"
+          src={`${assetBase}hero-v5.jpg`}
           alt="AI future portal — KL skyline"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: 'center center' }}
@@ -125,7 +126,7 @@ export default function LandingScreen({
             className="mb-3 flex items-center gap-3"
           >
             <img
-              src="/tm-logo-official.png"
+              src={`${assetBase}tm-logo-official.png`}
               alt="Telekom Malaysia"
               className="w-auto object-contain"
               style={{ height: 'clamp(2.4rem, 4.5vw, 3.2rem)' }}
