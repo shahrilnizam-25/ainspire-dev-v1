@@ -85,7 +85,7 @@ export default function App() {
   const questions = assessmentQuestionsByLang[lang];
 
   // Shared classify helper
-  const runClassify = useCallback(async (answers: StoredAnswer, targetLang: Lang): Promise<AIResult> => {
+  const runClassify = useCallback(async (answers: StoredAnswer, targetLang: Lang, referenceResult?: AIResult): Promise<AIResult> => {
     const res = await fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/classify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -95,6 +95,7 @@ export default function App() {
         role: userRole,
         answers,
         lang: targetLang,
+        referenceResult,
       }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -198,16 +199,14 @@ export default function App() {
     setLastAnswers(answers);
 
     try {
-      const languages: Lang[] = ['EN', 'BM'];
-      const settledResults = await Promise.allSettled(
-        languages.map((targetLang) => runClassify(answers, targetLang)),
-      );
       const nextCache: Partial<Record<Lang, AIResult>> = {};
-      settledResults.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          nextCache[languages[index]] = result.value;
-        }
-      });
+      const englishResult = await runClassify(answers, 'EN');
+      nextCache.EN = englishResult;
+      try {
+        nextCache.BM = await runClassify(answers, 'BM', englishResult);
+      } catch (bmError) {
+        console.error('Bahasa Melayu classification error:', bmError);
+      }
 
       const selectedResult = nextCache[lang] ?? nextCache.EN ?? nextCache.BM;
       if (!selectedResult) throw new Error('AI classification failed for both languages');

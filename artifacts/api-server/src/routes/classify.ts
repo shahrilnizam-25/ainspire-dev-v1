@@ -26,12 +26,13 @@ const LANG_LABELS: Record<string, string> = {
 };
 
 router.post("/classify", async (req, res) => {
-  const { answers, lang, department, role, assessmentVersion } = req.body as {
+  const { answers, lang, department, role, assessmentVersion, referenceResult } = req.body as {
     answers: AnswerItem[];
     lang?: string;
     department?: string;
     role?: string;
     assessmentVersion?: string;
+    referenceResult?: Record<string, unknown>;
   };
 
   req.log.info(
@@ -172,6 +173,7 @@ router.post("/classify", async (req, res) => {
       role,
       assessmentVersion,
       language: lang === "BM" ? "BM" : "EN",
+      referenceResult,
       languageInstruction: langInstruction,
       personaDefinitions: Object.entries(PERSONA_DEFS).map(([key, description]) => `- ${key}: ${description}`).join("\n"),
     });
@@ -207,6 +209,9 @@ router.post("/classify", async (req, res) => {
       const rawConfidence = result.confidence > 1 ? result.confidence / 100 : result.confidence;
       result.confidence = Math.max(0, Math.min(1, rawConfidence));
     }
+    if (lang === "BM" && typeof referenceResult?.confidence === "number") {
+      result.confidence = referenceResult.confidence;
+    }
     result.reasoning = sanitizeUserText(result.reasoning) ?? (lang === "BM" ? "Profil kesediaan anda dinilai merentas enam dimensi." : "Your readiness profile was evaluated across the six dimensions.");
     result.narrative = sanitizeUserText(result.narrative) ?? (lang === "BM" ? "Profil anda menunjukkan peluang praktikal untuk mengembangkan sumbangan AI anda." : "Your profile highlights practical opportunities to grow your AI contribution.");
     result.strengths = sanitizeTextArray(result.strengths);
@@ -219,7 +224,21 @@ router.post("/classify", async (req, res) => {
         : `${result.narrative} Your current role as ${role} in ${department} was included as context for this profile.`;
     }
     const learningPathway = agentRun.mcpContext.learningPathway as { priorities?: unknown; videoRecommendations?: unknown };
-    result.recommendations = normalizeRecommendations(result.recommendations, learningPathway.priorities, learningPathway.videoRecommendations);
+    const normalizedRecommendations = normalizeRecommendations(
+      result.recommendations,
+      lang === "BM" && Array.isArray(referenceResult?.recommendations) ? referenceResult.recommendations : learningPathway.priorities,
+      learningPathway.videoRecommendations,
+    );
+    if (lang === "BM" && Array.isArray(referenceResult?.recommendations) && normalizedRecommendations.length < referenceResult.recommendations.length) {
+      const missing = referenceResult.recommendations.length - normalizedRecommendations.length;
+      for (let index = 0; index < missing; index += 1) {
+        normalizedRecommendations.push({
+          title: `Cadangan pembelajaran AI ${normalizedRecommendations.length + 1}`,
+          description: "Langkah ini disyorkan berdasarkan profil kesediaan AI anda.",
+        });
+      }
+    }
+    result.recommendations = normalizedRecommendations;
     if (!Array.isArray(result.strengths)) result.strengths = [];
     if (!Array.isArray(result.developmentGaps)) result.developmentGaps = [];
     if (!Array.isArray(result.projectFit)) result.projectFit = [];

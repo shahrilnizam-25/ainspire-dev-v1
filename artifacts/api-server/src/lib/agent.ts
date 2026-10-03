@@ -14,6 +14,7 @@ export async function runReadinessAgent(input: {
   role: string;
   assessmentVersion?: string;
   language: "EN" | "BM";
+  referenceResult?: Record<string, unknown>;
   languageInstruction: string;
   personaDefinitions: string;
 }) {
@@ -35,7 +36,10 @@ export async function runReadinessAgent(input: {
     .map((answer) => `Q${answer.questionId} [${dimensionLabels[answer.dimension] ?? answer.dimension}]: ${answer.selectedOption}. "${answer.selectedText}" (score ${answer.score}/4)`)
     .join("\n");
 
-  const prompt = `You are the supervisor agent for Telekom Malaysia's AI workforce readiness programme. Use the MCP tool results below as grounded enterprise context. Produce an advisory readiness profile and secondary AI persona.${input.languageInstruction}
+  const canonicalInstruction = input.referenceResult
+    ? `\n\n## Canonical English analysis\n${JSON.stringify(input.referenceResult, null, 2)}\n\nFor this ${input.language} response, translate the canonical analysis faithfully. Preserve the persona, scores, evidence, recommendation count and order, and meaning. Do not reclassify, omit recommendations, or invent a different interpretation.`
+    : "";
+  const prompt = `You are the supervisor agent for Telekom Malaysia's AI workforce readiness programme. Use the MCP tool results below as grounded enterprise context. Produce an advisory readiness profile and secondary AI persona.${input.languageInstruction}${canonicalInstruction}
 
 ## Personas
 ${input.personaDefinitions}
