@@ -1,201 +1,186 @@
-# AiNspire — TM AI Persona Assessment Platform
+# AiNspire - TM AI Readiness Platform
 
-An internal workforce AI readiness platform for **Telekom Malaysia (TM)** employees. It runs a self-assessment quiz, classifies each employee into one of four AI personas using the TM AI LLM endpoint, and provides personalised learning pathway recommendations.
-
----
+AiNspire is a Telekom Malaysia workforce AI-readiness platform. Employees complete a bilingual EN/BM readiness journey, receive a progressive AI contribution profile, and get role-aware learning and project recommendations. HR can review workforce analytics and generate team development plans.
 
 ## What It Does
 
-Employees complete a 5-question multiple-choice quiz plus one open-ended response. The answers are sent to a TM-hosted AI model, which reasons holistically and classifies the employee into the most fitting **AI persona**, along with a confidence score, a personalised narrative, and tailored learning recommendations.
+The active journey contains:
 
-HR managers can view team-level analytics, run skills gap analysis, succession planning, and generate AI-powered 90-day upskilling action plans for their teams.
+- Department and current-role selection
+- 20 structured questions across six readiness dimensions
+- A pledge and consent step
+- Deterministic readiness scoring from 1-to-4 answer scores
+- Progressive contribution profiles based on overall readiness
+- AI-generated narrative, strengths, gaps, project fit, and learning actions
+- Optional English YouTube training recommendations with thumbnails
+- HR dashboard, report export, skills-gap analysis, and 90-day action plans
 
----
+The readiness score measures capability. The contribution profile describes the person's current way of contributing to AI work; it is not a seniority ranking.
 
-## The Four AI Personas
+## Assessment Dimensions
 
-| Persona | Profile |
+| Section | Dimension | Questions |
+|---|---|---:|
+| 1 | Cognitive Readiness | 4 |
+| 2 | Behavioral Adoption | 4 |
+| 3 | Skills Capability | 4 |
+| 4 | Organisational / Environmental Exposure | 3 |
+| 5 | Emotional Disposition | 3 |
+| 6 | Economic Vulnerability | 2 |
+
+The question set and EN/BM content are defined in `artifacts/tm-ai-persona/src/data/assessment.ts`.
+
+## Progressive Profiles
+
+The current profile bands are based on overall readiness:
+
+| Overall readiness | Profile | Meaning |
+|---:|---|---|
+| 0-54% | Explorer | Building awareness and confidence through discovery |
+| 55-69% | Builder | Applying AI practically in tools, workflows, and solutions |
+| 70-84% | Strategist | Connecting AI capability to business outcomes and planning |
+| 85-100% | Visionary | Leading transformational AI adoption and direction |
+
+The authoritative scoring logic is in `artifacts/api-server/src/lib/assessmentScore.ts`. The LLM explains the scored result; it does not override the deterministic profile.
+
+## Agentic MCP Layer
+
+The backend uses the official TypeScript MCP SDK with an in-process MCP client/server workflow. The frontend contract remains unchanged.
+
+MCP tools currently include:
+
+- `calculate_readiness_score`
+- `get_workforce_context`
+- `find_project_matches`
+- `get_learning_pathway`
+
+The learning-pathway tool can optionally search YouTube for English training videos using the selected persona, department, role, and weakest readiness dimensions. YouTube metadata is normalized and thumbnails are served through the same-origin API proxy at `/api/youtube-thumbnail/:videoId`.
+
+## AI Gateway
+
+LLM calls use the TM API Gateway OAuth client-credentials flow in `artifacts/api-server/src/lib/llm.ts`.
+
+Required environment variables:
+
+| Variable | Description |
 |---|---|
-| **The AI Explorer** | Curious, experimental, early adopter mindset |
-| **The AI Builder** | Technical, hands-on, builds and integrates AI solutions |
-| **The AI Strategist** | Business-aligned, drives AI ROI and strategy |
-| **The AI Visionary** | Transformational, shapes long-term AI direction at TM |
+| `TM_APIGATE_CLIENT_ID` | API Gateway OAuth client ID |
+| `TM_APIGATE_CLIENT_SECRET` | API Gateway OAuth client secret |
+| `TM_APIGATE_CHAT_KEY` | LiteLLM/API Gateway chat key |
+| `TM_LLM_MODEL` | Model name, normally `gpt-oss-20b` |
 
----
+The client caches access tokens, refreshes them before expiry, sends the gateway headers, and retries once after a 401 response.
 
-## Tech Stack
+## API Endpoints
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 19, Vite 7, TypeScript, Tailwind CSS v4 |
-| Backend | Express 5, Node.js 24, TypeScript |
-| AI / LLM | TM AI endpoint (OpenAI-compatible API, model: `gpt-oss-20b`) |
-| Validation | Zod v4 |
-| Monorepo | pnpm workspaces |
-| Build | esbuild (API server), Vite (frontend) |
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/api/healthz` | API health check |
+| `POST` | `/api/classify` | Score an assessment and generate a profile |
+| `POST` | `/api/action-plan` | Generate an HR team action plan |
+| `GET` | `/api/youtube-thumbnail/:videoId` | Same-origin YouTube thumbnail proxy |
 
----
+The classify response includes `overallReadiness`, `dimensionScores`, `personaScores`, `persona`, narrative fields, recommendations, and optional video metadata.
+
+## Languages
+
+The supported languages are:
+
+- English (`EN`)
+- Bahasa Melayu (`BM`)
+
+Both languages cover the active assessment, department flow, pledge, loading states, results, reports, and learning-path UI. Classification is prefetched for both languages when the assessment is submitted, so switching language does not trigger a second wait.
 
 ## Project Structure
 
-```
+```text
 v1/
 ├── artifacts/
-│   ├── api-server/          # Express 5 REST API
+│   ├── api-server/
 │   │   └── src/
 │   │       ├── lib/
-│   │       │   └── llm.ts   # TM AI LLM client (shared helper)
+│   │       │   ├── agent.ts
+│   │       │   ├── assessmentScore.ts
+│   │       │   ├── llm.ts
+│   │       │   └── mcp.ts
 │   │       └── routes/
-│   │           ├── classify.ts     # POST /api/classify — persona classification
-│   │           └── actionPlan.ts   # POST /api/action-plan — HR 90-day plan
-│   └── tm-ai-persona/       # React frontend (Vite)
+│   │           ├── classify.ts
+│   │           ├── actionPlan.ts
+│   │           ├── health.ts
+│   │           └── youtube.ts
+│   └── tm-ai-persona/
 │       └── src/
-│           ├── App.tsx              # Main app + classification state
-│           ├── i18n.ts              # All UI strings (EN / BM)
-│           ├── data/
-│           │   ├── personas.ts      # Persona definitions
-│           │   └── questions.ts     # Quiz questions
+│           ├── App.tsx
+│           ├── i18n.ts
+│           ├── data/assessment.ts
 │           └── components/
-│               ├── LandingScreen.tsx
-│               ├── QuestionScreen.tsx
-│               ├── OpenQuestionScreen.tsx
-│               ├── AIThinkingScreen.tsx
-│               ├── ResultsScreen.tsx
-│               ├── ReportScreen.tsx
-│               ├── HRDashboard.tsx
-│               └── StatisticsScreen.tsx
 ├── lib/
-│   ├── api-spec/            # OpenAPI 3.1 spec + Orval codegen config
-│   ├── api-client-react/    # Auto-generated React query hooks
-│   ├── api-zod/             # Auto-generated Zod schemas
-│   └── db/                  # Drizzle ORM + PostgreSQL schema
-├── scripts/
-├── pnpm-workspace.yaml
+│   ├── api-spec/
+│   ├── api-client-react/
+│   ├── api-zod/
+│   └── db/
+├── render.yaml
 └── README.md
 ```
 
----
-
-## AI Integration
-
-The platform uses a **TM-hosted OpenAI-compatible LLM endpoint** (`gpt-oss-20b`). All AI calls go through a shared helper at `artifacts/api-server/src/lib/llm.ts`.
-
-**Endpoint:** `https://v-qcwq7ngstdnjr69dtn7g-4000.tma01.gpuproxy.tm.com.my/v1`
-
-Configuration is controlled via environment variables:
-
-| Variable | Default | Description |
-|---|---|---|
-| `TM_LLM_BASE_URL` | TM GPU proxy URL | LLM API base URL |
-| `TM_LLM_API_KEY` | (set in env) | Bearer token for the LLM API |
-| `TM_LLM_MODEL` | `gpt-oss-20b` | Model name |
-
-### Classification Flow
-
-1. User completes 5 MCQs + 1 open-ended response
-2. Frontend sends all answers to `POST /api/classify`
-3. API server constructs a detailed prompt including the employee's role context, MCQ answers, and free-text response
-4. TM AI model returns a JSON object with:
-   - `persona` — one of `explorer | builder | strategist | visionary`
-   - `confidence` — float 0–1
-   - `reasoning` — 2–3 sentences citing specific evidence
-   - `narrative` — personalised message addressed to the employee
-   - `recommendations` — 3 tailored learning recommendations
-5. Results are displayed on the Results and Report screens
-
-### Multi-language Support
-
-The classification endpoint accepts a `lang` parameter (`EN` or `BM`). When Bahasa Melayu is selected, the model is instructed to produce all output text in that language.
-
----
-
-## HR Dashboard Features
-
-- **Team Overview** — persona distribution, individual results table, completion rates
-- **Skills Gap Analysis** — drag sliders to set target persona distribution, view headcount gaps
-- **Succession Planning** — AI leadership pipeline with drag-to-advance candidate stages
-- **90-Day Action Plan** — AI-generated structured 3-phase upskilling plan via `POST /api/action-plan`
-- **Human-in-the-Loop Governance** — HR managers must review and approve AI classifications before they are published
-
----
-
 ## Running Locally
 
-### Prerequisites
+Prerequisites:
 
 - Node.js 24+
 - pnpm 11+
 
-### 1. Install dependencies
+Install dependencies:
 
 ```sh
 cd v1
 pnpm install
 ```
 
-### 2. Build the API server
+Create `v1/.env` from `.env.example` and provide the TM API Gateway credentials. Add `YOUTUBE_API_KEY` if YouTube video recommendations are required. The file is ignored by Git.
+
+Start the API:
 
 ```sh
-cd artifacts/api-server
-node build.mjs
+PORT=3001 pnpm --dir artifacts/api-server dev
 ```
 
-### 3. Start the API server
+Start the frontend in another terminal:
 
 ```sh
-# From artifacts/api-server
-PORT=3001 node --enable-source-maps ./dist/index.mjs
+PORT=3000 API_PORT=3001 pnpm --dir artifacts/tm-ai-persona dev
 ```
 
-### 4. Start the frontend
+Open `http://localhost:3000/`. The API health endpoint is `http://localhost:3001/api/healthz`.
+
+## Validation Commands
 
 ```sh
-# From artifacts/tm-ai-persona
-PORT=3000 BASE_PATH=/ pnpm run dev
+pnpm --dir artifacts/api-server typecheck
+pnpm --dir artifacts/api-server test
+pnpm --dir artifacts/tm-ai-persona typecheck
+pnpm --dir artifacts/tm-ai-persona build
 ```
 
-### 5. Open in browser
+The API test suite covers deterministic scoring and the MCP tool workflow. A live LLM or YouTube request is not required for the automated tests.
 
-```
-http://localhost:3000
-```
+## Render Deployment
 
-The Vite dev server proxies all `/api/*` requests to the API server on port 3001.
+`render.yaml` defines the API service. Configure these secrets in Render:
 
-> **Note:** macOS users — port 5000 is reserved by ControlCenter (AirPlay Receiver). Use port 3001 for the API server as shown above.
-
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `PORT` | Yes | Port for the API server (e.g. `3001`) |
-| `TM_LLM_BASE_URL` | No | Override LLM endpoint base URL |
-| `TM_LLM_API_KEY` | No | Override LLM API key |
-| `TM_LLM_MODEL` | No | Override model name |
-| `DATABASE_URL` | Optional | PostgreSQL connection string (not required for core classification features) |
-
----
-
-## Available Scripts
-
-```sh
-# Full typecheck across all packages
-pnpm run typecheck
-
-# Build all packages
-pnpm run build
-
-# Regenerate API hooks and Zod schemas from OpenAPI spec
-pnpm --filter @workspace/api-spec run codegen
-
-# Push DB schema changes (dev only, requires DATABASE_URL)
-pnpm --filter @workspace/db run push
+```text
+TM_APIGATE_CLIENT_ID
+TM_APIGATE_CLIENT_SECRET
+TM_APIGATE_CHAT_KEY
+YOUTUBE_API_KEY
 ```
 
----
+The Render build runs the API bundle from `artifacts/api-server`, and the service starts the compiled API on the configured `PORT`.
+
+## YouTube Notes
+
+YouTube search is optional. Without `YOUTUBE_API_KEY`, the learning path still returns text recommendations. With a key, the MCP learning tool searches for English training videos, caches no persistent user data, and returns titles, channels, durations, watch links, and same-origin thumbnails. API quota and YouTube policy limits still apply.
 
 ## Confidentiality
 
-This platform is intended for **internal Telekom Malaysia use only**. All assessment results are for personal development purposes. No personally identifiable information (PII) is stored. Results are anonymised and aggregated for HR dashboard analytics.
+AiNspire is intended for internal Telekom Malaysia workforce-development use. Recommendations are advisory and should not be treated as automatic employment, promotion, or termination decisions. HR review and organisational policy remain required for consequential actions.
