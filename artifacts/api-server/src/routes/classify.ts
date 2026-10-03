@@ -180,9 +180,11 @@ router.post("/classify", async (req, res) => {
     const scores = calculateReadinessScores(answers);
     const validPersonas = ["explorer", "builder", "strategist", "visionary"];
     let result: Record<string, unknown>;
+    let modelOutputWasInvalid = false;
     try {
       result = parseJsonObject(agentRun.raw);
     } catch (parseError) {
+      modelOutputWasInvalid = true;
       req.log.warn({ event: "classify_model_output_invalid", err: parseError }, "Using deterministic fallback for invalid model JSON");
       result = {
         persona: scores.persona,
@@ -226,7 +228,7 @@ router.post("/classify", async (req, res) => {
     const learningPathway = agentRun.mcpContext.learningPathway as { priorities?: unknown; videoRecommendations?: unknown };
     const normalizedRecommendations = normalizeRecommendations(
       result.recommendations,
-      lang === "BM" && Array.isArray(referenceResult?.recommendations) ? referenceResult.recommendations : learningPathway.priorities,
+      lang === "BM" && !modelOutputWasInvalid && Array.isArray(referenceResult?.recommendations) ? referenceResult.recommendations : learningPathway.priorities,
       learningPathway.videoRecommendations,
     );
     if (lang === "BM" && Array.isArray(referenceResult?.recommendations) && normalizedRecommendations.length < referenceResult.recommendations.length) {
