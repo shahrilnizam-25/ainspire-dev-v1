@@ -37,7 +37,7 @@ jobs:
         env:
           PORT: 3000
           BASE_PATH: /ainspire-dev-v1/
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_URL: https://ainspire-dev-v1.onrender.com
         run: pnpm run build
 
       - name: Add .nojekyll
