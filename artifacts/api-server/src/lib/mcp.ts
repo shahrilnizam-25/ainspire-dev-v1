@@ -339,7 +339,9 @@ export async function runWorkforcePlanningMcpWorkflow(input: {
     });
     const learningPathway = await readToolResult(client, "get_learning_pathway", {
       department: input.divisionName,
+      role: "HR Workforce Planner",
       dimensionScores,
+      language: "EN",
     });
 
     return { workforceContext, projectMatches, learningPathway };
