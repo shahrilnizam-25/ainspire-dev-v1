@@ -175,9 +175,29 @@ router.post("/classify", async (req, res) => {
       languageInstruction: langInstruction,
       personaDefinitions: Object.entries(PERSONA_DEFS).map(([key, description]) => `- ${key}: ${description}`).join("\n"),
     });
-    const result = parseJsonObject(agentRun.raw);
     const scores = calculateReadinessScores(answers);
     const validPersonas = ["explorer", "builder", "strategist", "visionary"];
+    let result: Record<string, unknown>;
+    try {
+      result = parseJsonObject(agentRun.raw);
+    } catch (parseError) {
+      req.log.warn({ event: "classify_model_output_invalid", err: parseError }, "Using deterministic fallback for invalid model JSON");
+      result = {
+        persona: scores.persona,
+        confidence: 0.7,
+        reasoning: lang === "BM"
+          ? "Profil ini menggunakan skor kesediaan berstruktur merentas enam dimensi kerana output model tidak dapat distrukturkan."
+          : "This profile uses the structured readiness scores across six dimensions because the model output could not be structured.",
+        narrative: lang === "BM"
+          ? `Profil anda sebagai ${role} dalam ${department} menunjukkan laluan pembangunan AI yang jelas berdasarkan skor kesediaan anda.`
+          : `Your profile as a ${role} in ${department} shows a clear AI development path based on your readiness scores.`,
+        recommendations: [],
+        strengths: [],
+        developmentGaps: [],
+        projectFit: [],
+        resourceAssignmentSignals: [],
+      };
+    }
 
     if (!validPersonas.includes(String(scores.persona))) scores.persona = "explorer";
     result.persona = scores.persona;
