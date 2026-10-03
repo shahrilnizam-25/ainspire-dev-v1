@@ -1,144 +1,215 @@
 import { Router } from "express";
-import { chatComplete } from "../lib/llm.js";
+import { runReadinessAgent } from "../lib/agent.js";
+import { calculateReadinessScores } from "../lib/assessmentScore.js";
 
 const router = Router();
 
 type AnswerItem = {
-  questionId: number;
+  questionId: string;
   questionText: string;
-  selectedOption?: string;
-  selectedText?: string;
-  personaId?: string;
-  freeText?: string;
+  dimension: string;
+  selectedOption: string;
+  selectedText: string;
+  score: number;
 };
 
 const PERSONA_DEFS: Record<string, string> = {
-  explorer:
-    "curious and experimental — loves discovering AI tools, early adopter mindset, enthusiastic but without deep technical depth",
-  builder:
-    "technically hands-on — implements and integrates AI solutions, builds AI-powered systems, high technical depth",
-  strategist:
-    "business-aligned — leads AI projects, drives measurable ROI, bridges technical teams and executive stakeholders",
-  visionary:
-    "transformational — shapes long-term AI direction, inspires others, influences policy and thought leadership at an industry level",
+  explorer: "curious and experimental, discovering AI tools and building foundational confidence",
+  builder: "technically hands-on, implementing and integrating AI solutions",
+  strategist: "business-aligned, leading AI projects and connecting technology to outcomes",
+  visionary: "transformational, shaping long-term AI direction and inspiring change",
 };
 
 const LANG_LABELS: Record<string, string> = {
   EN: "English",
   BM: "Bahasa Melayu (Malay)",
-  CN: "Simplified Chinese (简体中文)",
 };
 
 router.post("/classify", async (req, res) => {
-  const { answers, lang } = req.body as { answers: AnswerItem[]; lang?: string };
+  const { answers, lang, department, role, assessmentVersion } = req.body as {
+    answers: AnswerItem[];
+    lang?: string;
+    department?: string;
+    role?: string;
+    assessmentVersion?: string;
+  };
 
   req.log.info(
     {
       event: "classify_started",
       answersCount: Array.isArray(answers) ? answers.length : 0,
       lang: lang ?? "EN",
+      department: department ?? "",
+      assessmentVersion: assessmentVersion ?? "",
     },
-    "Starting persona classification",
+    "Starting AI readiness classification",
   );
 
-  if (!answers || !Array.isArray(answers) || answers.length === 0) {
-    return res.status(400).json({ error: "answers array is required" });
+  if (!Array.isArray(answers) || answers.length !== 20) {
+    return res.status(400).json({ error: "exactly 20 assessment answers are required" });
   }
 
-  const mcq = answers.filter((a) => a.selectedOption !== undefined);
-  const roleAnswer = answers.find(
-    (a) => a.freeText !== undefined && a.questionId === 6,
-  );
-  const openAnswer = answers.find(
-    (a) => a.freeText !== undefined && a.questionId !== 6,
-  );
+  function parseJsonObject(raw: string): Record<string, unknown> {
+    const unfenced = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const start = unfenced.indexOf("{");
+    const end = unfenced.lastIndexOf("}");
+    if (start < 0 || end <= start) throw new Error("LLM response did not contain a complete JSON object");
+    return JSON.parse(unfenced.slice(start, end + 1)) as Record<string, unknown>;
+  }
 
-  const mcqSummary = mcq
-    .map(
-      (a) =>
-        `Q${a.questionId}: "${a.questionText}"\nSelected: ${a.selectedOption}. "${a.selectedText}" → maps to persona [${a.personaId}]`,
+  function videoFields(video: Record<string, unknown> | undefined) {
+    if (!video) return {};
+    return {
+      videoTitle: typeof video.videoTitle === "string" ? video.videoTitle : undefined,
+      relevanceStatement: typeof video.relevanceStatement === "string" ? video.relevanceStatement : undefined,
+      videoUrl: typeof video.videoUrl === "string" ? video.videoUrl : undefined,
+      thumbnailUrl: typeof video.thumbnailUrl === "string" ? video.thumbnailUrl : undefined,
+      channelTitle: typeof video.channelTitle === "string" ? video.channelTitle : undefined,
+      duration: typeof video.duration === "string" ? video.duration : undefined,
+    };
+  }
+
+  const localizedDimensions: Record<string, string> = lang === "BM"
+    ? {
+      cognitiveReadiness: "Kesediaan Kognitif",
+      behavioralAdoption: "Penggunaan Tingkah Laku",
+      skillsCapability: "Keupayaan Kemahiran",
+      orgEnvironmentalExposure: "Organisasi / Persekitaran",
+      emotionalDisposition: "Kecenderungan Emosi",
+      economicVulnerability: "Kerentanan Ekonomi",
+    }
+    : {
+      cognitiveReadiness: "Cognitive Readiness",
+      behavioralAdoption: "Behavioral Adoption",
+      skillsCapability: "Skills Capability",
+      orgEnvironmentalExposure: "Organisation / Environmental Exposure",
+      emotionalDisposition: "Emotional Disposition",
+      economicVulnerability: "Economic Vulnerability",
+    };
+
+  function sanitizeUserText(value: unknown) {
+    if (typeof value !== "string") return value;
+    let sanitized = value;
+    for (const [key, label] of Object.entries(localizedDimensions)) {
+      sanitized = sanitized.replace(new RegExp(key, "g"), label);
+    }
+    const questionLabels: Record<string, string> = {
+      cognitive: localizedDimensions.cognitiveReadiness,
+      behavior: localizedDimensions.behavioralAdoption,
+      skills: localizedDimensions.skillsCapability,
+      environment: localizedDimensions.orgEnvironmentalExposure,
+      emotion: localizedDimensions.emotionalDisposition,
+      economic: localizedDimensions.economicVulnerability,
+    };
+    sanitized = sanitized.replace(/Q(cognitive|behavior|skills|environment|emotion|economic)-0?(\d+)/gi, (_match, key: string, number: string) =>
+      `${questionLabels[key.toLowerCase()] ?? key} question ${number}`,
+    );
+    sanitized = sanitized.replace(/\b(readiness|score)\s+of\s+(\d{1,3})(?!%)/gi, "$1 of $2%");
+    sanitized = sanitized.replace(/(Cognitive Readiness|Behavioral Adoption|Skills Capability|Organisation \/ Environmental Exposure|Emotional Disposition|Economic Vulnerability)\s*\((\d{1,3})\)/g, "$1 ($2%)");
+    return lang === "BM"
+      ? sanitized.replace(/\bthis employee\b/gi, "anda").replace(/\bthe employee's\b/gi, "anda").replace(/\bthe employee\b/gi, "anda")
+      : sanitized.replace(/\bthis employee\b/gi, "you").replace(/\bthe employee's\b/gi, "your").replace(/\bthe employee\b/gi, "you");
+  }
+
+  function sanitizeTextArray(value: unknown) {
+    return Array.isArray(value) ? value.map((item) => sanitizeUserText(item)) : value;
+  }
+
+  function normalizeRecommendations(value: unknown, fallback: unknown, videos: unknown): Array<{ title: string; description: string; videoTitle?: string; videoUrl?: string; thumbnailUrl?: string; channelTitle?: string; duration?: string }> {
+    const primary = Array.isArray(value) ? value : [];
+    const fallbackItems = Array.isArray(fallback) ? fallback : [];
+    const videoItems = Array.isArray(videos) ? videos : [];
+    const defaultDescription = lang === "BM"
+      ? "Langkah seterusnya yang disyorkan berdasarkan profil kesediaan AI anda."
+      : "Recommended next step based on your AI readiness profile.";
+    const normalizeSource = (source: unknown[]) => source.flatMap((item, index) => {
+      if (typeof item === "string" && item.trim()) {
+        return [{ title: item.trim(), description: defaultDescription, ...videoFields(videoItems[index]) }];
+      }
+      if (!item || typeof item !== "object") return [];
+      const candidate = item as Record<string, unknown>;
+      const title = [candidate.title, candidate.name, candidate.course, candidate.recommendation]
+        .find((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
+      const fallbackTitle = typeof candidate.action === "string"
+        ? (lang === "BM" ? `Pembangunan disasarkan untuk ${localizedDimensions[String(candidate.dimension)] ?? "kesediaan AI"}` : candidate.action)
+        : undefined;
+      const description = [candidate.description, candidate.reason, candidate.why, candidate.justification, candidate.detail]
+        .find((entry): entry is string => typeof entry === "string" && entry.trim().length > 0);
+      if (!title && !fallbackTitle) return [];
+      return [{
+        title: (title ?? fallbackTitle as string).trim(),
+        description: description?.trim() ?? defaultDescription,
+        ...videoFields(videoItems[index]),
+      }];
+    });
+    const normalizedPrimary = normalizeSource(primary);
+    return normalizedPrimary.length > 0 ? normalizedPrimary : normalizeSource(fallbackItems);
+  }
+  if (!department || !role) {
+    return res.status(400).json({ error: "department and role are required" });
+  }
+  if (lang && !["EN", "BM"].includes(lang)) {
+    return res.status(400).json({ error: "lang must be EN or BM" });
+  }
+  if (answers.some((answer) => !answer.questionId || !answer.dimension || !answer.selectedOption || typeof answer.score !== "number")) {
+    return res.status(400).json({ error: "assessment answers are incomplete" });
+  }
+
+  const mcqSummary = answers
+    .map((answer) =>
+      `Q${answer.questionId} [${answer.dimension}]: "${answer.questionText}"\nSelected: ${answer.selectedOption}. "${answer.selectedText}" (score ${answer.score}/4)`,
     )
     .join("\n\n");
-
-  const roleSection = roleAnswer
-    ? `\n\nEmployee's current role at Telekom Malaysia: "${roleAnswer.freeText}"`
+  const outputLang = LANG_LABELS[lang ?? "EN"] ?? LANG_LABELS.EN;
+  const langInstruction = lang && lang !== "EN"
+    ? `\n\nAll narrative, reasoning, recommendation, strength, gap, project-fit, and assignment-signal text must be written entirely in ${outputLang}. Use natural Bahasa Melayu sentence structure and do not mix English except for TM, AI, API, and unavoidable technical or product names.`
     : "";
-
-  const openSection = openAnswer
-    ? `\n\nOpen-ended response:\nQ${openAnswer.questionId}: "${openAnswer.questionText}"\nEmployee wrote: "${openAnswer.freeText}"`
-    : "";
-
-  const outputLang = LANG_LABELS[lang ?? "EN"] ?? LANG_LABELS["EN"];
-  const langInstruction =
-    lang && lang !== "EN"
-      ? `\n\n## Language Requirement\nYou MUST write ALL text in the JSON output — every word in "reasoning", "narrative", all recommendation "title" and "description" fields — entirely in ${outputLang}. Do not mix in any English phrases.`
-      : "";
-
-  const prompt = `You are an expert AI talent classifier for Telekom Malaysia's workforce development programme. Analyse this employee's self-assessment holistically and classify them into the most fitting AI persona.${langInstruction}
-
-## The Four AI Personas
-${Object.entries(PERSONA_DEFS)
-  .map(([k, v]) => `- **${k}**: ${v}`)
-  .join("\n")}
-
-## Employee Context${roleSection}
-
-## Assessment Responses
-${mcqSummary}${openSection}
-
-## Instructions
-1. Analyse the employee's role context, multiple-choice answers, AND the open-ended response together as a whole picture
-2. Factor in the employee's current role — it provides important context about their position and likely AI exposure
-3. Pay special attention to the open-ended response — it often reveals the employee's true orientation more than MCQ choices
-4. Mixed signals are common and expected; resolve them with your best professional judgement
-5. Assign the ONE persona that best fits the complete picture, not just the plurality vote
-6. Be specific in your reasoning — cite actual phrases or patterns from their answers and role context
-
-Respond ONLY with a valid JSON object. No markdown, no text outside the JSON braces:
-{
-  "persona": "explorer|builder|strategist|visionary",
-  "confidence": 0.75,
-  "reasoning": "2-3 sentences citing specific evidence from their responses explaining your classification decision",
-  "narrative": "2-3 sentences addressed directly to the employee (use 'you' and 'your') celebrating their unique AI identity and what makes their profile distinctive at Telekom Malaysia",
-  "recommendations": [
-    { "title": "Specific course or action name", "description": "One sentence on why this fits their specific profile" },
-    { "title": "Specific course or action name", "description": "One sentence on why this fits their specific profile" },
-    { "title": "Specific course or action name", "description": "One sentence on why this fits their specific profile" }
-  ]
-}`;
 
   try {
-    const raw = await chatComplete(prompt, 1024);
+    const agentRun = await runReadinessAgent({
+      answers,
+      department,
+      role,
+      assessmentVersion,
+      language: lang === "BM" ? "BM" : "EN",
+      languageInstruction: langInstruction,
+      personaDefinitions: Object.entries(PERSONA_DEFS).map(([key, description]) => `- ${key}: ${description}`).join("\n"),
+    });
+    const result = parseJsonObject(agentRun.raw);
+    const scores = calculateReadinessScores(answers);
+    const validPersonas = ["explorer", "builder", "strategist", "visionary"];
 
-    // Strip any accidental markdown code fences
-    const cleaned = raw
-      .replace(/```json\n?/g, "")
-      .replace(/```\n?/g, "")
-      .trim();
+    if (!validPersonas.includes(String(scores.persona))) scores.persona = "explorer";
+    result.persona = scores.persona;
+    if (typeof result.confidence !== "number") {
+      result.confidence = 0.7;
+    } else {
+      const rawConfidence = result.confidence > 1 ? result.confidence / 100 : result.confidence;
+      result.confidence = Math.max(0, Math.min(1, rawConfidence));
+    }
+    result.reasoning = sanitizeUserText(result.reasoning) ?? (lang === "BM" ? "Profil kesediaan anda dinilai merentas enam dimensi." : "Your readiness profile was evaluated across the six dimensions.");
+    result.narrative = sanitizeUserText(result.narrative) ?? (lang === "BM" ? "Profil anda menunjukkan peluang praktikal untuk mengembangkan sumbangan AI anda." : "Your profile highlights practical opportunities to grow your AI contribution.");
+    result.strengths = sanitizeTextArray(result.strengths);
+    result.developmentGaps = sanitizeTextArray(result.developmentGaps);
+    result.projectFit = sanitizeTextArray(result.projectFit);
+    result.resourceAssignmentSignals = sanitizeTextArray(result.resourceAssignmentSignals);
+    if (!String(result.narrative).toLowerCase().includes(role.toLowerCase()) && !String(result.narrative).toLowerCase().includes(department.toLowerCase())) {
+      result.narrative = lang === "BM"
+        ? `${result.narrative} Peranan semasa anda sebagai ${role} dalam ${department} telah digunakan sebagai konteks untuk profil ini.`
+        : `${result.narrative} Your current role as ${role} in ${department} was included as context for this profile.`;
+    }
+    const learningPathway = agentRun.mcpContext.learningPathway as { priorities?: unknown; videoRecommendations?: unknown };
+    result.recommendations = normalizeRecommendations(result.recommendations, learningPathway.priorities, learningPathway.videoRecommendations);
+    if (!Array.isArray(result.strengths)) result.strengths = [];
+    if (!Array.isArray(result.developmentGaps)) result.developmentGaps = [];
+    if (!Array.isArray(result.projectFit)) result.projectFit = [];
+    if (!Array.isArray(result.resourceAssignmentSignals)) result.resourceAssignmentSignals = [];
 
-    const result = JSON.parse(cleaned);
-
-    // Validate and sanitise
-    const valid = ["explorer", "builder", "strategist", "visionary"];
-    if (!valid.includes(result.persona)) result.persona = "explorer";
-    if (typeof result.confidence !== "number") result.confidence = 0.7;
-    if (!Array.isArray(result.recommendations)) result.recommendations = [];
-
-    req.log.info(
-      {
-        event: "classify_success",
-        persona: result.persona,
-        confidence: result.confidence,
-      },
-      "Persona classification completed",
-    );
-
-    return res.json(result);
+    req.log.info({ event: "classify_success", persona: result.persona, confidence: result.confidence }, "AI readiness classification completed");
+    return res.json({ ...result, assessmentVersion, department, role, ...scores });
   } catch (err) {
-    req.log.error({ event: "classify_failed", err }, "Persona classification failed");
-    return res
-      .status(500)
-      .json({ error: "AI classification failed", details: String(err) });
+    req.log.error({ event: "classify_failed", err }, "AI readiness classification failed");
+    return res.status(500).json({ error: "AI classification failed", details: String(err) });
   }
 });
 

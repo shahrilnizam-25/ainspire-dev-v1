@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { TranslatedQuestion, TranslatedOption, Lang } from '../i18n';
-import { translations } from '../i18n';
+import { assessmentQuestionsByLang, dimensionLabelsByLang, type AssessmentQuestion, type AssessmentOption } from '../data/assessment';
+import type { Lang } from '../i18n';
 
 export default function QuestionScreen({
   lang,
@@ -11,26 +11,27 @@ export default function QuestionScreen({
   onAnswer,
 }: {
   lang: Lang;
-  question: TranslatedQuestion;
+  question: AssessmentQuestion;
   currentIndex: number;
   totalQuestions: number;
-  onAnswer: (option: TranslatedOption) => void;
+  onAnswer: (option: AssessmentOption) => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const t = translations[lang];
-
   // Reset selection when question changes
   useEffect(() => {
     setSelectedId(null);
   }, [question.id]);
 
-  const handleSelect = (option: TranslatedOption) => {
+  const handleSelect = (option: AssessmentOption) => {
     if (selectedId) return;
     setSelectedId(option.id);
     onAnswer(option);
   };
 
   const numStr = (n: number) => String(n).padStart(2, '0');
+  const sectionQuestions = assessmentQuestionsByLang[lang].filter((item) => item.section === question.section);
+  const sectionPosition = sectionQuestions.findIndex((item) => item.id === question.id) + 1;
+  const sectionLabel = dimensionLabelsByLang[lang][question.dimension].toUpperCase();
 
   return (
     <div className="w-full max-w-3xl px-6 py-8 flex flex-col items-center">
@@ -61,6 +62,9 @@ export default function QuestionScreen({
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="w-full"
           >
+            <div className="mb-6 inline-flex rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-primary/80">
+              Section {question.section} · {sectionLabel} · {sectionPosition}/{sectionQuestions.length}
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-10 leading-tight">
               {question.text}
             </h2>

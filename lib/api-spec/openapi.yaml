@@ -11,7 +11,7 @@ tags:
   - name: health
     description: Health operations
   - name: classify
-    description: AI persona classification
+    description: AI readiness classification
 paths:
   /healthz:
     get:
@@ -30,8 +30,8 @@ paths:
     post:
       operationId: classifyPersona
       tags: [classify]
-      summary: Classify AI persona using Claude
-      description: Sends all assessment answers to Claude, which reasons holistically and returns a persona classification with narrative and recommendations
+      summary: Classify AI readiness using the TM AI Gateway
+      description: Scores the structured assessment and returns readiness, persona, development, and project-fit signals
       requestBody:
         required: true
         content:
@@ -62,28 +62,45 @@ components:
       type: object
       properties:
         questionId:
-          type: integer
+          type: string
         questionText:
+          type: string
+        dimension:
           type: string
         selectedOption:
           type: string
         selectedText:
           type: string
-        personaId:
-          type: string
-        freeText:
-          type: string
+        score:
+          type: number
+          minimum: 1
+          maximum: 4
       required:
         - questionId
         - questionText
+        - dimension
+        - selectedOption
+        - selectedText
+        - score
     ClassifyRequest:
       type: object
       properties:
+        assessmentVersion:
+          type: string
+        department:
+          type: string
+        role:
+          type: string
+        lang:
+          type: string
         answers:
           type: array
           items:
             $ref: "#/components/schemas/AnswerItem"
       required:
+        - assessmentVersion
+        - department
+        - role
         - answers
     Recommendation:
       type: object
@@ -91,6 +108,20 @@ components:
         title:
           type: string
         description:
+          type: string
+        videoTitle:
+          type: string
+        relevanceStatement:
+          type: string
+        videoUrl:
+          type: string
+          format: uri
+        thumbnailUrl:
+          type: string
+          format: uri
+        channelTitle:
+          type: string
+        duration:
           type: string
       required:
         - title
@@ -113,6 +144,44 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Recommendation"
+        assessmentVersion:
+          type: string
+        department:
+          type: string
+        role:
+          type: string
+        overallReadiness:
+          type: number
+          minimum: 0
+          maximum: 100
+        dimensionScores:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+            maximum: 100
+        personaScores:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+            maximum: 100
+        strengths:
+          type: array
+          items:
+            type: string
+        developmentGaps:
+          type: array
+          items:
+            type: string
+        projectFit:
+          type: array
+          items:
+            type: string
+        resourceAssignmentSignals:
+          type: array
+          items:
+            type: string
       required:
         - persona
         - confidence

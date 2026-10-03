@@ -9,4 +9,10 @@
 export interface Recommendation {
   title: string;
   description: string;
+  videoTitle?: string;
+  relevanceStatement?: string;
+  videoUrl?: string;
+  thumbnailUrl?: string;
+  channelTitle?: string;
+  duration?: string;
 }

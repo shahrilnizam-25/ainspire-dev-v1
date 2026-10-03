@@ -7,10 +7,10 @@
  */
 
 export interface AnswerItem {
-  questionId: number;
+  questionId: string;
   questionText: string;
-  selectedOption?: string;
-  selectedText?: string;
-  personaId?: string;
-  freeText?: string;
+  dimension: string;
+  selectedOption: string;
+  selectedText: string;
+  score: number;
 }

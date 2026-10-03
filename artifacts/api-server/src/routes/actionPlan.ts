@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { chatComplete } from "../lib/llm.js";
+import { runWorkforcePlanningMcpWorkflow } from "../lib/mcp.js";
 
 const router = Router();
 
@@ -76,7 +77,11 @@ Respond ONLY with valid JSON, no markdown:
 }`;
 
   try {
-    const raw = await chatComplete(prompt, 2048);
+    const mcpContext = await runWorkforcePlanningMcpWorkflow({
+      divisionName: divisionName || "IT Strategy & Orchestration",
+      skillsGap: Array.isArray(skillsGap) ? skillsGap : [],
+    });
+    const raw = await chatComplete(`${prompt}\n\n## MCP workforce context\n${JSON.stringify(mcpContext, null, 2)}`, 2048);
     const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     const result = JSON.parse(cleaned);
 

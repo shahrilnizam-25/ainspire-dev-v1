@@ -781,7 +781,7 @@ export default function HRDashboard({ lang = 'EN', currentUserPersona, aiResult,
 
   const t = translations[lang];
 
-  const currentScore = aiResult ? Math.round(aiResult.confidence * 100) : null;
+  const currentScore = aiResult?.overallReadiness ?? (aiResult ? Math.round(aiResult.confidence * 100) : null);
   const allMembers: Member[] = [
     ...DEMO_TEAM,
     { name: 'You (current)', role: 'Current Assessment', grade: '—', persona: currentUserPersona, score: currentScore, trend: null, status: 'complete' },

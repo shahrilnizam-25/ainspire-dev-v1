@@ -10,21 +10,31 @@ export interface HealthStatus {
 }
 
 export interface AnswerItem {
-  questionId: number;
+  questionId: string;
   questionText: string;
-  selectedOption?: string;
-  selectedText?: string;
-  personaId?: string;
-  freeText?: string;
+  dimension: string;
+  selectedOption: string;
+  selectedText: string;
+  score: number;
 }
 
 export interface ClassifyRequest {
+  assessmentVersion: string;
+  department: string;
+  role: string;
   answers: AnswerItem[];
+  lang?: string;
 }
 
 export interface Recommendation {
   title: string;
   description: string;
+  videoTitle?: string;
+  relevanceStatement?: string;
+  videoUrl?: string;
+  thumbnailUrl?: string;
+  channelTitle?: string;
+  duration?: string;
 }
 
 export type ClassifyResponsePersona = typeof ClassifyResponsePersona[keyof typeof ClassifyResponsePersona];
@@ -47,5 +57,15 @@ export interface ClassifyResponse {
   reasoning: string;
   narrative: string;
   recommendations: Recommendation[];
+  assessmentVersion?: string;
+  department?: string;
+  role?: string;
+  overallReadiness?: number;
+  dimensionScores?: Record<string, number>;
+  personaScores?: Record<string, number>;
+  strengths?: string[];
+  developmentGaps?: string[];
+  projectFit?: string[];
+  resourceAssignmentSignals?: string[];
 }
 

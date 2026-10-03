@@ -18,4 +18,14 @@ export interface ClassifyResponse {
   reasoning: string;
   narrative: string;
   recommendations: Recommendation[];
+  assessmentVersion?: string;
+  department?: string;
+  role?: string;
+  overallReadiness?: number;
+  dimensionScores?: Record<string, number>;
+  personaScores?: Record<string, number>;
+  strengths?: string[];
+  developmentGaps?: string[];
+  projectFit?: string[];
+  resourceAssignmentSignals?: string[];
 }

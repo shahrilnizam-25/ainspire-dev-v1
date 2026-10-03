@@ -8,5 +8,9 @@
 import type { AnswerItem } from './answerItem';
 
 export interface ClassifyRequest {
+  assessmentVersion: string;
+  department: string;
+  role: string;
   answers: AnswerItem[];
+  lang?: string;
 }

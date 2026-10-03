@@ -2,24 +2,31 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingScreen from './components/LandingScreen';
 import QuestionScreen from './components/QuestionScreen';
-import OpenQuestionScreen from './components/OpenQuestionScreen';
+import DepartmentScreen from './components/DepartmentScreen';
+import PledgeScreen from './components/PledgeScreen';
 import AIThinkingScreen from './components/AIThinkingScreen';
 import ResultsScreen from './components/ResultsScreen';
 import HRDashboard from './components/HRDashboard';
 import ReportScreen from './components/ReportScreen';
 import StatisticsScreen from './components/StatisticsScreen';
 import ContactScreen from './components/ContactScreen';
-import { questionsByLang, openQuestionByLang, type Lang } from './i18n';
-import type { Option } from './data/questions';
+import { type Lang } from './i18n';
+import {
+  ASSESSMENT_VERSION,
+  assessmentQuestionsByLang,
+  type AssessmentAnswer,
+  type AssessmentOption,
+} from './data/assessment';
 
-type Screen = 'landing' | 'assessment' | 'open-question' | 'ai-loading' | 'results' | 'hr-view' | 'statistics' | 'contact' | 'report';
+type Screen = 'landing' | 'department' | 'assessment' | 'pledge' | 'ai-loading' | 'results' | 'hr-view' | 'statistics' | 'contact' | 'report';
 
 export type MCQAnswer = {
-  questionId: number;
+  questionId: string;
   questionText: string;
   selectedOption: string;
   selectedText: string;
-  personaId: string;
+  dimension: string;
+  score: number;
 };
 
 export type AIResult = {
@@ -27,21 +34,35 @@ export type AIResult = {
   confidence: number;
   reasoning: string;
   narrative: string;
-  recommendations: Array<{ title: string; description: string }>;
+  recommendations: Array<{
+    title: string;
+    description: string;
+    videoTitle?: string;
+    relevanceStatement?: string;
+    videoUrl?: string;
+    thumbnailUrl?: string;
+    channelTitle?: string;
+    duration?: string;
+  }>;
+  overallReadiness?: number;
+  dimensionScores?: Record<string, number>;
+  personaScores?: Record<string, number>;
+  strengths?: string[];
+  developmentGaps?: string[];
+  projectFit?: string[];
+  resourceAssignmentSignals?: string[];
 };
 
 // Payload shape sent to /api/classify
-type StoredAnswer =
-  | MCQAnswer
-  | { questionId: number; questionText: string; freeText: string };
+type StoredAnswer = AssessmentAnswer[];
 
-const LANGS: Lang[] = ['EN', 'BM', 'CN'];
+const LANGS: Lang[] = ['EN', 'BM'];
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('landing');
   const [lang, setLang] = useState<Lang>('EN');
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
-  const [mcqAnswers, setMcqAnswers] = useState<MCQAnswer[]>([]);
+  const [mcqAnswers, setMcqAnswers] = useState<AssessmentAnswer[]>([]);
 
   // Per-language result cache: once fetched for a language it never re-fetches
   const [aiResultCache, setAiResultCache] = useState<Partial<Record<Lang, AIResult>>>({});
@@ -50,8 +71,9 @@ export default function App() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [isReClassifying, setIsReClassifying] = useState(false);
   // Stored answers so we can re-call the API when language changes
-  const [lastAnswers, setLastAnswers] = useState<StoredAnswer[] | null>(null);
+  const [lastAnswers, setLastAnswers] = useState<StoredAnswer | null>(null);
   const [userRole, setUserRole] = useState<string>('');
+  const [department, setDepartment] = useState<string>('');
 
   // Track which lang is currently in-flight to avoid duplicate requests
   const fetchingForLang = useRef<Lang | null>(null);
@@ -60,19 +82,24 @@ export default function App() {
   const aiResult = aiResultCache[lang] ?? null;
 
   // Active language-specific data
-  const questions = questionsByLang[lang];
-  const openQuestion = openQuestionByLang[lang];
+  const questions = assessmentQuestionsByLang[lang];
 
   // Shared classify helper
-  const runClassify = useCallback(async (answers: StoredAnswer[], targetLang: Lang): Promise<AIResult> => {
+  const runClassify = useCallback(async (answers: StoredAnswer, targetLang: Lang): Promise<AIResult> => {
     const res = await fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/classify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers, lang: targetLang }),
+      body: JSON.stringify({
+        assessmentVersion: ASSESSMENT_VERSION,
+        department,
+        role: userRole,
+        answers,
+        lang: targetLang,
+      }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json() as Promise<AIResult>;
-  }, []);
+  }, [department, userRole]);
 
   // Re-classify whenever language changes on results/report screens
   useEffect(() => {
@@ -124,7 +151,7 @@ export default function App() {
   }, [lang, screen, lastAnswers, runClassify]);
 
   const handleStart = () => {
-    setScreen('assessment');
+    setScreen('department');
     setCurrentQuestionIdx(0);
     setMcqAnswers([]);
     setAiResultCache({});
@@ -132,51 +159,61 @@ export default function App() {
     setLastAnswers(null);
     setAiError(null);
     setIsReClassifying(false);
+    setDepartment('');
+    setUserRole('');
   };
 
-  const handleAnswer = (option: Option) => {
+  const handleDepartmentSubmit = (selectedDepartment: string, role: string) => {
+    setDepartment(selectedDepartment);
+    setUserRole(role);
+    setCurrentQuestionIdx(0);
+    setMcqAnswers([]);
+    setScreen('assessment');
+  };
+
+  const handleAnswer = (option: AssessmentOption) => {
     const question = questions[currentQuestionIdx];
-    const answer: MCQAnswer = {
+    const answer: AssessmentAnswer = {
       questionId: question.id,
       questionText: question.text,
+      dimension: question.dimension,
       selectedOption: option.id,
       selectedText: option.text,
-      personaId: option.personaId,
+      score: option.score,
     };
     setMcqAnswers((prev) => [...prev, answer]);
 
     if (currentQuestionIdx < questions.length - 1) {
       setTimeout(() => setCurrentQuestionIdx((prev) => prev + 1), 600);
     } else {
-      setTimeout(() => setScreen('open-question'), 600);
+      setTimeout(() => setScreen('pledge'), 600);
     }
   };
 
-  const handleOpenSubmit = async (role: string, freeText: string) => {
-    setUserRole(role);
+  const handleSubmit = async () => {
     setScreen('ai-loading');
-
-    const answers: StoredAnswer[] = [
-      ...mcqAnswers,
-      {
-        questionId: 6,
-        questionText: 'What is your current role in Telekom Malaysia?',
-        freeText: role,
-      },
-      {
-        questionId: openQuestion.id,
-        questionText: openQuestion.text,
-        freeText,
-      },
-    ];
+    const answers: StoredAnswer = mcqAnswers;
 
     // Persist answers so language switches can re-use them
     setLastAnswers(answers);
 
     try {
-      const data = await runClassify(answers, lang);
-      setAiResultCache({ [lang]: data });
-      setClassifiedPersonaId(data.persona);
+      const languages: Lang[] = ['EN', 'BM'];
+      const settledResults = await Promise.allSettled(
+        languages.map((targetLang) => runClassify(answers, targetLang)),
+      );
+      const nextCache: Partial<Record<Lang, AIResult>> = {};
+      settledResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          nextCache[languages[index]] = result.value;
+        }
+      });
+
+      const selectedResult = nextCache[lang] ?? nextCache.EN ?? nextCache.BM;
+      if (!selectedResult) throw new Error('AI classification failed for both languages');
+
+      setAiResultCache(nextCache);
+      setClassifiedPersonaId(selectedResult.persona);
       setScreen('results');
     } catch (err) {
       console.error('Classification error:', err);
@@ -185,7 +222,7 @@ export default function App() {
     }
   };
 
-  // Rule-based fallback persona (plurality vote)
+  // Rule-based fallback persona for compatibility with the existing report UI.
   const getFallbackPersona = (): string => {
     const counts: Record<string, number> = {
       explorer: 0,
@@ -194,7 +231,8 @@ export default function App() {
       visionary: 0,
     };
     mcqAnswers.forEach((a) => {
-      if (counts[a.personaId] !== undefined) counts[a.personaId]++;
+      const persona = a.score >= 4 ? 'builder' : a.score === 3 ? 'strategist' : 'explorer';
+      counts[persona]++;
     });
     return (
       Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'explorer'
@@ -255,6 +293,12 @@ export default function App() {
             </motion.div>
           )}
 
+          {screen === 'department' && (
+            <motion.div key="department" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full flex justify-center">
+              <DepartmentScreen lang={lang} onSubmit={handleDepartmentSubmit} />
+            </motion.div>
+          )}
+
           {screen === 'assessment' && (
             <motion.div
               key="assessment"
@@ -274,21 +318,20 @@ export default function App() {
             </motion.div>
           )}
 
-          {screen === 'open-question' && (
+          {screen === 'pledge' && (
             <motion.div
-              key="open-question"
+              key="pledge"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.4 }}
               className="w-full flex justify-center"
             >
-              <OpenQuestionScreen
+              <PledgeScreen
                 lang={lang}
-                question={openQuestion}
                 currentIndex={questions.length}
                 totalQuestions={questions.length + 1}
-                onSubmit={handleOpenSubmit}
+                onSubmit={handleSubmit}
               />
             </motion.div>
           )}

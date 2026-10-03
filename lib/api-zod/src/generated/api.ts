@@ -22,13 +22,17 @@ export const HealthCheckResponse = zod.object({
  * @summary Classify AI persona using Claude
  */
 export const ClassifyPersonaBody = zod.object({
+  "assessmentVersion": zod.string(),
+  "department": zod.string(),
+  "role": zod.string(),
+  "lang": zod.string().optional(),
   "answers": zod.array(zod.object({
-  "questionId": zod.number(),
+  "questionId": zod.string(),
   "questionText": zod.string(),
-  "selectedOption": zod.string().optional(),
-  "selectedText": zod.string().optional(),
-  "personaId": zod.string().optional(),
-  "freeText": zod.string().optional()
+  "dimension": zod.string(),
+  "selectedOption": zod.string(),
+  "selectedText": zod.string(),
+  "score": zod.number().min(1).max(4)
 }))
 })
 
@@ -44,8 +48,24 @@ export const ClassifyPersonaResponse = zod.object({
   "narrative": zod.string(),
   "recommendations": zod.array(zod.object({
   "title": zod.string(),
-  "description": zod.string()
-}))
+  "description": zod.string(),
+  "videoTitle": zod.string().optional(),
+  "relevanceStatement": zod.string().optional(),
+  "videoUrl": zod.string().optional(),
+  "thumbnailUrl": zod.string().optional(),
+  "channelTitle": zod.string().optional(),
+  "duration": zod.string().optional()
+})),
+  "assessmentVersion": zod.string().optional(),
+  "department": zod.string().optional(),
+  "role": zod.string().optional(),
+  "overallReadiness": zod.number().min(0).max(100).optional(),
+  "dimensionScores": zod.record(zod.number().min(0).max(100)).optional(),
+  "personaScores": zod.record(zod.number().min(0).max(100)).optional(),
+  "strengths": zod.array(zod.string()).optional(),
+  "developmentGaps": zod.array(zod.string()).optional(),
+  "projectFit": zod.array(zod.string()).optional(),
+  "resourceAssignmentSignals": zod.array(zod.string()).optional()
 })
 
 

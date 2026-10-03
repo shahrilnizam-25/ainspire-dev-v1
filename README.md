@@ -51,7 +51,7 @@ v1/
 │   └── tm-ai-persona/       # React frontend (Vite)
 │       └── src/
 │           ├── App.tsx              # Main app + classification state
-│           ├── i18n.ts              # All UI strings (EN / BM / 中文)
+│           ├── i18n.ts              # All UI strings (EN / BM)
 │           ├── data/
 │           │   ├── personas.ts      # Persona definitions
 │           │   └── questions.ts     # Quiz questions
@@ -105,7 +105,7 @@ Configuration is controlled via environment variables:
 
 ### Multi-language Support
 
-The classification endpoint accepts a `lang` parameter (`EN`, `BM`, `CN`). When a non-English language is selected, the model is instructed to produce all output text in that language.
+The classification endpoint accepts a `lang` parameter (`EN` or `BM`). When Bahasa Melayu is selected, the model is instructed to produce all output text in that language.
 
 ---
 
