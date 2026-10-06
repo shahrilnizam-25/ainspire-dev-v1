@@ -137,7 +137,7 @@ cd v1
 pnpm install
 ```
 
-Create `v1/.env` from `.env.example` and provide the TM API Gateway credentials. Add `YOUTUBE_API_KEY` if YouTube video recommendations are required. The file is ignored by Git.
+Create `v1/.env` from `.env.example` and provide the TM API Gateway credentials. Add `YOUTUBE_API_KEY` if YouTube video recommendations are required, and optionally `YOUTUBE_API_KEY_BACKUP` as a second key for quota/auth fallback. The file is ignored by Git.
 
 Start the API:
 
@@ -173,6 +173,7 @@ TM_APIGATE_CLIENT_ID
 TM_APIGATE_CLIENT_SECRET
 TM_APIGATE_CHAT_KEY
 YOUTUBE_API_KEY
+YOUTUBE_API_KEY_BACKUP
 ```
 
 The Render build runs the API bundle from `artifacts/api-server`, and the service starts the compiled API on the configured `PORT`.
@@ -180,6 +181,8 @@ The Render build runs the API bundle from `artifacts/api-server`, and the servic
 ## YouTube Notes
 
 YouTube search is optional. Without `YOUTUBE_API_KEY`, the learning path still returns text recommendations. With a key, the MCP learning tool searches for English training videos, caches no persistent user data, and returns titles, channels, durations, watch links, and same-origin thumbnails. API quota and YouTube policy limits still apply.
+
+If `YOUTUBE_API_KEY_BACKUP` is also set, the MCP learning tool automatically retries with the backup key when the primary key returns a quota or auth error (HTTP 403/429), keeping video recommendations available if one key's daily quota is exhausted.
 
 ## Confidentiality
 
