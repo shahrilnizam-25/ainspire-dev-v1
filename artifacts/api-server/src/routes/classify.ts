@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { runReadinessAgent } from "../lib/agent.js";
+import { runReadinessAgent, translateReadinessResultToBM } from "../lib/agent.js";
 import { calculateReadinessScores } from "../lib/assessmentScore.js";
 
 const router = Router();
@@ -56,6 +56,41 @@ router.post("/classify", async (req, res) => {
     const end = unfenced.lastIndexOf("}");
     if (start < 0 || end <= start) throw new Error("LLM response did not contain a complete JSON object");
     return JSON.parse(unfenced.slice(start, end + 1)) as Record<string, unknown>;
+  }
+
+  // Merges a BM translation response back onto the canonical EN reference: text
+  // fields come from the translation, everything else (persona, confidence,
+  // video metadata) is carried over unchanged to guarantee EN/BM parity.
+  function mergeTranslatedResult(raw: string, referenceResult: Record<string, unknown>): Record<string, unknown> {
+    const translated = parseJsonObject(raw);
+    const referenceRecommendations = Array.isArray(referenceResult.recommendations) ? referenceResult.recommendations : [];
+    const translatedRecommendations = Array.isArray(translated.recommendations) ? translated.recommendations : [];
+    if (typeof translated.reasoning !== "string" || typeof translated.narrative !== "string") {
+      throw new Error("BM translation response is missing reasoning or narrative");
+    }
+    if (translatedRecommendations.length !== referenceRecommendations.length) {
+      throw new Error("BM translation response recommendation count does not match the EN reference");
+    }
+    const recommendations = referenceRecommendations.map((item, index) => {
+      const base = (item ?? {}) as Record<string, unknown>;
+      const translatedItem = (translatedRecommendations[index] ?? {}) as Record<string, unknown>;
+      return {
+        ...base,
+        title: typeof translatedItem.title === "string" && translatedItem.title.trim() ? translatedItem.title.trim() : base.title,
+        description: typeof translatedItem.description === "string" && translatedItem.description.trim() ? translatedItem.description.trim() : base.description,
+      };
+    });
+    return {
+      persona: referenceResult.persona,
+      confidence: referenceResult.confidence,
+      reasoning: translated.reasoning,
+      narrative: translated.narrative,
+      strengths: Array.isArray(translated.strengths) ? translated.strengths : referenceResult.strengths ?? [],
+      developmentGaps: Array.isArray(translated.developmentGaps) ? translated.developmentGaps : referenceResult.developmentGaps ?? [],
+      projectFit: Array.isArray(translated.projectFit) ? translated.projectFit : referenceResult.projectFit ?? [],
+      resourceAssignmentSignals: Array.isArray(translated.resourceAssignmentSignals) ? translated.resourceAssignmentSignals : referenceResult.resourceAssignmentSignals ?? [],
+      recommendations,
+    };
   }
 
   function videoFields(video: Record<string, unknown> | undefined) {
@@ -166,6 +201,24 @@ router.post("/classify", async (req, res) => {
     ? `\n\nAll narrative, reasoning, recommendation, strength, gap, project-fit, and assignment-signal text must be written entirely in ${outputLang}. Use natural Bahasa Melayu sentence structure and do not mix English except for TM, AI, API, and unavoidable technical or product names.`
     : "";
 
+  const scores = calculateReadinessScores(answers);
+  const validPersonas = ["explorer", "builder", "strategist", "visionary"];
+  if (!validPersonas.includes(String(scores.persona))) scores.persona = "explorer";
+
+  // Fast path: BM with a usable EN reference is translated directly, so persona,
+  // confidence, and scores stay identical to EN and only the narrative text is
+  // regenerated. Falls through to the full pipeline below if translation fails.
+  if (lang === "BM" && referenceResult && typeof referenceResult.narrative === "string" && typeof referenceResult.reasoning === "string") {
+    try {
+      const translatedRaw = await translateReadinessResultToBM(referenceResult, { department, role });
+      const merged = mergeTranslatedResult(translatedRaw, referenceResult);
+      req.log.info({ event: "classify_translate_success", persona: merged.persona }, "BM translation of canonical EN result completed");
+      return res.json({ ...merged, assessmentVersion, department, role, ...scores });
+    } catch (translateError) {
+      req.log.warn({ event: "classify_translate_failed", err: translateError }, "Falling back to full BM classification after translation failure");
+    }
+  }
+
   try {
     const agentRun = await runReadinessAgent({
       answers,
@@ -177,8 +230,6 @@ router.post("/classify", async (req, res) => {
       languageInstruction: langInstruction,
       personaDefinitions: Object.entries(PERSONA_DEFS).map(([key, description]) => `- ${key}: ${description}`).join("\n"),
     });
-    const scores = calculateReadinessScores(answers);
-    const validPersonas = ["explorer", "builder", "strategist", "visionary"];
     let result: Record<string, unknown>;
     let modelOutputWasInvalid = false;
     try {
