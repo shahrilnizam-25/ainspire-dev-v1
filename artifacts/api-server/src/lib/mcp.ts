@@ -123,7 +123,7 @@ function isEnglishTrainingResult(title: string, description: string) {
   const letters = text.match(/\p{L}/gu) ?? [];
   const nonLatinLetters = letters.filter((letter) => !/[a-z]/i.test(letter)).length;
   const isMostlyLatin = letters.length === 0 || nonLatinLetters / letters.length < 0.25;
-  const hasAiTopic = /\b(ai|artificial intelligence|machine learning|automation|prompt|data|technology|innovation)\b/.test(text);
+  const hasAiTopic = /\b(ai|artificial intelligence|machine learning|generative ai|large language model|llm|chatgpt|automation|prompt engineering|data analytics|data science)\b/.test(text);
   const hasLearningSignal = /\b(course|training|tutorial|learn|workshop|fundamental|explained|guide|how to|skills|engineering|development|series|lecture|talk|webinar|lesson)\b/.test(text);
   return isMostlyLatin && hasAiTopic && hasLearningSignal;
 }
@@ -275,7 +275,14 @@ function createMcpServer() {
           ? `Disyorkan untuk profil ${persona} anda kerana menyokong pembelajaran ${LEARNING_TOPICS[item.dimension] ?? "kemahiran AI"} dalam konteks ${role}.`
           : `Recommended for your ${persona} profile because it supports ${LEARNING_TOPICS[item.dimension] ?? "AI skills"} in the context of your ${role}.`,
       })));
-      return textResult({ department, priorities, videoRecommendations });
+      // Different dimension searches often surface the same popular video; keep only the first occurrence.
+      const seenVideoUrls = new Set<string>();
+      const dedupedVideoRecommendations = videoRecommendations.filter((video) => {
+        if (seenVideoUrls.has(video.videoUrl)) return false;
+        seenVideoUrls.add(video.videoUrl);
+        return true;
+      });
+      return textResult({ department, priorities, videoRecommendations: dedupedVideoRecommendations });
     },
   );
 

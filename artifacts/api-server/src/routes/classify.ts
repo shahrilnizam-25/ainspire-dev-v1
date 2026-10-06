@@ -140,7 +140,7 @@ router.post("/classify", async (req, res) => {
     sanitized = sanitized.replace(/Q(cognitive|behavior|skills|environment|emotion|economic)-0?(\d+)/gi, (_match, key: string, number: string) =>
       `${questionLabels[key.toLowerCase()] ?? key} question ${number}`,
     );
-    sanitized = sanitized.replace(/\b(readiness|score)\s+of\s+(\d{1,3})(?!%)/gi, "$1 of $2%");
+    sanitized = sanitized.replace(/\b(readiness|score)\s+of\s+(\d{1,3})(?!\d)(?!%)/gi, "$1 of $2%");
     sanitized = sanitized.replace(/(Cognitive Readiness|Behavioral Adoption|Skills Capability|Organisation \/ Environmental Exposure|Emotional Disposition|Economic Vulnerability)\s*\((\d{1,3})\)/g, "$1 ($2%)");
     return lang === "BM"
       ? sanitized.replace(/\bthis employee\b/gi, "anda").replace(/\bthe employee's\b/gi, "anda").replace(/\bthe employee\b/gi, "anda")
