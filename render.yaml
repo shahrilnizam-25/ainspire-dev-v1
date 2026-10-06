@@ -15,3 +15,5 @@ services:
         sync: false
       - key: YOUTUBE_API_KEY
         sync: false
+      - key: YOUTUBE_API_KEY_BACKUP
+        sync: false

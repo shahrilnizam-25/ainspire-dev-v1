@@ -36,7 +36,24 @@ type YouTubeVideoDetails = {
   status?: { embeddable?: boolean };
 };
 
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+const YOUTUBE_API_KEYS = [process.env.YOUTUBE_API_KEY, process.env.YOUTUBE_API_KEY_BACKUP]
+  .filter((key): key is string => Boolean(key));
+
+// Tries each configured key in order, falling back on auth/quota errors (403/429).
+async function fetchYouTubeWithFallback(buildUrl: (key: string) => string): Promise<Response | null> {
+  let lastResponse: Response | null = null;
+  for (const key of YOUTUBE_API_KEYS) {
+    try {
+      const response = await fetch(buildUrl(key), { signal: AbortSignal.timeout(15_000) });
+      if (response.ok) return response;
+      lastResponse = response;
+      if (response.status !== 403 && response.status !== 429) return response;
+    } catch {
+      // network error — try next key
+    }
+  }
+  return lastResponse;
+}
 
 const PROJECTS_BY_DEPARTMENT: Record<string, string[]> = {
   "Network Engineering": [
@@ -112,25 +129,25 @@ function isEnglishTrainingResult(title: string, description: string) {
 }
 
 async function searchYouTubeLearningVideos(query: string, language: LearningLanguage): Promise<YouTubeVideo[]> {
-  if (!YOUTUBE_API_KEY) return [];
+  if (YOUTUBE_API_KEYS.length === 0) return [];
 
-  const searchParams = new URLSearchParams({
-    part: "snippet",
-    type: "video",
-    maxResults: "10",
-    order: "relevance",
-    videoDuration: "medium",
-    videoEmbeddable: "true",
-    safeSearch: "strict",
-    regionCode: "MY",
-    relevanceLanguage: language === "BM" ? "ms" : "en",
-    q: query,
-    key: YOUTUBE_API_KEY,
+  const searchResponse = await fetchYouTubeWithFallback((key) => {
+    const searchParams = new URLSearchParams({
+      part: "snippet",
+      type: "video",
+      maxResults: "10",
+      order: "relevance",
+      videoDuration: "medium",
+      videoEmbeddable: "true",
+      safeSearch: "strict",
+      regionCode: "MY",
+      relevanceLanguage: language === "BM" ? "ms" : "en",
+      q: query,
+      key,
+    });
+    return `https://www.googleapis.com/youtube/v3/search?${searchParams}`;
   });
-  const searchResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?${searchParams}`, {
-    signal: AbortSignal.timeout(15_000),
-  });
-  if (!searchResponse.ok) return [];
+  if (!searchResponse || !searchResponse.ok) return [];
   const searchData = (await searchResponse.json()) as { items?: YouTubeSearchItem[] };
   const candidates = (searchData.items ?? []).flatMap((item) => {
     const videoId = item.id?.videoId;
@@ -143,15 +160,15 @@ async function searchYouTubeLearningVideos(query: string, language: LearningLang
   });
   if (candidates.length === 0) return [];
 
-  const detailsParams = new URLSearchParams({
-    part: "snippet,contentDetails,status",
-    id: candidates.map((candidate) => candidate.videoId).join(","),
-    key: YOUTUBE_API_KEY,
+  const detailsResponse = await fetchYouTubeWithFallback((key) => {
+    const detailsParams = new URLSearchParams({
+      part: "snippet,contentDetails,status",
+      id: candidates.map((candidate) => candidate.videoId).join(","),
+      key,
+    });
+    return `https://www.googleapis.com/youtube/v3/videos?${detailsParams}`;
   });
-  const detailsResponse = await fetch(`https://www.googleapis.com/youtube/v3/videos?${detailsParams}`, {
-    signal: AbortSignal.timeout(15_000),
-  });
-  const detailsData = detailsResponse.ok
+  const detailsData = detailsResponse?.ok
     ? (await detailsResponse.json()) as { items?: YouTubeVideoDetails[] }
     : { items: [] };
   const detailsById = new Map((detailsData.items ?? []).map((item) => [item.id, item]));
