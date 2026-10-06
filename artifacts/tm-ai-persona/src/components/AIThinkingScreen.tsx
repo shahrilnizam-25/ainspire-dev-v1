@@ -1,14 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Brain, Lightbulb, Sparkles, CheckCircle } from 'lucide-react';
+import { Eye, Brain, Lightbulb, Sparkles, CheckCircle, Terminal } from 'lucide-react';
 import type { Lang } from '../i18n';
 import { translations } from '../i18n';
 
 const STEP_DURATION = 1900; // ms per step
+const LOG_INTERVAL_MS = 1400; // ms between verbose log lines
+const PROGRESS_TAU_MS = 7000; // time constant for the asymptotic progress curve
+const PROGRESS_CAP_PERCENT = 96; // never show 100% until the real result arrives
 
 export default function AIThinkingScreen({ lang }: { lang: Lang }) {
   const [activeStep, setActiveStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [logLines, setLogLines] = useState<string[]>([]);
+  const logIndexRef = useRef(0);
   const t = translations[lang];
 
   const STEPS = [
@@ -17,6 +23,46 @@ export default function AIThinkingScreen({ lang }: { lang: Lang }) {
     { id: 'decide',   icon: Lightbulb, label: t.thinkStep3Label, detail: t.thinkStep3Detail, color: '#f59e0b' },
     { id: 'produce',  icon: Sparkles,  label: t.thinkStep4Label, detail: t.thinkStep4Detail, color: '#10b981' },
   ];
+
+  const LOG_MESSAGES = [
+    t.thinkLogParsing,
+    t.thinkLogScoring,
+    t.thinkLogMcpContext,
+    t.thinkLogProjectMatch,
+    t.thinkLogLearningPath,
+    t.thinkLogModelCall,
+    t.thinkLogNarrative,
+    t.thinkLogFinalizing,
+  ];
+
+  // Elapsed-time clock driving the progress bar
+  useEffect(() => {
+    const startedAt = Date.now();
+    const tick = setInterval(() => setElapsedMs(Date.now() - startedAt), 100);
+    return () => clearInterval(tick);
+  }, []);
+
+  // Verbose activity log — appends a new line on an interval, looping on a
+  // "still working" filler once every scripted message has been shown
+  useEffect(() => {
+    logIndexRef.current = 0;
+    setLogLines([LOG_MESSAGES[0]]);
+    const interval = setInterval(() => {
+      logIndexRef.current += 1;
+      const nextMessage = logIndexRef.current < LOG_MESSAGES.length
+        ? LOG_MESSAGES[logIndexRef.current]
+        : t.thinkLogStillWorking;
+      setLogLines((prev) => [...prev.slice(-5), nextMessage]);
+    }, LOG_INTERVAL_MS);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
+
+  const progressPercent = Math.min(
+    PROGRESS_CAP_PERCENT,
+    Math.round(PROGRESS_CAP_PERCENT * (1 - Math.exp(-elapsedMs / PROGRESS_TAU_MS))),
+  );
+  const elapsedSeconds = Math.floor(elapsedMs / 1000);
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -156,6 +202,57 @@ export default function AIThinkingScreen({ lang }: { lang: Lang }) {
           );
         })}
       </div>
+
+      {/* Verbose progress bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="w-full max-w-md mb-8"
+      >
+        <div className="flex items-center justify-between mb-2 text-xs font-semibold text-muted-foreground">
+          <span>{t.thinkingProgressLabel}</span>
+          <span className="tabular-nums">{progressPercent}% · {elapsedSeconds}s</span>
+        </div>
+        <div className="h-2 w-full rounded-full bg-card-border/30 overflow-hidden">
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-primary via-secondary to-primary"
+            style={{ backgroundSize: '200% 100%' }}
+            animate={{ width: `${progressPercent}%`, backgroundPosition: ['0% 0%', '100% 0%'] }}
+            transition={{
+              width: { duration: 0.3, ease: 'easeOut' },
+              backgroundPosition: { duration: 2, repeat: Infinity, ease: 'linear' },
+            }}
+          />
+        </div>
+      </motion.div>
+
+      {/* Verbose agent activity log */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="w-full max-w-md mb-10 rounded-xl border border-card-border/40 bg-card/30 backdrop-blur-sm px-4 py-3 text-left"
+      >
+        <div className="flex items-center gap-2 mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <Terminal className="w-3.5 h-3.5" />
+          {t.thinkingLogLabel}
+        </div>
+        <div className="space-y-1 font-mono text-xs">
+          <AnimatePresence initial={false}>
+            {logLines.map((line, index) => (
+              <motion.div
+                key={`${index}-${line}`}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: index === logLines.length - 1 ? 1 : 0.45, y: 0 }}
+                className="truncate text-muted-foreground"
+              >
+                <span className="text-primary mr-1.5">›</span>{line}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </motion.div>
 
       {/* Bouncing dots */}
       <motion.div
