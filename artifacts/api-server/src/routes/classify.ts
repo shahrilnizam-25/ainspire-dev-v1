@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { runReadinessAgent, translateReadinessResultToBM } from "../lib/agent.js";
+import { runReadinessAgent, translateNarrativeFieldsToBM, translateRecommendationsToBM } from "../lib/agent.js";
 import { calculateReadinessScores } from "../lib/assessmentScore.js";
 
 const router = Router();
@@ -58,39 +58,46 @@ router.post("/classify", async (req, res) => {
     return JSON.parse(unfenced.slice(start, end + 1)) as Record<string, unknown>;
   }
 
-  // Merges a BM translation response back onto the canonical EN reference: text
-  // fields come from the translation, everything else (persona, confidence,
-  // video metadata) is carried over unchanged to guarantee EN/BM parity.
-  function mergeTranslatedResult(raw: string, referenceResult: Record<string, unknown>): Record<string, unknown> {
-    const translated = parseJsonObject(raw);
-    const referenceRecommendations = Array.isArray(referenceResult.recommendations) ? referenceResult.recommendations : [];
-    const translatedRecommendations = Array.isArray(translated.recommendations) ? translated.recommendations : [];
-    if (typeof translated.reasoning !== "string" || typeof translated.narrative !== "string") {
-      throw new Error("BM translation response is missing reasoning or narrative");
+  // Closes any string/array/object left open when the model hit its token ceiling.
+  function closeOpenJsonStructures(text: string): string {
+    const stack: string[] = [];
+    let inString = false;
+    let escaped = false;
+    for (const character of text) {
+      if (escaped) { escaped = false; continue; }
+      if (character === "\\") { if (inString) escaped = true; continue; }
+      if (character === '"') { inString = !inString; continue; }
+      if (inString) continue;
+      if (character === "{" || character === "[") stack.push(character);
+      else if (character === "}" || character === "]") stack.pop();
     }
-    if (translatedRecommendations.length !== referenceRecommendations.length) {
-      throw new Error("BM translation response recommendation count does not match the EN reference");
+    let repaired = inString ? `${text}"` : text;
+    repaired = repaired.replace(/,\s*$/, "");
+    while (stack.length > 0) repaired += stack.pop() === "{" ? "}" : "]";
+    return repaired;
+  }
+
+  // Truncated translations are still useful, so trim back property by property
+  // until the remaining prefix parses instead of discarding the whole response.
+  function parseJsonObjectLoose(raw: string): Record<string, unknown> {
+    try {
+      return parseJsonObject(raw);
+    } catch {
+      const unfenced = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const start = unfenced.indexOf("{");
+      if (start < 0) throw new Error("LLM response did not contain a JSON object");
+      let candidate = unfenced.slice(start);
+      for (let attempt = 0; attempt < 200; attempt += 1) {
+        try {
+          return JSON.parse(closeOpenJsonStructures(candidate)) as Record<string, unknown>;
+        } catch {
+          const lastComma = candidate.lastIndexOf(",");
+          if (lastComma <= 0) break;
+          candidate = candidate.slice(0, lastComma);
+        }
+      }
+      throw new Error("LLM response could not be recovered into a JSON object");
     }
-    const recommendations = referenceRecommendations.map((item, index) => {
-      const base = (item ?? {}) as Record<string, unknown>;
-      const translatedItem = (translatedRecommendations[index] ?? {}) as Record<string, unknown>;
-      return {
-        ...base,
-        title: typeof translatedItem.title === "string" && translatedItem.title.trim() ? translatedItem.title.trim() : base.title,
-        description: typeof translatedItem.description === "string" && translatedItem.description.trim() ? translatedItem.description.trim() : base.description,
-      };
-    });
-    return {
-      persona: referenceResult.persona,
-      confidence: referenceResult.confidence,
-      reasoning: translated.reasoning,
-      narrative: translated.narrative,
-      strengths: Array.isArray(translated.strengths) ? translated.strengths : referenceResult.strengths ?? [],
-      developmentGaps: Array.isArray(translated.developmentGaps) ? translated.developmentGaps : referenceResult.developmentGaps ?? [],
-      projectFit: Array.isArray(translated.projectFit) ? translated.projectFit : referenceResult.projectFit ?? [],
-      resourceAssignmentSignals: Array.isArray(translated.resourceAssignmentSignals) ? translated.resourceAssignmentSignals : referenceResult.resourceAssignmentSignals ?? [],
-      recommendations,
-    };
   }
 
   function videoFields(video: Record<string, unknown> | undefined) {
@@ -205,18 +212,68 @@ router.post("/classify", async (req, res) => {
   const validPersonas = ["explorer", "builder", "strategist", "visionary"];
   if (!validPersonas.includes(String(scores.persona))) scores.persona = "explorer";
 
-  // Fast path: BM with a usable EN reference is translated directly, so persona,
-  // confidence, and scores stay identical to EN and only the narrative text is
-  // regenerated. Falls through to the full pipeline below if translation fails.
+  // BM always derives from the canonical EN result. Translation chunks degrade
+  // individually, so persona, scores, recommendation count, and video metadata
+  // stay identical to EN even when the model misbehaves.
   if (lang === "BM" && referenceResult && typeof referenceResult.narrative === "string" && typeof referenceResult.reasoning === "string") {
-    try {
-      const translatedRaw = await translateReadinessResultToBM(referenceResult, { department, role });
-      const merged = mergeTranslatedResult(translatedRaw, referenceResult);
-      req.log.info({ event: "classify_translate_success", persona: merged.persona }, "BM translation of canonical EN result completed");
-      return res.json({ ...merged, assessmentVersion, department, role, ...scores });
-    } catch (translateError) {
-      req.log.warn({ event: "classify_translate_failed", err: translateError }, "Falling back to full BM classification after translation failure");
-    }
+    const translateChunk = async (label: string, run: () => Promise<string>): Promise<Record<string, unknown> | null> => {
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          return parseJsonObjectLoose(await run());
+        } catch (chunkError) {
+          req.log.warn({ event: "classify_translate_chunk_failed", label, attempt, err: chunkError }, "BM translation chunk failed");
+        }
+      }
+      return null;
+    };
+
+    const referenceRecommendations = Array.isArray(referenceResult.recommendations) ? referenceResult.recommendations : [];
+    const [narrativeBlock, recommendationBlock] = await Promise.all([
+      translateChunk("narrative", () => translateNarrativeFieldsToBM(referenceResult, { department, role })),
+      referenceRecommendations.length > 0
+        ? translateChunk("recommendations", () => translateRecommendationsToBM(referenceRecommendations, { department, role }))
+        : Promise.resolve<Record<string, unknown> | null>({ recommendations: [] }),
+    ]);
+
+    const translatedRecommendations = Array.isArray(recommendationBlock?.recommendations) ? recommendationBlock.recommendations : [];
+    const recommendations = referenceRecommendations.map((item, index) => {
+      const base = (item ?? {}) as Record<string, unknown>;
+      const translatedItem = (translatedRecommendations[index] ?? {}) as Record<string, unknown>;
+      return {
+        ...base,
+        title: typeof translatedItem.title === "string" && translatedItem.title.trim() ? translatedItem.title.trim() : base.title,
+        description: typeof translatedItem.description === "string" && translatedItem.description.trim() ? translatedItem.description.trim() : base.description,
+      };
+    });
+    const pickArray = (value: unknown, fallback: unknown) => (Array.isArray(value) ? value : Array.isArray(fallback) ? fallback : []);
+    const translatedText = (value: unknown, fallback: string) =>
+      typeof value === "string" && value.trim().length > 0 ? value.trim() : fallback;
+
+    const translatedResult = {
+      persona: referenceResult.persona,
+      confidence: referenceResult.confidence,
+      reasoning: translatedText(narrativeBlock?.reasoning, "Profil kesediaan anda dinilai merentas enam dimensi."),
+      narrative: translatedText(
+        narrativeBlock?.narrative,
+        `Profil anda sebagai ${role} dalam ${department} menunjukkan laluan pembangunan AI yang jelas berdasarkan skor kesediaan anda.`,
+      ),
+      strengths: pickArray(narrativeBlock?.strengths, referenceResult.strengths),
+      developmentGaps: pickArray(narrativeBlock?.developmentGaps, referenceResult.developmentGaps),
+      projectFit: pickArray(narrativeBlock?.projectFit, referenceResult.projectFit),
+      resourceAssignmentSignals: pickArray(narrativeBlock?.resourceAssignmentSignals, referenceResult.resourceAssignmentSignals),
+      recommendations,
+    };
+
+    req.log.info(
+      {
+        event: "classify_translate_success",
+        persona: translatedResult.persona,
+        narrativeTranslated: narrativeBlock !== null,
+        recommendationsTranslated: recommendationBlock !== null,
+      },
+      "BM result derived from canonical EN result",
+    );
+    return res.json({ ...translatedResult, assessmentVersion, department, role, ...scores });
   }
 
   try {

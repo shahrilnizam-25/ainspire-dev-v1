@@ -73,13 +73,20 @@ ${JSON.stringify(mcpContext, null, 2)}
 }
 
 // Translates an already-computed canonical English result into Bahasa Melayu.
-// This is a pure linguistic translation, not a re-classification, so persona,
-// confidence, and scores are never re-derived here — only narrative text is sent.
-export async function translateReadinessResultToBM(
+// Split into two smaller calls because a single combined response regularly hit
+// the token ceiling and truncated mid-JSON, forcing a full re-classification.
+const BM_TRANSLATION_RULES = `You are a professional English-to-Bahasa Melayu translator for Telekom Malaysia's AI workforce readiness programme.
+
+Translate the JSON values below into fluent, natural Bahasa Melayu. This is a pure translation task:
+- Do not change the meaning, add new information, remove information, or reinterpret the content.
+- Do not change how many items are in any array; translate each item 1:1, in the same order.
+- Keep "TM", "AI", "API", percentages, and unavoidable technical or product names unchanged.
+- Address the reader directly using "anda".`;
+
+export async function translateNarrativeFieldsToBM(
   referenceResult: Record<string, unknown>,
   context: { department: string; role: string },
 ): Promise<string> {
-  const recommendations = Array.isArray(referenceResult.recommendations) ? referenceResult.recommendations : [];
   const translatable = {
     reasoning: referenceResult.reasoning,
     narrative: referenceResult.narrative,
@@ -87,28 +94,39 @@ export async function translateReadinessResultToBM(
     developmentGaps: Array.isArray(referenceResult.developmentGaps) ? referenceResult.developmentGaps : [],
     projectFit: Array.isArray(referenceResult.projectFit) ? referenceResult.projectFit : [],
     resourceAssignmentSignals: Array.isArray(referenceResult.resourceAssignmentSignals) ? referenceResult.resourceAssignmentSignals : [],
-    recommendations: recommendations.map((item) => {
-      const candidate = (item ?? {}) as Record<string, unknown>;
-      return { title: candidate.title ?? "", description: candidate.description ?? "" };
-    }),
   };
 
-  const prompt = `You are a professional English-to-Bahasa Melayu translator for Telekom Malaysia's AI workforce readiness programme.
-
-Translate the JSON values below into fluent, natural Bahasa Melayu. This is a pure translation task:
-- Do not change the meaning, add new information, remove information, or reinterpret the content.
-- Do not change how many items are in any array; translate each item 1:1, in the same order.
-- Keep "TM", "AI", "API", and unavoidable technical or product names unchanged.
-- Address the reader directly using "anda".
+  const prompt = `${BM_TRANSLATION_RULES}
 - The employee's role is "${context.role}" in "${context.department}" — keep this context natural if it already appears in the text.
 
 ## English content to translate
 ${JSON.stringify(translatable, null, 2)}
 
 ## Output rules
-Return ONLY valid JSON with exactly these keys: reasoning, narrative, strengths, developmentGaps, projectFit, resourceAssignmentSignals, recommendations.
-"recommendations" must be an array of exactly ${translatable.recommendations.length} objects, each with only "title" and "description", in the same order as the input.
+Return ONLY valid JSON with exactly these keys: reasoning, narrative, strengths, developmentGaps, projectFit, resourceAssignmentSignals.
 `;
 
-  return chatComplete(prompt, 3072);
+  return chatComplete(prompt, 2048);
+}
+
+export async function translateRecommendationsToBM(
+  recommendations: unknown[],
+  context: { department: string; role: string },
+): Promise<string> {
+  const translatable = recommendations.map((item) => {
+    const candidate = (item ?? {}) as Record<string, unknown>;
+    return { title: candidate.title ?? "", description: candidate.description ?? "" };
+  });
+
+  const prompt = `${BM_TRANSLATION_RULES}
+- The employee's role is "${context.role}" in "${context.department}".
+
+## English recommendations to translate
+${JSON.stringify(translatable, null, 2)}
+
+## Output rules
+Return ONLY valid JSON shaped as {"recommendations": [...]} containing exactly ${translatable.length} objects, each with only "title" and "description", in the same order as the input.
+`;
+
+  return chatComplete(prompt, 2048);
 }
