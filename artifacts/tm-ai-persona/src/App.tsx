@@ -74,6 +74,7 @@ export default function App() {
   const [lastAnswers, setLastAnswers] = useState<StoredAnswer | null>(null);
   const [userRole, setUserRole] = useState<string>('');
   const [department, setDepartment] = useState<string>('');
+  const [clientSessionId, setClientSessionId] = useState(() => crypto.randomUUID());
 
   // Track which lang is currently in-flight to avoid duplicate requests
   const fetchingForLang = useRef<Lang | null>(null);
@@ -96,11 +97,32 @@ export default function App() {
         answers,
         lang: targetLang,
         referenceResult,
+        clientSessionId,
       }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json() as Promise<AIResult>;
   }, [department, userRole]);
+
+  const trackEvent = useCallback((eventName: string, eventCategory: string, properties?: Record<string, unknown>) => {
+    void fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventName,
+        eventCategory,
+        sessionId: clientSessionId,
+        languageCode: lang,
+        screenName: screen,
+        route: window.location.pathname,
+        properties,
+      }),
+    }).catch(() => undefined);
+  }, [clientSessionId, lang, screen]);
+
+  useEffect(() => {
+    trackEvent('screen_viewed', 'navigation', { screen });
+  }, [screen, trackEvent]);
 
   // Re-classify whenever language changes on results/report screens
   useEffect(() => {
@@ -124,7 +146,7 @@ export default function App() {
     fetchingForLang.current = lang;
     setIsReClassifying(true);
 
-    runClassify(lastAnswers, lang)
+    runClassify(lastAnswers, lang, lang === 'BM' ? aiResultCache.EN : undefined)
       .then((data) => {
         if (!cancelled) {
           setAiResultCache((prev) => ({ ...prev, [lang]: data }));
@@ -147,11 +169,10 @@ export default function App() {
       // so the next effect run can reset it cleanly via the cache-hit branch above.
       setIsReClassifying(false);
     };
-  // aiResultCache intentionally omitted — we check it at call time, not as a dep
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang, screen, lastAnswers, runClassify]);
+  }, [aiResultCache, lang, screen, lastAnswers, runClassify]);
 
   const handleStart = () => {
+    trackEvent('assessment_started', 'assessment');
     setScreen('department');
     setCurrentQuestionIdx(0);
     setMcqAnswers([]);
@@ -162,6 +183,7 @@ export default function App() {
     setIsReClassifying(false);
     setDepartment('');
     setUserRole('');
+    setClientSessionId(crypto.randomUUID());
   };
 
   const handleDepartmentSubmit = (selectedDepartment: string, role: string) => {
@@ -192,6 +214,7 @@ export default function App() {
   };
 
   const handleSubmit = async () => {
+    trackEvent('assessment_submitted', 'assessment', { answerCount: mcqAnswers.length });
     setScreen('ai-loading');
     const answers: StoredAnswer = mcqAnswers;
 

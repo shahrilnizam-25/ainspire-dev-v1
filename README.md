@@ -81,6 +81,7 @@ The client caches access tokens, refreshes them before expiry, sends the gateway
 | `POST` | `/api/classify` | Score an assessment and generate a profile |
 | `POST` | `/api/action-plan` | Generate an HR team action plan |
 | `GET` | `/api/youtube-thumbnail/:videoId` | Same-origin YouTube thumbnail proxy |
+| `POST` | `/api/events` | Persist frontend observability events |
 
 The classify response includes `overallReadiness`, `dimensionScores`, `personaScores`, `persona`, narrative fields, recommendations, and optional video metadata.
 

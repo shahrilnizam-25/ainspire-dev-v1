@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { runReadinessAgent, translateNarrativeFieldsToBM, translateRecommendationsToBM } from "../lib/agent.js";
 import { calculateReadinessScores } from "../lib/assessmentScore.js";
+import { persistClassification } from "../lib/persistence.js";
 
 const router = Router();
 
@@ -26,12 +27,13 @@ const LANG_LABELS: Record<string, string> = {
 };
 
 router.post("/classify", async (req, res) => {
-  const { answers, lang, department, role, assessmentVersion, referenceResult } = req.body as {
+  const { answers, lang, department, role, assessmentVersion, referenceResult, clientSessionId } = req.body as {
     answers: AnswerItem[];
     lang?: string;
     department?: string;
     role?: string;
     assessmentVersion?: string;
+    clientSessionId?: string;
     referenceResult?: Record<string, unknown>;
   };
 
@@ -197,6 +199,8 @@ router.post("/classify", async (req, res) => {
   if (answers.some((answer) => !answer.questionId || !answer.dimension || !answer.selectedOption || typeof answer.score !== "number")) {
     return res.status(400).json({ error: "assessment answers are incomplete" });
   }
+  const requiredDepartment = department;
+  const requiredRole = role;
 
   const mcqSummary = answers
     .map((answer) =>
@@ -211,6 +215,31 @@ router.post("/classify", async (req, res) => {
   const scores = calculateReadinessScores(answers);
   const validPersonas = ["explorer", "builder", "strategist", "visionary"];
   if (!validPersonas.includes(String(scores.persona))) scores.persona = "explorer";
+
+  async function persistResult(result: Record<string, unknown>) {
+    try {
+      await persistClassification({
+        clientSessionId,
+        department: requiredDepartment,
+        role: requiredRole,
+        assessmentVersion,
+        language: lang === "BM" ? "BM" : "EN",
+        answers,
+        result: {
+          persona: String(result.persona ?? scores.persona),
+          confidence: typeof result.confidence === "number" ? result.confidence : undefined,
+          reasoning: typeof result.reasoning === "string" ? result.reasoning : undefined,
+          narrative: typeof result.narrative === "string" ? result.narrative : undefined,
+          recommendations: Array.isArray(result.recommendations) ? result.recommendations as Array<{ title: string; description: string; videoTitle?: string; videoUrl?: string; thumbnailUrl?: string; channelTitle?: string; duration?: string; relevanceStatement?: string }> : [],
+          overallReadiness: scores.overallReadiness,
+          dimensionScores: scores.dimensionScores,
+          personaScores: scores.personaScores,
+        },
+      });
+    } catch (persistenceError) {
+      req.log.error({ event: "classification_persistence_failed", err: persistenceError }, "Classification succeeded but database persistence failed");
+    }
+  }
 
   // BM always derives from the canonical EN result. Translation chunks degrade
   // individually, so persona, scores, recommendation count, and video metadata
@@ -273,6 +302,7 @@ router.post("/classify", async (req, res) => {
       },
       "BM result derived from canonical EN result",
     );
+    await persistResult(translatedResult);
     return res.json({ ...translatedResult, assessmentVersion, department, role, ...scores });
   }
 
@@ -354,6 +384,7 @@ router.post("/classify", async (req, res) => {
     if (!Array.isArray(result.projectFit)) result.projectFit = [];
     if (!Array.isArray(result.resourceAssignmentSignals)) result.resourceAssignmentSignals = [];
 
+    await persistResult(result);
     req.log.info({ event: "classify_success", persona: result.persona, confidence: result.confidence }, "AI readiness classification completed");
     return res.json({ ...result, assessmentVersion, department, role, ...scores });
   } catch (err) {

@@ -1,8 +1,38 @@
 import { Router } from "express";
 import { chatComplete } from "../lib/llm.js";
 import { runWorkforcePlanningMcpWorkflow } from "../lib/mcp.js";
+import { persistActionPlan } from "../lib/persistence.js";
 
 const router = Router();
+
+function parseActionPlanJson(raw: string): Record<string, unknown> {
+  const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+  const start = cleaned.indexOf("{");
+  if (start < 0) throw new Error("Action plan response did not contain a JSON object");
+  let candidate = cleaned.slice(start);
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    try {
+      return JSON.parse(candidate) as Record<string, unknown>;
+    } catch {
+      const lastComma = candidate.lastIndexOf(",");
+      if (lastComma <= 0) break;
+      candidate = candidate.slice(0, lastComma);
+      let inString = false;
+      let escaped = false;
+      const stack: string[] = [];
+      for (const character of candidate) {
+        if (escaped) { escaped = false; continue; }
+        if (character === "\\") { if (inString) escaped = true; continue; }
+        if (character === '"') { inString = !inString; continue; }
+        if (inString) continue;
+        if (character === "{" || character === "[") stack.push(character);
+        else if (character === "}" || character === "]") stack.pop();
+      }
+      candidate = `${inString ? `${candidate}"` : candidate}${stack.reverse().map((item) => item === "{" ? "}" : "]").join("")}`;
+    }
+  }
+  throw new Error("Action plan response could not be recovered into JSON");
+}
 
 router.post("/action-plan", async (req, res) => {
   const { distribution, teamSize, divisionName, skillsGap, dominantPersona } = req.body as {
@@ -12,32 +42,37 @@ router.post("/action-plan", async (req, res) => {
     dominantPersona: string;
     skillsGap: Array<{ persona: string; current: number; target: number; gap: number }>;
   };
+  const safeDistribution = distribution && typeof distribution === "object" ? distribution : {};
+  const safeSkillsGap = Array.isArray(skillsGap) ? skillsGap : [];
+  const safeDivisionName = divisionName || "IT Strategy & Orchestration";
+  const safeTeamSize = typeof teamSize === "number" ? teamSize : 0;
+  const safeDominantPersona = dominantPersona || "explorer";
 
   req.log.info(
     {
       event: "action_plan_started",
-      teamSize,
-      divisionName: divisionName || "IT Strategy & Orchestration",
-      dominantPersona,
-      skillsGapCount: Array.isArray(skillsGap) ? skillsGap.length : 0,
+      teamSize: safeTeamSize,
+      divisionName: safeDivisionName,
+      dominantPersona: safeDominantPersona,
+      skillsGapCount: safeSkillsGap.length,
     },
     "Starting action plan generation",
   );
 
-  const gapSummary = skillsGap
+  const gapSummary = safeSkillsGap
     .map(g => `  - ${g.persona}: currently ${g.current}% → target ${g.target}% (gap: ${g.gap > 0 ? `+${g.gap}` : g.gap}%)`)
     .join("\n");
 
-  const distSummary = Object.entries(distribution)
+  const distSummary = Object.entries(safeDistribution)
     .map(([p, pct]) => `  - ${p}: ${pct}%`)
     .join("\n");
 
   const prompt = `You are an expert AI Workforce Development Strategist for Telekom Malaysia. Generate a comprehensive, actionable 90-day team AI upskilling action plan based on the team data below.
 
 ## Team Context
-- Division / Team: ${divisionName || "IT Strategy & Orchestration"}
-- Team Size: ${teamSize} employees assessed
-- Dominant AI Persona: ${dominantPersona}
+- Division / Team: ${safeDivisionName}
+- Team Size: ${safeTeamSize} employees assessed
+- Dominant AI Persona: ${safeDominantPersona}
 
 ## Current Persona Distribution
 ${distSummary}
@@ -78,12 +113,22 @@ Respond ONLY with valid JSON, no markdown:
 
   try {
     const mcpContext = await runWorkforcePlanningMcpWorkflow({
-      divisionName: divisionName || "IT Strategy & Orchestration",
-      skillsGap: Array.isArray(skillsGap) ? skillsGap : [],
+      divisionName: safeDivisionName,
+      skillsGap: safeSkillsGap,
     });
     const raw = await chatComplete(`${prompt}\n\n## MCP workforce context\n${JSON.stringify(mcpContext, null, 2)}`, 2048);
-    const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const result = JSON.parse(cleaned);
+    const result = parseActionPlanJson(raw);
+
+    try {
+      await persistActionPlan({
+        divisionName: safeDivisionName,
+        teamSize: safeTeamSize,
+        dominantPersona: safeDominantPersona,
+        result,
+      });
+    } catch (persistenceError) {
+      req.log.error({ event: "action_plan_persistence_failed", err: persistenceError }, "Action plan generated but database persistence failed");
+    }
 
     req.log.info({ event: "action_plan_success" }, "Action plan generation completed");
 

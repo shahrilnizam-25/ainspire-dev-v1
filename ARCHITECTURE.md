@@ -124,7 +124,10 @@ Express app (app.ts)
             |      POST /api/action-plan
             |
             +--> youtube.ts
-                   GET /api/youtube-thumbnail/:videoId
+                         GET /api/youtube-thumbnail/:videoId
+                     |
+                     +--> events.ts
+                         POST /api/events
 ```
 
 ### `POST /api/classify`
