@@ -360,3 +360,204 @@ pnpm --dir artifacts/api-server typecheck
 pnpm --dir artifacts/api-server test
 pnpm --dir artifacts/tm-ai-persona build
 ```
+
+## 12. Entity Relationship Diagram
+
+The proposed schema is connected through `assessment_sessions`. This is the
+central transaction record for one employee assessment journey. The existing
+repository does not yet contain these tables; this is the target relational
+model for implementation.
+
+```mermaid
+erDiagram
+    ORGANIZATIONS ||--o{ USERS : contains
+    ORGANIZATIONS ||--o{ DEPARTMENTS : owns
+    ORGANIZATIONS ||--o{ WORKFORCE_MEMBERS : employs
+
+    DEPARTMENTS ||--o{ ROLES : offers
+    DEPARTMENTS ||--o{ PROJECTS : owns
+    ROLES ||--o{ WORKFORCE_MEMBERS : classifies
+
+    ASSESSMENT_VERSIONS ||--o{ ASSESSMENT_QUESTIONS : defines
+    READINESS_DIMENSIONS ||--o{ ASSESSMENT_QUESTIONS : measures
+    ASSESSMENT_QUESTIONS ||--o{ ASSESSMENT_OPTIONS : provides
+
+    USERS ||--o{ ASSESSMENT_SESSIONS : completes
+    ORGANIZATIONS ||--o{ ASSESSMENT_SESSIONS : scopes
+    ASSESSMENT_VERSIONS ||--o{ ASSESSMENT_SESSIONS : uses
+    DEPARTMENTS ||--o{ ASSESSMENT_SESSIONS : selected_for
+    ROLES ||--o{ ASSESSMENT_SESSIONS : selected_role
+
+    ASSESSMENT_SESSIONS ||--o{ ASSESSMENT_ANSWERS : contains
+    ASSESSMENT_QUESTIONS ||--o{ ASSESSMENT_ANSWERS : answered
+    ASSESSMENT_OPTIONS ||--o{ ASSESSMENT_ANSWERS : selected
+    ASSESSMENT_SESSIONS ||--o{ ASSESSMENT_CONSENTS : records
+    ASSESSMENT_SESSIONS ||--o{ OPEN_RESPONSES : includes
+
+    LANGUAGES ||--o{ ASSESSMENT_RESULTS : localizes
+    ASSESSMENT_SESSIONS ||--o{ ASSESSMENT_RESULTS : produces
+    PERSONAS ||--o{ ASSESSMENT_RESULTS : assigns
+    ASSESSMENT_VERSIONS ||--o{ PERSONA_READINESS_BANDS : configures
+    PERSONAS ||--o{ PERSONA_READINESS_BANDS : defines
+
+    ASSESSMENT_RESULTS ||--o{ RESULT_DIMENSION_SCORES : contains
+    READINESS_DIMENSIONS ||--o{ RESULT_DIMENSION_SCORES : scores
+    ASSESSMENT_RESULTS ||--o{ RESULT_PERSONA_SCORES : calculates
+    PERSONAS ||--o{ RESULT_PERSONA_SCORES : scores
+    ASSESSMENT_RESULTS ||--o{ RESULT_RECOMMENDATIONS : generates
+    READINESS_DIMENSIONS ||--o{ RESULT_RECOMMENDATIONS : targets
+    RESULT_RECOMMENDATIONS ||--o| RECOMMENDATION_VIDEOS : may_include
+
+    PROJECTS ||--o{ PROJECT_DIMENSION_MAPPINGS : matches
+    READINESS_DIMENSIONS ||--o{ PROJECT_DIMENSION_MAPPINGS : supports
+    READINESS_DIMENSIONS ||--o{ LEARNING_TOPICS : guides
+
+    WORKFORCE_MEMBERS ||--o{ WORKFORCE_ASSESSMENT_LINKS : has
+    ASSESSMENT_SESSIONS ||--o{ WORKFORCE_ASSESSMENT_LINKS : links
+    ORGANIZATIONS ||--o{ WORKFORCE_SNAPSHOTS : snapshots
+    DEPARTMENTS ||--o{ WORKFORCE_SNAPSHOTS : groups
+    WORKFORCE_SNAPSHOTS ||--o{ WORKFORCE_PERSONA_DISTRIBUTIONS : summarizes
+    PERSONAS ||--o{ WORKFORCE_PERSONA_DISTRIBUTIONS : counts
+
+    ORGANIZATIONS ||--o{ ACTION_PLANS : owns
+    USERS ||--o{ ACTION_PLANS : creates
+    WORKFORCE_SNAPSHOTS ||--o{ ACTION_PLANS : informs
+    ACTION_PLANS ||--o{ ACTION_PLAN_PHASES : contains
+    ACTION_PLAN_PHASES ||--o{ ACTION_PLAN_ACTIONS : contains
+
+    USERS ||--o{ ANALYTICS_EVENTS : generates
+    ASSESSMENT_SESSIONS ||--o{ ANALYTICS_EVENTS : tracks
+    ASSESSMENT_RESULTS ||--o{ ANALYTICS_EVENTS : observes
+    RESULT_RECOMMENDATIONS ||--o{ ANALYTICS_EVENTS : clicked
+    ACTION_PLANS ||--o{ ANALYTICS_EVENTS : observes
+
+    ORGANIZATIONS {
+        uuid id PK
+        string code UK
+        string name
+    }
+
+    USERS {
+        uuid id PK
+        uuid organization_id FK
+        string employee_number
+        string email
+        string user_type
+    }
+
+    ASSESSMENT_SESSIONS {
+        uuid id PK
+        uuid user_id FK
+        uuid organization_id FK
+        uuid assessment_version_id FK
+        uuid department_id FK
+        uuid role_id FK
+        string submitted_role_name
+        string status
+        timestamp submitted_at
+    }
+
+    ASSESSMENT_ANSWERS {
+        uuid id PK
+        uuid assessment_session_id FK
+        uuid question_id FK
+        uuid selected_option_id FK
+        integer score
+        integer time_to_answer_ms
+    }
+
+    ASSESSMENT_RESULTS {
+        uuid id PK
+        uuid assessment_session_id FK
+        string language_code FK
+        boolean is_canonical
+        string persona_code FK
+        integer overall_readiness
+        decimal confidence
+        string generation_status
+    }
+
+    RESULT_DIMENSION_SCORES {
+        uuid id PK
+        uuid assessment_result_id FK
+        uuid dimension_id FK
+        integer percentage
+    }
+
+    RESULT_RECOMMENDATIONS {
+        uuid id PK
+        uuid assessment_result_id FK
+        integer sequence_number
+        string recommendation_type
+        string source
+    }
+
+    RECOMMENDATION_VIDEOS {
+        uuid id PK
+        uuid recommendation_id FK
+        string video_id
+        string video_url
+        string thumbnail_url
+        string youtube_api_source
+    }
+
+    ANALYTICS_EVENTS {
+        bigserial id PK
+        uuid event_id UK
+        uuid assessment_session_id FK
+        string event_name
+        string screen_name
+        jsonb properties
+        timestamp occurred_at
+    }
+```
+
+### Relationship rules
+
+```text
+Organization
+  ├── Users
+  ├── Departments ─── Roles
+  ├── Workforce members
+  └── Action plans / workforce snapshots
+
+Assessment version
+  └── Questions ─── Options
+                  └── Readiness dimension
+
+Assessment session
+  ├── Answers
+  ├── Consents
+  ├── Open responses
+  ├── EN result  [canonical]
+  │     ├── Dimension scores
+  │     ├── Persona scores
+  │     └── Recommendations ─── Video metadata
+  ├── BM result  [derived translation]
+  └── Analytics events
+```
+
+### Required constraints
+
+- `assessment_sessions.id` is the primary correlation key for the complete user journey.
+- `assessment_answers` should have a unique constraint on `(assessment_session_id, question_id)`.
+- `assessment_results` should have a unique constraint on `(assessment_session_id, language_code)`.
+- Only one result per session should have `is_canonical = true`; that result is the EN result.
+- `result_dimension_scores` should be unique on `(assessment_result_id, dimension_id)`.
+- `result_recommendations` should be unique on `(assessment_result_id, sequence_number)`.
+- `recommendation_videos.video_id` should be indexed for deduplication.
+- `analytics_events.event_id` should be globally unique and append-only.
+- Historical results must retain their `assessment_version_id`, prompt version, and model name.
+
+The most important relationship is therefore:
+
+```text
+assessment_sessions
+    -> assessment_answers
+    -> assessment_results (EN and BM)
+    -> result_dimension_scores
+    -> result_persona_scores
+    -> result_recommendations
+    -> recommendation_videos
+    -> analytics_events
+```
