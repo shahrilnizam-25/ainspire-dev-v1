@@ -69,6 +69,8 @@ Required environment variables:
 | `TM_APIGATE_CHAT_KEY` | LiteLLM/API Gateway chat key |
 | `TM_LLM_MODEL` | Model name, normally `gpt-oss-20b` |
 
+The database uses PostgreSQL through Drizzle ORM. Set `DATABASE_URL` to a PostgreSQL connection string before running database commands or enabling persistence.
+
 The client caches access tokens, refreshes them before expiry, sends the gateway headers, and retries once after a 401 response.
 
 ## API Endpoints
@@ -164,6 +166,15 @@ pnpm --dir artifacts/tm-ai-persona build
 
 The API test suite covers deterministic scoring and the MCP tool workflow. A live LLM or YouTube request is not required for the automated tests.
 
+Database schema commands:
+
+```sh
+pnpm --dir lib/db generate
+pnpm --dir lib/db migrate
+```
+
+`generate` creates SQL from the Drizzle schema. `migrate` applies committed migrations to the PostgreSQL database in `DATABASE_URL`. Do not run `push-force` against production.
+
 ## Render Deployment
 
 `render.yaml` defines the API service. Configure these secrets in Render:
@@ -172,6 +183,7 @@ The API test suite covers deterministic scoring and the MCP tool workflow. A liv
 TM_APIGATE_CLIENT_ID
 TM_APIGATE_CLIENT_SECRET
 TM_APIGATE_CHAT_KEY
+DATABASE_URL
 YOUTUBE_API_KEY
 YOUTUBE_API_KEY_BACKUP
 ```
