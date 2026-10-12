@@ -32,9 +32,10 @@ AiNspire is a bilingual AI-readiness platform for Telekom Malaysia. Employees co
                          |                          |                          |
                          v                          v                          v
                  +---------------+          +---------------+          +---------------+
-                 | TM AI Gateway |          | YouTube Data  |          | Thumbnail     |
-                 | OAuth + LLM   |          | API v3        |          | proxy         |
-                 | lib/llm.ts    |          | primary/backup|          | routes/youtube|
+                 | GIGX Qwen LLM |          | YouTube Data  |          | Thumbnail     |
+                 | primary       |          | API v3        |          | proxy         |
+                 | API Gate backup|         | primary/backup|          | routes/youtube|
+                 | lib/llm.ts    |          | lib/mcp.ts    |          | routes/youtube|
                  +---------------+          +---------------+          +---------------+
 ```
 
@@ -170,7 +171,7 @@ distribution + teamSize + division + skillsGap
        workforce planning MCP workflow
                          |
                          v
-                TM AI Gateway LLM
+                GIGX Qwen primary, API Gate fallback
                          |
                          v
        3-phase, 90-day HR action plan JSON
@@ -285,6 +286,8 @@ v1/.env
     +--> TM_APIGATE_CLIENT_SECRET
     +--> TM_APIGATE_CHAT_KEY
     +--> TM_LLM_MODEL
+    +--> GIGX_API_TOKEN
+    +--> GIGX_LLM_MODEL
     +--> YOUTUBE_API_KEY
     +--> YOUTUBE_API_KEY_BACKUP
 
@@ -338,7 +341,7 @@ GitHub Pages frontend
     v
 Render API service
     |
-    +--> TM AI Gateway
+    +--> GIGX Qwen primary / TM API Gateway fallback
     +--> YouTube Data API v3
     +--> YouTube thumbnail origin
 ```
@@ -346,6 +349,7 @@ Render API service
 ## 10. Reliability Boundaries
 
 - Deterministic scoring remains available even when LLM JSON is invalid.
+- LLM completions try GIGX Qwen first and fail over to TM API Gate on request or response failure.
 - EN is the canonical semantic result for bilingual parity.
 - BM translation is isolated from classification and never changes persona or scores.
 - BM translation chunks retry independently.

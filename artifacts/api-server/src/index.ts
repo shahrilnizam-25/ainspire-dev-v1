@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 export { runReadinessMcpWorkflow } from "./lib/mcp.js";
+export { chatComplete } from "./lib/llm.js";
 
 if (process.env.NODE_ENV === "test") {
   // The test bundle exports MCP workflows without opening a network listener.

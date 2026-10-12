@@ -58,16 +58,26 @@ The learning-pathway tool can optionally search YouTube for English training vid
 
 ## AI Gateway
 
-LLM calls use the TM API Gateway OAuth client-credentials flow in `artifacts/api-server/src/lib/llm.ts`.
+LLM calls use the GIGX Qwen3-VL endpoint as the primary provider and fall back to the TM API Gateway OAuth client-credentials flow in `artifacts/api-server/src/lib/llm.ts` if the primary request fails.
 
-Required environment variables:
+Primary provider configuration:
+
+| Variable | Description |
+|---|---|
+| `GIGX_API_URL` | Primary OpenAI-compatible chat-completions endpoint |
+| `GIGX_API_TOKEN` | Primary GIGX bearer token |
+| `GIGX_LLM_MODEL` | Primary model name, normally `qwen3-vl-4b-instruct` |
+
+Fallback provider configuration (required for automatic API Gate failover):
 
 | Variable | Description |
 |---|---|
 | `TM_APIGATE_CLIENT_ID` | API Gateway OAuth client ID |
 | `TM_APIGATE_CLIENT_SECRET` | API Gateway OAuth client secret |
 | `TM_APIGATE_CHAT_KEY` | LiteLLM/API Gateway chat key |
-| `TM_LLM_MODEL` | Model name, normally `gpt-oss-20b` |
+| `TM_LLM_MODEL` | Fallback model name, normally `gpt-oss-20b` |
+
+The client tries GIGX first and uses API Gate if GIGX fails, times out, or returns an invalid completion. Keep both providers' credentials in environment variables; never commit real tokens.
 
 The database uses PostgreSQL through Drizzle ORM. Set `DATABASE_URL` to a PostgreSQL connection string before running database commands or enabling persistence.
 

@@ -8,7 +8,7 @@
     "build": "node ./build.mjs",
     "start": "node --env-file=../../.env --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "NODE_ENV=test pnpm run build && NODE_ENV=test node --experimental-strip-types --test test/assessmentScore.test.ts test/mcp.test.mjs"
+    "test": "NODE_ENV=test pnpm run build && NODE_ENV=test node --experimental-strip-types --test test/assessmentScore.test.ts test/mcp.test.mjs test/llm.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.31.0",
