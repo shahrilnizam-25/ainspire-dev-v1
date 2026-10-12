@@ -5,11 +5,15 @@ import { translations, type Lang } from '../i18n';
 
 export default function PledgeScreen({
   lang,
+  currentIndex,
+  totalQuestions,
   onSubmit,
   reflectionRequired = false,
   reflectionProvided = false,
 }: {
   lang: Lang;
+  currentIndex: number;
+  totalQuestions: number;
   onSubmit: () => void;
   reflectionRequired?: boolean;
   reflectionProvided?: boolean;

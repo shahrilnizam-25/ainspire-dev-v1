@@ -140,10 +140,26 @@ test('video search targets capability gaps, exposes source and uses relevant pla
  const answers=profile(['D','D','A','B','C','A']);
  const curated=await getLearningVideos('strategist',answers,'EN');
  assert.equal(curated[0].searchStatus,'curated-no-key');
- assert.ok(curated[0].searchQuery.includes('responsible AI output evaluation'));
- assert.ok(curated[0].searchQuery.includes('problem definition'));
+ assert.ok(curated[0].searchQuery.includes('responsible AI'));
+ assert.ok(!curated[0].searchQuery.includes('AI use case'));
  assert.ok(!curated[0].searchQuery.includes('learning pathway'));
  assert.equal(new URL(curated[0].searchUrl).searchParams.get('search_query'),curated[0].searchQuery);
+ const softwareContext=await getLearningVideos('builder',answers,'EN',{role:'Software Engineer',department:'Group IT & Digital (GITD)'});
+ const hrContext=await getLearningVideos('builder',answers,'EN',{role:'HR Business Partner',department:'Group Human Capital Management (GHCM)'});
+ assert.ok(softwareContext[0].searchQuery.includes('spec-driven development'));
+ assert.ok(softwareContext[0].searchQuery.includes('responsible AI'));
+ assert.ok(hrContext[0].searchQuery.includes('hr business partners'));
+ assert.notEqual(softwareContext[0].searchQuery,hrContext[0].searchQuery);
+ assert.ok(softwareContext[0].relevanceStatement.includes('Software Engineer'));
+ const oldContextKey=process.env.YOUTUBE_API_KEY;const oldContextFetch=globalThis.fetch;
+ process.env.YOUTUBE_API_KEY='context-test';
+ globalThis.fetch=async(input)=>{const url=new URL(String(input));assert.equal(url.searchParams.get('maxResults'),'10');assert.ok(url.searchParams.get('q')?.includes('hr business partners'));return Response.json({items:[
+  {id:{videoId:'abcdefghijk'},snippet:{title:'Generative AI for Everyone',channelTitle:'General Learning'}},
+  {id:{videoId:'bcdefghijkl'},snippet:{title:'AI in HR workforce planning',channelTitle:'HR Learning'}},
+  {id:{videoId:'cdefghijklm'},snippet:{title:'AI for HR recruiting and employee relations',channelTitle:'HR Learning'}},
+  {id:{videoId:'defghijklmn'},snippet:{title:'IBM Replaces HR Department with AI!',channelTitle:'Clickbait Learning'}},
+ ]});};
+ try{const contextual=await getLearningVideos('builder',answers,'EN',{role:'HR Business Partner',department:'Group Human Capital Management (GHCM)'});assert.equal(contextual.length,2);assert.ok(contextual.every(v=>/\bHR\b/i.test(v.videoTitle)));assert.ok(contextual.every(v=>!v.videoTitle.includes('Replaces HR')));}finally{globalThis.fetch=oldContextFetch;if(oldContextKey===undefined)delete process.env.YOUTUBE_API_KEY;else process.env.YOUTUBE_API_KEY=oldContextKey;}
  const original=globalThis.fetch; process.env.YOUTUBE_API_KEY='test-only';
  globalThis.fetch=async(input)=>{
   const url=new URL(String(input)); assert.equal(url.searchParams.get('order'),'relevance');

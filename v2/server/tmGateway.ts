@@ -97,21 +97,38 @@ async function readCompletion(response: Response, provider: string): Promise<str
 async function requestGigx(prompt: string, maxTokens: number): Promise<string> {
   const apiKey = process.env.GIGX_API_KEY;
   if (!apiKey) throw new Error("GiGX API key is not configured");
-  const response = await fetch(providerFetchUrl(process.env.GIGX_API_URL ?? DEFAULT_GIGX_API_URL), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.GIGX_LLM_MODEL ?? "qwen3-vl-4b-instruct",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: maxTokens,
-      temperature: 0,
-    }),
-    signal: AbortSignal.timeout(15_000),
-  });
-  return readCompletion(response, "GiGX");
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(providerFetchUrl(process.env.GIGX_API_URL ?? DEFAULT_GIGX_API_URL), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: process.env.GIGX_LLM_MODEL ?? "qwen3-vl-4b-instruct",
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: maxTokens,
+          temperature: 0,
+        }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (attempt === 0 && (response.status === 408 || response.status === 429 || response.status >= 500)) {
+        await response.body?.cancel();
+        await new Promise(resolve => setTimeout(resolve, 250));
+        continue;
+      }
+      return await readCompletion(response, "GiGX");
+    } catch (error) {
+      const transientNetworkError = error instanceof TypeError;
+      if (attempt === 0 && transientNetworkError) {
+        await new Promise(resolve => setTimeout(resolve, 250));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error("GiGX request failed after transient retry");
 }
 
 async function requestApiGate(prompt: string, maxTokens: number): Promise<string> {

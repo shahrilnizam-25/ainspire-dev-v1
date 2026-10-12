@@ -38,6 +38,9 @@ Without credentials, the assessment remains usable with a labelled deterministic
 
 `GET /api/health` exposes assessment version and runtime feature metadata. `POST /api/classify` requires version `2026-10-rapid-v2`, department, role, EN/BM language and exactly six question/option pairs. Optional reflection must match the server-selected governed category.
 
+## Power Automate email notifications
+Set `POWER_AUTOMATE_TRIGGER_URL` as a server-side Sites runtime secret (or in local `.env`) to enable employee-journey emails. Configure the HTTP-trigger cloud flow and its seven-day reminder branch using [POWER_AUTOMATE.md](POWER_AUTOMATE.md). The app fixes recipients server-side: assessment results and project interest go to the configured employee with the supervisor and HR copied; learning milestones and the scheduled reminder go to the employee with the supervisor copied. These events do not require a demo Staff ID and are only raised from Employee View actions. Emails use the portal's navy/cyan/violet styling and include the portal link. If the flow URL is absent or the flow fails, the assessment and saved progress continue normally.
+
 See TECHNICAL_CHANGELOG.md for rules, limitations and next calibration work.
 
 ## YouTube learning links

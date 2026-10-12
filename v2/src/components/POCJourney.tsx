@@ -5,11 +5,13 @@ import {contributionIcon,profileHeroLabel,profileHeroTitle} from '../data/contri
 import {primaryContributionRole,employeeProjectOffers} from '../shared/contributionRoles';
 import {useState,useRef,useEffect,type ReactNode} from 'react';
 import EmployeeAIProfile from './EmployeeAIProfile';
-import {BriefcaseBusiness,ArrowRight,ArrowLeft,BookOpen,ChartNoAxesCombined,UserRoundSearch,FileText,Home} from 'lucide-react';
+import {Sparkles,BriefcaseBusiness,CheckCircle2,ArrowRight,ArrowLeft,BookOpen,ChartNoAxesCombined,UserRoundSearch,FileText,Home} from 'lucide-react';
 import type {AIResult} from '../App';
 import type {Lang} from '../i18n';
 import {roles,projects,personalisedPlan,approvalOf,deliveryOf,type PocRecord} from '../shared/poc';
 import {writeRecord} from '../shared/pocStore';
+import {createNotificationEventId,sendEmployeeNotification} from '../shared/notifications';
+const box='min-w-0 rounded-2xl border border-primary/30 bg-card/90 p-5 shadow-[0_0_20px_rgba(0,212,255,0.08)]';
 const btn='rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary';
 export default function POCJourney({result,record:r,lang,onReport,onMain,overviewHeader,initialStep=null}:{result:AIResult;record:PocRecord;lang:Lang;onReport:()=>void;onMain:()=>void;overviewHeader:ReactNode;initialStep?:number|null}){
  const tr=(en:string,bm:string)=>lang==='BM'?bm:en;const [step,setStep]=useState<number|null>(initialStep);const overviewRef=useRef<HTMLDivElement|null>(null);const sectionRef=useRef<HTMLDivElement|null>(null);const learningRef=useRef<HTMLElement|null>(null);
@@ -18,7 +20,15 @@ export default function POCJourney({result,record:r,lang,onReport,onMain,overvie
  useEffect(()=>{const frame=requestAnimationFrame(()=>revealDestination(step===null?overviewRef.current:step===1?learningRef.current:sectionRef.current,step===null?'page':'section'));return()=>cancelAnimationFrame(frame);},[step]);const [all,setAll]=useState(false);const [notice,setNotice]=useState('');
  const backToJourney=()=>navigate(null);
  const backButton='inline-flex items-center gap-2 rounded-xl border border-primary/50 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary';
- const save=(next:PocRecord)=>setNotice(writeRecord(next)?'':tr('Changes are session-only because browser storage is unavailable.','Perubahan untuk sesi sahaja kerana simpanan pelayar tidak tersedia.'));
+ const save=(next:PocRecord)=>{
+  const saved=writeRecord(next);
+  setNotice(saved?'':tr('Changes are session-only because browser storage is unavailable.','Perubahan untuk sesi sahaja kerana simpanan pelayar tidak tersedia.'));
+  const interest=Object.entries(next.assignments).find(([projectId,assignment])=>assignment.response==='accepted'&&r.assignments[projectId]?.response!=='accepted');
+  if(interest){
+   const [projectId,assignment]=interest;const project=projects.find(item=>item.id===projectId);const selectedRole=roles.find(item=>item.id===assignment.roleId);
+   if(project&&selectedRole)void sendEmployeeNotification({eventId:createNotificationEventId(),eventType:'project.interest',lang,employeeName:r.employeeName,department:r.department,projectName:project.name,contributionRole:selectedRole.name[lang]}).then(({ok})=>setNotice(ok?tr('Your interest email was accepted for delivery.','E-mel minat anda telah diterima untuk penghantaran.'):tr('Interest saved, but its email could not be sent.','Minat disimpan, tetapi e-mel tidak dapat dihantar.')));
+  }
+ };
  const offers=employeeProjectOffers(r);const accepted=Object.entries(r.assignments).filter(([,a])=>a.response==='accepted');
  const role=primaryContributionRole(r.review?.persona??r.persona);const ContributionIcon=contributionIcon(r.review?.persona??r.persona);
  const target=offers.find(o=>o.primaryMatch)??offers[0];

@@ -57,7 +57,7 @@ function exportCSV(rows: readonly Member[], extra?: { name: string; persona: str
 
 // ── Sub-components ───────────────────────────────────────────────────
 
-function TabButton({ label, icon: Icon, active, onClick }: { label: string; icon: any; active: boolean; onClick: () => void }) {
+function TabButton({ id, label, icon: Icon, active, onClick }: { id: Tab; label: string; icon: any; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -836,7 +836,7 @@ export default function HRDashboard({ lang = 'EN', currentUserPersona, aiResult,
 
       {/* Tab nav */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex items-center gap-3 mb-8 flex-wrap">
-        {TABS.map(tab => <TabButton key={tab.id} label={tab.label} icon={tab.icon} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)} />)}
+        {TABS.map(tab => <TabButton key={tab.id} {...tab} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)} />)}
       </motion.div>
 
       {/* Tab content */}

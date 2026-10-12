@@ -1,4 +1,5 @@
 "use client";
+import '../app/globals.css';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ScreenDestination from './components/ScreenDestination';
@@ -17,6 +18,8 @@ import ReportScreen from './components/ReportScreen';
 import ContactScreen from './components/ContactScreen';
 import StatisticsScreen from './components/StatisticsScreen';
 import { useDemoSession } from './shared/demoSession';
+import { createNotificationEventId, sendEmployeeNotification } from './shared/notifications';
+import { primaryContributionRole } from './shared/contributionRoles';
 import { type Lang } from './i18n';
 import {
   ASSESSMENT_VERSION,
@@ -101,7 +104,9 @@ export default function App() {
   const [employeeName, setEmployeeName] = useState('');
   const [userRole, setUserRole] = useState<string>('');
   const [department, setDepartment] = useState<string>('');
+  const [notificationStatus, setNotificationStatus] = useState<string | null>(null);
   const demoProfile = useDemoSession().profile;
+  const assessmentNotificationId = useRef<string | null>(null);
 
   // Track which lang is currently in-flight to avoid duplicate requests
   const fetchingForLang = useRef<Lang | null>(null);
@@ -199,6 +204,8 @@ export default function App() {
   }, [lang, screen, lastAnswers, runClassify]);
 
   const handleStart = () => {
+    assessmentNotificationId.current = createNotificationEventId();
+    setNotificationStatus(null);
     setResultEntry(null);
     setReflection(null);
     setScreen('department');
@@ -264,6 +271,30 @@ export default function App() {
 
       setAiResultCache(nextCache);
       setClassifiedPersonaId(selectedResult.persona);
+      const eventId = assessmentNotificationId.current;
+      assessmentNotificationId.current = null;
+      if (eventId) {
+        setNotificationStatus(lang === 'BM' ? 'Menghantar keputusan melalui e-mel…' : 'Sending your results by email…');
+        void sendEmployeeNotification({
+          eventId,
+          eventType: 'assessment.results_ready',
+          lang,
+          employeeName,
+          persona: selectedResult.persona,
+          contributionRole: primaryContributionRole(selectedResult.persona).name[lang],
+          overallReadiness: selectedResult.overallReadiness,
+          dimensionScores: selectedResult.dimensionScores,
+          narrative: selectedResult.narrative,
+          strengths: selectedResult.strengths,
+          developmentGaps: selectedResult.developmentGaps,
+          learningResources: selectedResult.recommendations.slice(0, 5).map(resource => ({
+            title: resource.videoTitle ?? resource.title,
+            url: resource.videoUrl ?? resource.searchUrl,
+          })),
+        }).then(({ ok }) => setNotificationStatus(ok
+          ? (lang === 'BM' ? 'Keputusan telah dihantar kepada penerima yang ditetapkan.' : 'Results email was accepted for delivery to the configured recipients.')
+          : (lang === 'BM' ? 'E-mel tidak dapat dihantar. Keputusan anda masih tersedia di portal.' : 'Email could not be sent. Your results remain available in the portal.')));
+      }
     } catch (err) {
       console.error('Classification error:', err);
       setAiError(String(err));
@@ -322,6 +353,7 @@ export default function App() {
       </div>
 
       <main className={"flex-1 relative z-10 flex flex-col items-center w-full py-8 "+(screen==='results'?'justify-start':'justify-center min-h-[100dvh]')}>
+        {screen === 'results' && notificationStatus && <p role="status" className="mb-4 max-w-3xl px-4 text-center text-sm text-primary">{notificationStatus}</p>}
         <AnimatePresence mode="wait">
           {screen === 'landing' && (
             <motion.div
@@ -385,6 +417,8 @@ export default function App() {
             >
               <ScreenDestination><PledgeScreen
                 lang={lang}
+                currentIndex={questions.length}
+                totalQuestions={questions.length}
                 reflectionRequired={adaptiveDecision(mcqAnswers).required}
                 reflectionProvided={!!reflection}
                 onSubmit={handleSubmit}
@@ -401,7 +435,7 @@ export default function App() {
               transition={{ duration: 0.4 }}
               className="w-full flex justify-center"
             >
-              <ScreenDestination><AIThinkingScreen lang={lang} resultReady={analysisReady} modelProviderTrace={aiResult?.modelProviderTrace} learningVideoSource={aiResult?.learningVideoSource} learningVideoStatus={aiResult?.learningVideoStatus} hasError={!!aiError} onComplete={finishAnalysis} /></ScreenDestination>
+              <ScreenDestination><AIThinkingScreen lang={lang} resultReady={analysisReady} engine={aiResult?.engine} modelProviderTrace={aiResult?.modelProviderTrace} learningVideoSource={aiResult?.learningVideoSource} learningVideoStatus={aiResult?.learningVideoStatus} hasError={!!aiError} onComplete={finishAnalysis} /></ScreenDestination>
             </motion.div>
           )}
 
