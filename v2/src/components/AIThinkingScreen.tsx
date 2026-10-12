@@ -34,10 +34,9 @@ function RouteConnector({ paused }: { paused: boolean }) {
   </div>;
 }
 
-export default function AIThinkingScreen({ lang, resultReady, engine, modelProviderTrace, learningVideoSource, learningVideoStatus, hasError, onComplete }: {
+export default function AIThinkingScreen({ lang, resultReady, modelProviderTrace, learningVideoSource, learningVideoStatus, hasError, onComplete }: {
   lang: Lang;
   resultReady: boolean;
-  engine?: string | null;
   modelProviderTrace?: ProviderTrace | null;
   learningVideoSource?: string | null;
   learningVideoStatus?: string | null;

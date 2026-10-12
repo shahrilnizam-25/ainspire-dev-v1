@@ -49,6 +49,7 @@ next-env.d.ts
 /mcp-server/.venv/
 /mcp-server/.pytest_cache/
 /mcp-server/**/__pycache__/
+**/*.egg-info/
 
 *.tsbuildinfo
 

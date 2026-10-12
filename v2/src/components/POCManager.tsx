@@ -3,7 +3,7 @@ import {projectTasks,projectRequirements} from '../shared/projectDetails';
 import {useState} from 'react';
 import type {Lang} from '../i18n';
 import {translations} from '../i18n';
-import {roles,projects,recommendedOffers,approvalOf,deliveryOf,approveAssignment,progressAssignment,confirmProjectAssignment,benefitNames,validBenefit,validateBenefit,type PocRecord,type Assignment,type Benefit,type BenefitCategory,type PersonaId} from '../shared/poc';
+import {roles,projects,recommendedOffers,approvalOf,deliveryOf,progressAssignment,confirmProjectAssignment,benefitNames,validBenefit,validateBenefit,type PocRecord,type Assignment,type Benefit,type BenefitCategory,type PersonaId} from '../shared/poc';
 import {primaryContributionRole} from '../shared/contributionRoles';
 import {usePocRecords,writeRecord} from '../shared/pocStore';
 const input='mt-1 w-full rounded-lg border border-white/20 bg-background p-2.5 text-sm text-white';

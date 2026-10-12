@@ -5,12 +5,11 @@ import {contributionIcon,profileHeroLabel,profileHeroTitle} from '../data/contri
 import {primaryContributionRole,employeeProjectOffers} from '../shared/contributionRoles';
 import {useState,useRef,useEffect,type ReactNode} from 'react';
 import EmployeeAIProfile from './EmployeeAIProfile';
-import {Sparkles,BriefcaseBusiness,CheckCircle2,ArrowRight,ArrowLeft,BookOpen,ChartNoAxesCombined,UserRoundSearch,FileText,Home} from 'lucide-react';
+import {BriefcaseBusiness,ArrowRight,ArrowLeft,BookOpen,ChartNoAxesCombined,UserRoundSearch,FileText,Home} from 'lucide-react';
 import type {AIResult} from '../App';
 import type {Lang} from '../i18n';
 import {roles,projects,personalisedPlan,approvalOf,deliveryOf,type PocRecord} from '../shared/poc';
 import {writeRecord} from '../shared/pocStore';
-const box='min-w-0 rounded-2xl border border-primary/30 bg-card/90 p-5 shadow-[0_0_20px_rgba(0,212,255,0.08)]';
 const btn='rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary';
 export default function POCJourney({result,record:r,lang,onReport,onMain,overviewHeader,initialStep=null}:{result:AIResult;record:PocRecord;lang:Lang;onReport:()=>void;onMain:()=>void;overviewHeader:ReactNode;initialStep?:number|null}){
  const tr=(en:string,bm:string)=>lang==='BM'?bm:en;const [step,setStep]=useState<number|null>(initialStep);const overviewRef=useRef<HTMLDivElement|null>(null);const sectionRef=useRef<HTMLDivElement|null>(null);const learningRef=useRef<HTMLElement|null>(null);

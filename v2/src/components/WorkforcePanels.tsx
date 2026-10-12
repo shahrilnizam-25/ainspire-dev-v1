@@ -1,6 +1,6 @@
 import MetricInfo from './MetricInfo';
 import type {ReactNode} from 'react';
-import {ArrowLeft,UsersRound,BookOpen,Brain,BriefcaseBusiness,Info} from 'lucide-react';
+import {ArrowLeft,UsersRound,BookOpen,Info} from 'lucide-react';
 import type {Lang} from '../i18n';
 import {personas as personaCatalogue} from '../data/personas';
 import {primaryContributionRole} from '../shared/contributionRoles';

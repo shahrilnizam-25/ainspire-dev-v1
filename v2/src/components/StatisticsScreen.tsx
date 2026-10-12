@@ -7,7 +7,6 @@ import {workforceAnalytics} from '../shared/workforceAnalytics';
 import {employeeWorkforceDemo,workforceTarget} from '../shared/employeeWorkforceDemo';
 import {primaryContributionRole} from '../shared/contributionRoles';
 import {personas} from '../data/personas';
-import {divisionDashboardSummary} from '../shared/divisionAnalytics';
 import {WorkforceBrand,SourcePicker,BackMain,AnalyticsPanel,employeePrimaryAction} from './WorkforcePanels';
 import MetricInfo from './MetricInfo';
 import AnimatedAssessmentCount from './AnimatedAssessmentCount';
@@ -17,7 +16,7 @@ import EmployeeReadinessGuide from './EmployeeReadinessGuide';
 import {EmployeePersonaCharts} from './EmployeePersonaCharts';
 import {EmployeeParticipation} from './EmployeeWorkforceInsights';
 export default function StatisticsScreen({lang='EN',onBack,result=null,onProfile,onLearning}:{lang?:Lang;onBack:()=>void;result?:AIResult|null;onProfile?:()=>void;onLearning?:()=>void}){
- const stored=usePocRecords();const employee=usePocRecord(result);const [source,setSource]=useState<'example'|'browser'>('example');const global=useMemo(()=>workforceAnalytics(source==='example'?employeeWorkforceDemo:stored),[source,stored]);const metrics=divisionDashboardSummary(global.records);const tr=(en:string,bm:string)=>lang==='BM'?bm:en;const mock=source==='example';const participation=global.records.length/workforceTarget*100;const persona=employee?.review?.persona??employee?.persona;const share=persona&&global.records.length?(global.personas.find(p=>p.id===persona)?.count??0)/global.records.length*100:0;
+ const stored=usePocRecords();const employee=usePocRecord(result);const [source,setSource]=useState<'example'|'browser'>('example');const global=useMemo(()=>workforceAnalytics(source==='example'?employeeWorkforceDemo:stored),[source,stored]);const tr=(en:string,bm:string)=>lang==='BM'?bm:en;const mock=source==='example';const participation=global.records.length/workforceTarget*100;const persona=employee?.review?.persona??employee?.persona;const share=persona&&global.records.length?(global.personas.find(p=>p.id===persona)?.count??0)/global.records.length*100:0;
  return <div className="mx-auto w-full max-w-7xl space-y-7 px-4 py-6 sm:px-8">
  <div className="flex flex-wrap items-center justify-between gap-4"><BackMain onBack={onBack} lang={lang}/><div className="ml-auto"><WorkforceBrand/></div></div>
  <div className="flex flex-wrap items-center justify-between gap-4"><p className="text-[36px] font-black leading-tight tracking-tight text-primary">AiNspire · {tr('Workforce Intelligence Dashboard','Papan Pemuka Risikan Tenaga Kerja')}</p><SourcePicker value={source} onChange={setSource} lang={lang}/></div>

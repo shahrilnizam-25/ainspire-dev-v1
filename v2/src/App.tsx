@@ -385,8 +385,6 @@ export default function App() {
             >
               <ScreenDestination><PledgeScreen
                 lang={lang}
-                currentIndex={questions.length}
-                totalQuestions={questions.length}
                 reflectionRequired={adaptiveDecision(mcqAnswers).required}
                 reflectionProvided={!!reflection}
                 onSubmit={handleSubmit}
@@ -403,7 +401,7 @@ export default function App() {
               transition={{ duration: 0.4 }}
               className="w-full flex justify-center"
             >
-              <ScreenDestination><AIThinkingScreen lang={lang} resultReady={analysisReady} engine={aiResult?.engine} modelProviderTrace={aiResult?.modelProviderTrace} learningVideoSource={aiResult?.learningVideoSource} learningVideoStatus={aiResult?.learningVideoStatus} hasError={!!aiError} onComplete={finishAnalysis} /></ScreenDestination>
+              <ScreenDestination><AIThinkingScreen lang={lang} resultReady={analysisReady} modelProviderTrace={aiResult?.modelProviderTrace} learningVideoSource={aiResult?.learningVideoSource} learningVideoStatus={aiResult?.learningVideoStatus} hasError={!!aiError} onComplete={finishAnalysis} /></ScreenDestination>
             </motion.div>
           )}
 
